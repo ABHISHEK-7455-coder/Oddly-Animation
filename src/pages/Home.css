@@ -1,7 +1,7 @@
 .home-container {
-  max-width: 600px;
+  width: 90%;
   margin: auto;
-  padding: 40px 20px 80px;
+  padding: 10px 20px 80px;
   font-family: 'Poppins', sans-serif;
   text-align: center;
   display: flex;

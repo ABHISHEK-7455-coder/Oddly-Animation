@@ -1,27 +1,414 @@
-.wave-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin: 40px 0;
+/* Fluid Animation */
+.fluid-animation {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #4caf50;
+    position: relative;
+    animation: fluidPulse 3s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+@keyframes fluidPulse {
+    0% {
+        transform: scale(1) rotate(0deg);
+        background-color: #4caf50;
+    }
+
+    50% {
+        transform: scale(1.3) rotate(90deg);
+        background-color: #ff4081;
+    }
+
+    100% {
+        transform: scale(1) rotate(180deg);
+        background-color: #4caf50;
+    }
+}
+
+/* Ripple Effect */
+.ripple-animation {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-color: #4caf50;
+    border-radius: 50%;
+    animation: rippleEffect 3s infinite;
+}
+
+@keyframes rippleEffect {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.8);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}
+
+/* Gradient Transition */
+.gradient-animation {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #ff5e62, #ff9966);
+    animation: gradientShift 5s infinite ease-in-out;
+    will-change: background;
+}
+
+@keyframes gradientShift {
+    0% {
+        background: linear-gradient(45deg, #ff5e62, #ff9966);
+    }
+
+    25% {
+        background: linear-gradient(45deg, #36d1dc, #5b86e5);
+    }
+
+    50% {
+        background: linear-gradient(45deg, #ff7e5f, #feb47b);
+    }
+
+    75% {
+        background: linear-gradient(45deg, #f27121, #e9483b);
+    }
+
+    100% {
+        background: linear-gradient(45deg, #ff5e62, #ff9966);
+    }
+}
+
+/* Soft Wave Effect */
+.soft-wave-animation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.soft-wave-animation .wave {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #4caf50;
+    animation: wave 2.5s ease-in-out infinite;
+}
+
+.soft-wave-animation .wave:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.soft-wave-animation .wave:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes wave {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+}
+
+/* Pendulum Swing */
+.pendulum-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pendulum {
+    position: relative;
+}
+
+.rod {
+    width: 4px;
+    height: 150px;
+    background-color: #333;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform-origin: top center;
+    animation: pendulumSwing 3s ease-in-out infinite;
 }
 
 .circle {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  animation-name: pulse;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background-color: #4caf50;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
+@keyframes pendulumSwing {
+    0% {
+        transform: rotate(25deg);
+    }
+
+    50% {
+        transform: rotate(-25deg);
+    }
+
+    100% {
+        transform: rotate(25deg);
+    }
+}
+
+/* Particle Container */
+.particle-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: #111;
+    overflow: hidden;
+}
+
+/* Particle Styling */
+.particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #4caf50;
+    animation: moveParticles 5s infinite ease-in-out;
+    opacity: 0.8;
+}
+
+/* Particle Movement Animation */
+@keyframes moveParticles {
+    0% {
+        transform: translate(0, 0);
+        opacity: 0.7;
+    }
+
+    25% {
+        transform: translate(100px, -100px);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: translate(-100px, 100px);
+        opacity: 1;
+    }
+
+    75% {
+        transform: translate(50px, -50px);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translate(0, 0);
+        opacity: 0.7;
+    }
+}
+
+/* Animation.css */
+.fluid-dynamics-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: -40px;
+}
+
+.fluid-dynamics-blob {
+  border-radius: 50%;
+  animation: blobMove infinite ease-in-out;
+  opacity: 0.8;
+  position: absolute;
+}
+
+@keyframes blobMove {
+  0% { transform: translate(0,0) scale(1); }
+  25% { transform: translate(30px,-20px) scale(1.1); }
+  50% { transform: translate(-20px,30px) scale(0.9); }
+  75% { transform: translate(20px,-30px) scale(1.2); }
+  100% { transform: translate(0,0) scale(1); }
+}
+
+.geometric-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.polygon {
+  position: absolute;
+  border: 2px solid;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  animation: rotatePolygon infinite linear;
+}
+
+@keyframes rotatePolygon {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.pastel-particles-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.pastel-particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: flowParticles infinite linear;
+}
+
+@keyframes flowParticles {
+  0% { transform: translate(0, 0); opacity: 0.7; }
+  50% { transform: translate(50px, 50px); opacity: 1; }
+  100% { transform: translate(0, 0); opacity: 0.7; }
+}
+
+.kaleidoscope-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kaleidoscope-shape {
+  position: absolute;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  animation: rotateShape infinite linear;
+}
+
+@keyframes rotateShape {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.orbit-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.orbit-sphere {
+  position: absolute;
+  border-radius: 50%;
+  animation: orbitRotate infinite linear;
+  transform-origin: center center;
+}
+
+@keyframes orbitRotate {
+  0% { transform: rotate(0deg) translateX(100px); }
+  100% { transform: rotate(360deg) translateX(100px); }
+}
+
+.dashing-rings-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dashing-ring {
+  position: absolute;
+  border: 3px solid;
+  border-radius: 50%;
+  opacity: 0.7;
+  animation: rotateRing infinite linear;
+  box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+}
+
+@keyframes rotateRing {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: rotate(90deg) scale(1.2);
     opacity: 0.7;
   }
   50% {
-    transform: scale(1.5);
-    opacity: 1;
+    transform: rotate(180deg) scale(1);
+    opacity: 0.9;
   }
+  75% {
+    transform: rotate(270deg) scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.5;
+  }
+}
+
+.trippy-rings-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.trippy-ring {
+  position: absolute;
+  border: 4px solid transparent;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #ff5e62,
+    #ff9966,
+    #36d1dc,
+    #5b86e5,
+    #ff5e62
+  );
+  mask-image: radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+  animation: rotateRing 8s linear infinite;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2),
+              0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+@keyframes rotateRing {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Particles orbiting around center */
+.trippy-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #ff5e62, #5b86e5);
+  top: 50%;
+  left: 50%;
+  transform-origin: -150px 0;
+  animation: orbitParticle 6s linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes orbitParticle {
+  0% { transform: rotate(0deg) translateX(150px); }
+  100% { transform: rotate(360deg) translateX(150px); }
 }
