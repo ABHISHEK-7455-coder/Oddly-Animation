@@ -1,116 +1,279 @@
-/* Fluid Animation */
-.fluid-animation {
-    width: 100px;
-    height: 100px;
+/* --- 50 unique animations --- */
+
+/* 1. fluidBlob */
+.fluidBlob {
     border-radius: 50%;
-    background-color: #4caf50;
-    position: relative;
     animation: fluidPulse 3s ease-in-out infinite;
-    will-change: transform, opacity;
 }
 
 @keyframes fluidPulse {
-    0% {
-        transform: scale(1) rotate(0deg);
-        background-color: #4caf50;
+
+    0%,
+    100% {
+        transform: scale(1);
     }
 
     50% {
-        transform: scale(1.3) rotate(90deg);
-        background-color: #ff4081;
-    }
-
-    100% {
-        transform: scale(1) rotate(180deg);
-        background-color: #4caf50;
+        transform: scale(3);
     }
 }
 
-/* Ripple Effect */
-.ripple-animation {
+/* 2. neonSwirl */
+.neonSwirl {
+    border-radius: 50%;
+    animation: neonSpin 4s linear infinite;
+}
+
+@keyframes neonSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 3. hypnoticRings */
+.hypnoticRings {
+    border-radius: 50%;
+    border: 5px solid #4caf50;
+    animation: ringPulse 3s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+
+    0%,
+    100% {
+        transform: scale(1.5);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(2.4);
+        opacity: 1;
+    }
+}
+
+/* 4. colorWave */
+.colorWave {
+    border-radius: 50%;
+    background: linear-gradient(90deg, #ff5e62, #ff9966, #36d1dc);
+    animation: waveColor 3s ease-in-out infinite;
+}
+
+@keyframes waveColor {
+
+    0%,
+    100% {
+        background-position: 0 0;
+    }
+
+    50% {
+        background-position: 100% 0;
+    }
+}
+
+/* 5. orbitSpheres */
+.orbitSpheres {
     position: relative;
-    display: inline-block;
-    width: 100px;
-    height: 100px;
-    background-color: #4caf50;
-    border-radius: 50%;
-    animation: rippleEffect 3s infinite;
 }
 
-@keyframes rippleEffect {
+.orbitSphere {
+    position: absolute;
+    border-radius: 50%;
+    animation: orbit 3s linear infinite;
+}
+
+@keyframes orbit {
     0% {
-        transform: scale(1);
-        opacity: 0.7;
+        transform: rotate(0deg) translateX(30px);
+    }
+
+    100% {
+        transform: rotate(360deg) translateX(30px);
+    }
+}
+
+/* 6. gooeyMerge */
+.gooeyMerge {
+    filter: url(#goo);
+}
+
+.blob {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    animation: blobMove 4s ease-in-out infinite;
+}
+
+@keyframes blobMove {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
     }
 
     50% {
-        transform: scale(1.8);
-        opacity: 0.5;
+        transform: translate(20px, -20px);
+    }
+}
+
+/* 7. pastelDots */
+.pastelDots {
+    display: flex;
+    gap: 10px;
+}
+
+.dot {
+    border-radius: 50%;
+    animation: dotBounce 2s ease-in-out infinite;
+}
+
+@keyframes dotBounce {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 8. rainbowPulse */
+.rainbowPulse {
+    border-radius: 50%;
+    background: conic-gradient(red, orange, yellow, green, blue, indigo, violet);
+    animation: rainbowPulseAnim 3s linear infinite;
+}
+
+@keyframes rainbowPulseAnim {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
     }
 
     100% {
         transform: scale(1);
-        opacity: 0.7;
     }
 }
 
-/* Gradient Transition */
-.gradient-animation {
-    width: 150px;
-    height: 150px;
+/* 9. elasticBounce */
+.elasticBounce {
     border-radius: 50%;
-    background: linear-gradient(45deg, #ff5e62, #ff9966);
-    animation: gradientShift 5s infinite ease-in-out;
-    will-change: background;
+    animation: elastic 1.5s ease-in-out infinite;
 }
 
-@keyframes gradientShift {
-    0% {
-        background: linear-gradient(45deg, #ff5e62, #ff9966);
+@keyframes elastic {
+
+    0%,
+    100% {
+        transform: scale(1);
     }
 
     25% {
-        background: linear-gradient(45deg, #36d1dc, #5b86e5);
+        transform: scale(1.2);
     }
 
     50% {
-        background: linear-gradient(45deg, #ff7e5f, #feb47b);
+        transform: scale(0.8);
     }
 
     75% {
-        background: linear-gradient(45deg, #f27121, #e9483b);
+        transform: scale(1.1);
+    }
+}
+
+/* 10. spiralMotion */
+.spiralMotion {
+    border-radius: 50%;
+    animation: spiral 2s linear infinite;
+}
+
+@keyframes spiral {
+    0% {
+        transform: rotate(0deg) translateX(0);
+    }
+
+    50% {
+        transform: rotate(180deg) translateX(30px);
     }
 
     100% {
-        background: linear-gradient(45deg, #ff5e62, #ff9966);
+        transform: rotate(360deg) translateX(0);
     }
 }
 
-/* Soft Wave Effect */
-.soft-wave-animation {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
+/* --- remaining 40 animations follow same pattern with unique keyframes, colors, shapes, movement, loops --- */
 
-.soft-wave-animation .wave {
-    width: 40px;
-    height: 40px;
+/* 11. liquidRipple */
+.liquidRipple {
     border-radius: 50%;
-    background-color: #4caf50;
-    animation: wave 2.5s ease-in-out infinite;
+    background: radial-gradient(circle, #ff6b6b, #f06595);
+    animation: liquidWave 3s ease-in-out infinite;
 }
 
-.soft-wave-animation .wave:nth-child(2) {
-    animation-delay: 0.3s;
+@keyframes liquidWave {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.4) rotate(15deg);
+    }
 }
 
-.soft-wave-animation .wave:nth-child(3) {
-    animation-delay: 0.6s;
+/* 12. starfield */
+.starfield {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
 }
 
-@keyframes wave {
+.star {
+    position: absolute;
+    border-radius: 50%;
+    width: 3px;
+    height: 3px;
+    background: white;
+    animation: starMove 4s linear infinite;
+}
+
+@keyframes starMove {
+    0% {
+        transform: translate(0, 0);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translate(300px, 200px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(0, 0);
+        opacity: 0.5;
+    }
+}
+
+/* 13. pulseRings */
+.pulseRings {
+    border-radius: 50%;
+    border: 3px solid #0ff;
+    animation: pulseRing 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseRing {
 
     0%,
     100% {
@@ -119,296 +282,848 @@
     }
 
     50% {
-        transform: scale(1.5);
+        transform: scale(1.8);
         opacity: 1;
     }
 }
 
-/* Pendulum Swing */
-.pendulum-container {
+/* 14. morphPolygon */
+.morphPolygon {
+    width: 80px;
+    height: 80px;
+    background: #ff9f1c;
+    clip-path: polygon(50% 0%, 100% 25%, 75% 100%, 25% 100%, 0% 25%);
+    animation: morphPoly 4s ease-in-out infinite;
+}
+
+@keyframes morphPoly {
+
+    0%,
+    100% {
+        clip-path: polygon(50% 0%, 100% 25%, 75% 100%, 25% 100%, 0% 25%);
+    }
+
+    50% {
+        clip-path: polygon(40% 0%, 100% 30%, 70% 100%, 30% 100%, 0% 20%);
+    }
+}
+
+/* 15. hypnoticGrid */
+.hypnoticGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 20px);
+    gap: 5px;
+    animation: gridPulse 3s ease-in-out infinite;
+}
+
+.hypnoticGrid div {
+    width: 20px;
+    height: 20px;
+    background: #ff0;
+}
+
+@keyframes gridPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+/* 16. wavyLines */
+.wavyLines {
+    width: 100px;
+    height: 10px;
+    background: linear-gradient(to right, #f0f, #0ff);
+    animation: lineWave 2s ease-in-out infinite;
+}
+
+@keyframes lineWave {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(10px);
+    }
+}
+
+/* 17. bubbleRise */
+.bubbleRise {
+    position: relative;
+    height: 100px;
+    width: 100px;
+}
+
+.bubbleRise .bubble {
+    position: absolute;
+    border-radius: 50%;
+    animation: bubbleUp 3s ease-in-out infinite;
+}
+
+@keyframes bubbleUp {
+    0% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translateY(-80px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+}
+
+/* 18. cosmicSwirl */
+.cosmicSwirl {
+    border-radius: 50%;
+    background: conic-gradient(#ff0, #f0f, #0ff);
+    animation: swirlCosmic 4s linear infinite;
+}
+
+@keyframes swirlCosmic {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 19. kaleidoscope */
+.kaleidoscope {
+    width: 100px;
+    height: 100px;
+    background: repeating-conic-gradient(#f0f 0 30deg, #0ff 30deg 60deg);
+    border-radius: 50%;
+    animation: kaleidoSpin 5s linear infinite;
+}
+
+@keyframes kaleidoSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 20. neonTrail */
+.neonTrail {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.trailDot {
+    position: absolute;
+    border-radius: 50%;
+    animation: trailMove 2s ease-in-out infinite;
+}
+
+@keyframes trailMove {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(50px, 50px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+/* 21. orbitBlobs */
+.orbitBlobs {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.orbitBlob {
+    position: absolute;
+    border-radius: 50%;
+    animation: orbitBlobAnim 3s linear infinite;
+}
+
+@keyframes orbitBlobAnim {
+    0% {
+        transform: rotate(0deg) translateX(30px);
+    }
+
+    100% {
+        transform: rotate(360deg) translateX(30px);
+    }
+}
+
+/* 22. colorSpiral */
+.colorSpiral {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(#f0f, #ff0, #0ff);
+    animation: spinSpiral 4s linear infinite;
+}
+
+@keyframes spinSpiral {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 23. hypnoticWave */
+.hypnoticWave {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(to right, #ff0, #f0f);
+    animation: waveHypno 3s ease-in-out infinite;
+}
+
+@keyframes waveHypno {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 24. softGradientFlow */
+.softGradientFlow {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f0f, #0ff, #ff0);
+    animation: gradientFlow 4s linear infinite;
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 100% 100%;
+    }
+}
+
+/* 25. elasticRings */
+.elasticRings {
+    border-radius: 50%;
+    border: 3px solid #0ff;
+    animation: elasticRing 2s ease-in-out infinite;
+}
+
+@keyframes elasticRing {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.6);
+    }
+}
+
+/* 26. pulsingDots */
+.pulsingDots {
+    display: flex;
+    gap: 10px;
+}
+
+.pulseDot {
+    border-radius: 50%;
+    animation: pulseDotAnim 2s ease-in-out infinite;
+}
+
+@keyframes pulseDotAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 27. fractalSpiral */
+.fractalSpiral {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(#f0f, #ff0, #0ff);
+    animation: fractalSpin 3s linear infinite;
+}
+
+@keyframes fractalSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 28. orbitRings */
+.orbitRings {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.orbitRing {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid #0ff;
+    animation: orbitRingAnim 3s linear infinite;
+}
+
+@keyframes orbitRingAnim {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 29. glowCircles */
+.glowCircles {
+    border-radius: 50%;
+    box-shadow: 0 0 15px #0ff;
+    animation: glowAnim 2s ease-in-out infinite;
+}
+
+@keyframes glowAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+/* 30. particleExplosion */
+.particleExplosion {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: particleExplode 3s ease-in-out infinite;
+}
+
+@keyframes particleExplode {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(50px, -50px);
+    }
+}
+
+/* 31. pastelSpiral */
+.pastelSpiral {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(#f0f, #0ff, #ff0);
+    animation: pastelSpin 4s linear infinite;
+}
+
+@keyframes pastelSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 32. hypnoticRipple */
+.hypnoticRipple {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(to right, #ff0, #0ff);
+    animation: hypnoRipple 3s ease-in-out infinite;
+}
+
+@keyframes hypnoRipple {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 33. morphingWave */
+.morphingWave {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(to right, #f0f, #ff0);
+    animation: morphWave 4s ease-in-out infinite;
+}
+
+@keyframes morphWave {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.6);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 34. rainbowOrbit */
+.rainbowOrbit {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(red, orange, yellow, green, blue, indigo, violet);
+    animation: rainbowOrbitAnim 4s linear infinite;
+}
+
+@keyframes rainbowOrbitAnim {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 35. neonRings */
+.neonRings {
+    border-radius: 50%;
+    border: 3px solid #0ff;
+    animation: neonRing 2.5s ease-in-out infinite;
+}
+
+@keyframes neonRing {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 36. softPulse */
+.softPulse {
+    border-radius: 50%;
+    background: #0ff;
+    animation: softPulseAnim 2s ease-in-out infinite;
+}
+
+@keyframes softPulseAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.4);
+    }
+}
+
+/* 37. waveCircles */
+.waveCircles {
+    border-radius: 50%;
+    background: linear-gradient(90deg, #ff0, #0ff);
+    animation: waveCircleAnim 3s ease-in-out infinite;
+}
+
+@keyframes waveCircleAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 38. hypnoticMotion */
+.hypnoticMotion {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(to right, #ff0, #f0f, #0ff);
+    animation: hypnoMotion 4s ease-in-out infinite;
+}
+
+@keyframes hypnoMotion {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 39. gooeyBlobs */
+.gooeyBlobs {
+    filter: url(#goo);
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.gooeyBlobs .blob {
+    position: absolute;
+    border-radius: 50%;
+    animation: blobMove2 4s ease-in-out infinite;
+}
+
+@keyframes blobMove2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(20px, -20px);
+    }
+}
+
+/* 40. colorFusion */
+.colorFusion {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #ff0, #0ff, #f0f);
+    animation: colorFusionAnim 3s ease-in-out infinite;
+}
+
+@keyframes colorFusionAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 41. pulseWave */
+.pulseWave {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #ff0;
+    animation: pulseWaveAnim 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseWaveAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.4);
+    }
+}
+
+/* 42. liquidOrbs */
+.liquidOrbs {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.liquidOrbs .orb {
+    position: absolute;
+    border-radius: 50%;
+    animation: orbLiquid 3s ease-in-out infinite;
+}
+
+@keyframes orbLiquid {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(20px, -20px);
+    }
+}
+
+/* 43. glowingSwirl */
+.glowingSwirl {
+    border-radius: 50%;
+    background: conic-gradient(#f0f, #ff0, #0ff);
+    animation: glowSwirlAnim 4s linear infinite;
+}
+
+@keyframes glowSwirlAnim {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 44. neonPulse */
+.neonPulse {
+    border-radius: 50%;
+    box-shadow: 0 0 20px #0ff;
+    animation: neonPulseAnim 2s ease-in-out infinite;
+}
+
+@keyframes neonPulseAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 45. rippleDots */
+.rippleDots {
+    display: flex;
+    gap: 10px;
+}
+
+.rippleDot {
+    border-radius: 50%;
+    animation: rippleDotAnim 2s ease-in-out infinite;
+}
+
+@keyframes rippleDotAnim {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 46. orbitGlow */
+.orbitGlow {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.glowDot {
+    position: absolute;
+    border-radius: 50%;
+    animation: glowDotAnim 3s linear infinite;
+}
+
+@keyframes glowDotAnim {
+    0% {
+        transform: rotate(0deg) translateX(30px);
+    }
+
+    100% {
+        transform: rotate(360deg) translateX(30px);
+    }
+}
+
+/* 47. hypnoticRibbons */
+.hypnoticRibbons {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(45deg, #f0f, #0ff, #ff0);
+    animation: hypnoRibbonAnim 4s ease-in-out infinite;
+}
+
+@keyframes hypnoRibbonAnim {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(20px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* 48. cosmicPulse */
+.cosmicPulse {
+    border-radius: 50%;
+    background: conic-gradient(#f0f, #ff0, #0ff);
+    animation: cosmicPulseAnim 3s linear infinite;
+}
+
+@keyframes cosmicPulseAnim {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 49. lavaFlow */
+.lavaFlow {
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f00, #ff0, #f0f);
+    animation: lavaFlowAnim 3s linear infinite;
+}
+
+@keyframes lavaFlowAnim {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 50. plasmaOrbs */
+.plasmaOrbs {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.plasmaOrb {
+    position: absolute;
+    border-radius: 50%;
+    animation: plasmaOrbAnim 3s linear infinite;
+}
+
+@keyframes plasmaOrbAnim {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(30px, -30px);
+    }
+}
+
+/* ================= Floating Spheres Animation ================= */
+.floatingSpheres {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.pendulum {
-    position: relative;
-}
-
-.rod {
-    width: 4px;
+    gap: 25px;
+    width: 150px;
     height: 150px;
-    background-color: #333;
+    perspective: 600px;
+}
+
+.floatingSpheres .sphere {
     position: absolute;
-    top: 0;
-    left: 50%;
-    transform-origin: top center;
-    animation: pendulumSwing 3s ease-in-out infinite;
-}
-
-.circle {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 50%;
-    background-color: #4caf50;
-}
-
-@keyframes pendulumSwing {
-    0% {
-        transform: rotate(25deg);
-    }
-
-    50% {
-        transform: rotate(-25deg);
-    }
-
-    100% {
-        transform: rotate(25deg);
-    }
-}
-
-/* Particle Container */
-.particle-container {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    background-color: #111;
-    overflow: hidden;
-}
-
-/* Particle Styling */
-.particle {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #4caf50;
-    animation: moveParticles 5s infinite ease-in-out;
-    opacity: 0.8;
-}
-
-/* Particle Movement Animation */
-@keyframes moveParticles {
-    0% {
-        transform: translate(0, 0);
-        opacity: 0.7;
-    }
-
-    25% {
-        transform: translate(100px, -100px);
-        opacity: 0.9;
-    }
-
-    50% {
-        transform: translate(-100px, 100px);
-        opacity: 1;
-    }
-
-    75% {
-        transform: translate(50px, -50px);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: translate(0, 0);
-        opacity: 0.7;
-    }
-}
-
-/* Animation.css */
-.fluid-dynamics-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: -40px;
-}
-
-.fluid-dynamics-blob {
-  border-radius: 50%;
-  animation: blobMove infinite ease-in-out;
-  opacity: 0.8;
-  position: absolute;
-}
-
-@keyframes blobMove {
-  0% { transform: translate(0,0) scale(1); }
-  25% { transform: translate(30px,-20px) scale(1.1); }
-  50% { transform: translate(-20px,30px) scale(0.9); }
-  75% { transform: translate(20px,-30px) scale(1.2); }
-  100% { transform: translate(0,0) scale(1); }
-}
-
-.geometric-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.polygon {
-  position: absolute;
-  border: 2px solid;
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  animation: rotatePolygon infinite linear;
-}
-
-@keyframes rotatePolygon {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.2); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-.pastel-particles-container {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.pastel-particle {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.8;
-  animation: flowParticles infinite linear;
-}
-
-@keyframes flowParticles {
-  0% { transform: translate(0, 0); opacity: 0.7; }
-  50% { transform: translate(50px, 50px); opacity: 1; }
-  100% { transform: translate(0, 0); opacity: 0.7; }
-}
-
-.kaleidoscope-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.kaleidoscope-shape {
-  position: absolute;
-  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-  animation: rotateShape infinite linear;
-}
-
-@keyframes rotateShape {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.orbit-container {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.orbit-sphere {
-  position: absolute;
-  border-radius: 50%;
-  animation: orbitRotate infinite linear;
-  transform-origin: center center;
-}
-
-@keyframes orbitRotate {
-  0% { transform: rotate(0deg) translateX(100px); }
-  100% { transform: rotate(360deg) translateX(100px); }
-}
-
-.dashing-rings-container {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.dashing-ring {
-  position: absolute;
-  border: 3px solid;
-  border-radius: 50%;
-  opacity: 0.7;
-  animation: rotateRing infinite linear;
-  box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
-}
-
-@keyframes rotateRing {
-  0% {
-    transform: rotate(0deg) scale(1);
-    opacity: 0.5;
-  }
-  25% {
-    transform: rotate(90deg) scale(1.2);
-    opacity: 0.7;
-  }
-  50% {
-    transform: rotate(180deg) scale(1);
-    opacity: 0.9;
-  }
-  75% {
-    transform: rotate(270deg) scale(1.2);
-    opacity: 0.7;
-  }
-  100% {
-    transform: rotate(360deg) scale(1);
-    opacity: 0.5;
-  }
-}
-
-.trippy-rings-container {
-  position: relative;
-  width: 400px;
-  height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.trippy-ring {
-  position: absolute;
-  border: 4px solid transparent;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    #ff5e62,
-    #ff9966,
-    #36d1dc,
-    #5b86e5,
-    #ff5e62
-  );
-  mask-image: radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
-  animation: rotateRing 8s linear infinite;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2),
-              0 0 40px rgba(255, 255, 255, 0.1);
-}
-
-@keyframes rotateRing {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.1); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-/* Particles orbiting around center */
-.trippy-particle {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, #ff5e62, #5b86e5);
   top: 50%;
   left: 50%;
-  transform-origin: -150px 0;
-  animation: orbitParticle 6s linear infinite;
-  opacity: 0.8;
+  width: 100%;
+  height: 100%;
+  border: 6px solid transparent;
+  border-top-color: #00f5d4;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: spin 6s linear infinite;
+  filter: drop-shadow(0 0 10px #00f5d4);
 }
 
-@keyframes orbitParticle {
-  0% { transform: rotate(0deg) translateX(150px); }
-  100% { transform: rotate(360deg) translateX(150px); }
+@keyframes floatSphere {
+    0% {
+        transform: translateY(0px) rotateY(0deg);
+        filter: brightness(1);
+    }
+
+    50% {
+        transform: translateY(-25px) rotateY(180deg);
+        filter: brightness(1.4);
+    }
+
+    100% {
+        transform: translateY(0px) rotateY(360deg);
+        filter: brightness(1);
+    }
 }
+

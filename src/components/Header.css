@@ -1,13 +1,27 @@
 .header {
-  background-color: #4caf50;
-  padding: 12px 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  /* background-color: #4caf50; */
+  padding: 0px 50px;
+  box-shadow: 5px 5px 8px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  width: 90%;
+  margin: 16px auto 0px auto;
+  border-radius: 50px;
+  position: sticky;
+  top: 16px;
+}
+
+.logo {
+  /* background-image: url("src/assets/bubble.png"); */
+  color: white;
 }
 
 .nav {
   display: flex;
-  gap: 200px;
-  justify-content: center;
+  gap: 100px;
+  justify-content: space-around;
 }
 
 .nav-link {
@@ -18,12 +32,20 @@
   padding: 6px 12px;
   border-radius: 8px;
   transition: background-color 0.3s ease;
+  border: none;
 }
 
 .nav-link:hover {
-  background-color: #388e3c;
+  /* background-color: white; */
 }
 
 .active {
-  background-color: #2e7d32;
+  /* background-color: rgba(245, 245, 245, 0.5); */
+}
+
+/* ✅ Optional: if button styled same as nav links */
+.gallery-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
