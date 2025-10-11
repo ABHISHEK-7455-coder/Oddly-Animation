@@ -67,6 +67,15 @@ const About = () => {
           Explore Gallery
         </button>
       </section> */}
+       <div className="bubbles">
+                    <img src="src/assets/bubble.png" />
+                    <img src="src/assets/bubble.png" />
+                    <img src="src/assets/bubble.png" />
+                    <img src="src/assets/bubble.png" />
+                    <img src="src/assets/bubble.png" />
+                    <img src="src/assets/bubble.png" />
+                    <img src="src/assets/bubble.png" />
+                </div>
     </main>
   );
 };

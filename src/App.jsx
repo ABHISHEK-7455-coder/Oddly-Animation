@@ -9,23 +9,24 @@ import "./App.css";
 import { div } from "framer-motion/client";
 
 function App() {
-  return (
-    <div>
-      <div>
-        <Router>
-          <Header />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/login" element={<div className='text-center py-20'>Login Page (Coming Soon)</div>} />
-          </Routes>
+    return (
+        <div>
+            <div>
+                <Router>
+                    <Header />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/gallery" element={<Gallery />} />
+                        <Route path="/login" element={<div className='text-center py-20'>Login Page (Coming Soon)</div>} />
+                    </Routes>
 
-        </Router>
-      </div>
-      <Footer />
-    </div>
-  );
+                </Router>
+               
+            </div>
+            <Footer />
+        </div>
+    );
 }
 
 export default App;
