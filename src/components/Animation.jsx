@@ -5,7 +5,7 @@ const Animation = ({ type, color = "#ef8bf4ff", speed = 1.4, size = 50, params =
     switch (type) {
         case "floatingSpheres":
             return (
-                <div className="floatingSpheres" style={{ width: size, height: size }}>
+                <div className="floatingSpheres" style={{ width: size, height: size, animationDuration: speed + "s" }}>
                     {[...Array(6)].map((_, i) => (
                         <div
                             key={i}
@@ -13,8 +13,8 @@ const Animation = ({ type, color = "#ef8bf4ff", speed = 1.4, size = 50, params =
                             style={{
                                 backgroundColor: color,
                                 animationDelay: `${i * 0.4}s`,
-                                width: size / 2.5,
-                                height: size / 2.5,
+                                width: size / 2,
+                                height: size / 2,
                             }}
                         />
                     ))}
