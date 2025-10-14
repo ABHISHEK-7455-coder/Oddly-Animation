@@ -5,10 +5,6 @@ import "./Header.css";
 const Header = () => {
     const navigate = useNavigate();
 
-    const handleGalleryClick = () => {
-        navigate("/gallery");
-    };
-
     return (
         <header className="header">
             <div className="logo">
@@ -25,7 +21,7 @@ const Header = () => {
                     Home
                 </NavLink>
 
-                <button className="nav-link gallery-btn" onClick={handleGalleryClick}>
+                <button className="nav-link" onClick={()=>{navigate("/gallery")}}>
                     Gallery
                 </button>
 

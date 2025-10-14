@@ -1,29 +1,87 @@
-/* src/styles/Animation.css */
-
-.floatingSpheres {
+.floatingspheres {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
+  justify-content: space-around;
 }
 
 .sphere {
-  border-radius: 50%;
-  animation: float 2s infinite ease-in-out;
+  width: 50px;
+  /* height: 50px; */
+  animation: bubble 12s linear infinite;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+.sphere {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  position: absolute;
+  bottom: -70px;
 }
 
-/* fluidBlob animation */
-.fluidBlob {
-  border-radius: 50%;
-  animation: blobMorph 3s infinite ease-in-out;
+@keyframes bubble {
+  0%{
+    transform: translateY(0);
+    opacity: 0;
+  }
+  50%{
+    /* transform: translateY(0); */
+    opacity: 1;
+  }
+  70%{
+    /* transform: translateY(0); */
+    opacity: 1;
+  }
+  100%{
+    transform: translateY(-80vh);
+    opacity: 0;
+  }
 }
 
-@keyframes blobMorph {
-  0%, 100% { border-radius: 40% 60% 60% 40%; }
-  50% { border-radius: 60% 40% 40% 60%; }
+.sphere img:nth-child(1){
+  animation-delay: 2s;
+  width: 25px;
+  height: 25px;
+}
+.sphere img:nth-child(2){
+  animation-delay: 1s;
+}
+.sphere img:nth-child(3){
+  animation-delay: 3s;
+  width: 25px;
+  height: 25px;
+}
+.sphere img:nth-child(4){
+  animation-delay: 4.5s;
+}
+.sphere:nth-child(5){
+  animation-delay: 5s;
+  width: 36px;
+  height: 36px;
+}
+.sphere:nth-child(6){
+  animation-delay: 3s;
+}
+.sphere:nth-child(7){
+  animation-delay: 6s;
+  width: 30px;
+  height: 30px;
+}
+
+/* Rotating Squares */
+.rotatingSquares {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.square {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.1); }
 }

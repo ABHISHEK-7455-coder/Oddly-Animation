@@ -5,13 +5,9 @@ import "./Gallery.css";
 
 const Gallery = () => {
     const [selectedAnimation, setSelectedAnimation] = useState("floatingSpheres");
-    const [color, setColor] = useState("#4caf50");
+    const [color, setColor] = useState("#ef8bf4ff");
     const [size, setSize] = useState(100);
-    const [speed, setSpeed] = useState(1.4);
-
-    const handleCardClick = (animationType) => {
-        setSelectedAnimation(animationType);
-    };
+    const [speed, setSpeed] = useState(1.5);
 
     return (
         <div className="gallery-container">
@@ -22,7 +18,7 @@ const Gallery = () => {
                     <div
                         key={index}
                         className={`gallery-card ${selectedAnimation === animation.type ? "active" : ""}`}
-                        onClick={() => handleCardClick(animation.type)}
+                        onClick={() => setSelectedAnimation(animation.type)}
                     >
                         <h4>{animation.name}</h4>
                     </div>

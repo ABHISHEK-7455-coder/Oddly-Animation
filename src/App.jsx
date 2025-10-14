@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Gallery from "./components/Gallery";
 import "./App.css";
-import { div } from "framer-motion/client";
+// import { div } from "framer-motion/client";
 
 function App() {
     return (
@@ -20,9 +20,7 @@ function App() {
                         <Route path="/gallery" element={<Gallery />} />
                         <Route path="/login" element={<div className='text-center py-20'>Login Page (Coming Soon)</div>} />
                     </Routes>
-
                 </Router>
-               
             </div>
             <Footer />
         </div>
