@@ -1,0 +1,104 @@
+[
+    {
+        "id": 1,
+        "type": "floatingSpheres",
+        "count": 15,
+        "sizeRange": [
+            0,
+            30
+        ],
+        "speedRange": [
+            3,
+            6
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "css": {
+            "borderRadius": "50%",
+            "boxShadow": "0 0 20px rgba(255,110,196,0.7)",
+            "animationTimingFunction": "ease-in-out"
+        },
+        "interactive": false
+    },
+    {
+        "id": 2,
+        "type": "waveParticles",
+        "count": 100,
+        "speedRange": [
+            0.02,
+            0.05
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 3,
+        "type": "rainbowRibbon",
+        "trailLength": 50,
+        "css": {
+            "lineWidth": 8,
+            "glow": true
+        },
+        "interactive": true
+    },
+    {
+        "id": 4,
+        "type": "fractalBlossoms",
+        "maxCircles": 50,
+        "interactive": false
+    },
+    {
+        "id": 5,
+        "type": "slime",
+        "points": 20,
+        "colors": [
+            "#ff6ec4"
+        ],
+        "interactive": true
+    },
+    {
+        "id": 6,
+        "type": "starfield",
+        "count": 300,
+        "speed": 2,
+        "interactive": false
+    },
+    {
+        "id": 7,
+        "type": "bouncingDots",
+        "gridSize": 20,
+        "interactive": true
+    },
+    {
+        "id": 8,
+        "type": "morphingBlob",
+        "size": 200,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 9,
+        "type": "liquidWaves",
+        "count": 50,
+        "speed": 0.02,
+        "interactive": true
+    },
+    {
+        "id": 10,
+        "type": "glowingRings",
+        "count": 10,
+        "colors": [
+            "#ff6ec4",
+            "#00fff0"
+        ],
+        "interactive": false
+    }
+]

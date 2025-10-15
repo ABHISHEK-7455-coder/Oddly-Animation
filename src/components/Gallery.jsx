@@ -1,18 +1,20 @@
 import React, { useState } from "react";
 import Animation from "../components/Animation";
-import animationsData from "../data/animationsData"; // 50 animations ka data
+import animationsData from "../data/animationsData.json"; // 50 animations ka data
 import "./Gallery.css";
 
 const Gallery = () => {
     const [selectedAnimation, setSelectedAnimation] = useState("floatingSpheres");
     const [color, setColor] = useState("#ef8bf4ff");
-    const [size, setSize] = useState(100);
-    const [speed, setSpeed] = useState(1.5);
+    const [size, setSize] = useState(50);
+    const [speed, setSpeed] = useState(2.5);
 
     return (
         <div className="gallery-container">
 
-            {/* Gallery Cards */}
+            <div>
+                <h3>Animations</h3>
+                {/* Gallery Cards */}
             <div className="gallery">
                 {animationsData.map((animation, index) => (
                     <div
@@ -20,9 +22,10 @@ const Gallery = () => {
                         className={`gallery-card ${selectedAnimation === animation.type ? "active" : ""}`}
                         onClick={() => setSelectedAnimation(animation.type)}
                     >
-                        <h4>{animation.name}</h4>
+                        <h4>{animation.type}</h4>
                     </div>
                 ))}
+            </div>
             </div>
 
             {/* Controls */}

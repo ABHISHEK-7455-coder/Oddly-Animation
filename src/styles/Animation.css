@@ -1,87 +1,158 @@
-.floatingspheres {
-  display: flex;
-  justify-content: space-around;
+:root {
+  --size: 150px;
+  --speed: 2s;
 }
 
-.sphere {
-  width: 50px;
-  /* height: 50px; */
-  animation: bubble 12s linear infinite;
-}
-
-.sphere {
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  position: absolute;
-  bottom: -70px;
-}
-
-@keyframes bubble {
-  0%{
-    transform: translateY(0);
-    opacity: 0;
-  }
-  50%{
-    /* transform: translateY(0); */
-    opacity: 1;
-  }
-  70%{
-    /* transform: translateY(0); */
-    opacity: 1;
-  }
-  100%{
-    transform: translateY(-80vh);
-    opacity: 0;
-  }
-}
-
-.sphere img:nth-child(1){
-  animation-delay: 2s;
-  width: 25px;
-  height: 25px;
-}
-.sphere img:nth-child(2){
-  animation-delay: 1s;
-}
-.sphere img:nth-child(3){
-  animation-delay: 3s;
-  width: 25px;
-  height: 25px;
-}
-.sphere img:nth-child(4){
-  animation-delay: 4.5s;
-}
-.sphere:nth-child(5){
-  animation-delay: 5s;
-  width: 36px;
-  height: 36px;
-}
-.sphere:nth-child(6){
-  animation-delay: 3s;
-}
-.sphere:nth-child(7){
-  animation-delay: 6s;
-  width: 30px;
-  height: 30px;
-}
-
-/* Rotating Squares */
-.rotatingSquares {
+/* Common container styling */
+.rotatingHalo, .orbitDots, .spiralExpand, .gridWave,
+.polygonRotate, .particleSwirl, .floatingCubes,
+.bouncingLines, .ringsTunnel, .orbitTrails {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  margin: auto;
 }
 
-.square {
-  width: 40px;
-  height: 40px;
+/* ===== ROTATING HALO ===== */
+.rotatingHalo .halo {
   position: absolute;
-  animation: rotate 3s linear infinite;
+  width: 80%;
+  height: 80%;
+  border: 2px solid;
+  border-radius: 50%;
+  animation: rotateHalo var(--speed) linear infinite;
+}
+@keyframes rotateHalo {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
+/* ===== ORBIT DOTS ===== */
+.orbitDots .dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: rotate var(--speed) linear infinite;
+  transform-origin: center;
+}
 @keyframes rotate {
-  from { transform: rotate(0deg) scale(1); }
-  to { transform: rotate(360deg) scale(1.1); }
+  0% { transform: rotate(0deg) translateX(var(--size)/2); }
+  100% { transform: rotate(360deg) translateX(var(--size)/2); }
+}
+
+/* ===== SPIRAL EXPAND ===== */
+.spiralExpand .point {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: spiral var(--speed) linear infinite;
+  transform-origin: center;
+}
+@keyframes spiral {
+  0% { transform: rotate(0deg) scale(0.5); }
+  50% { transform: rotate(180deg) scale(1); }
+  100% { transform: rotate(360deg) scale(0.5); }
+}
+
+/* ===== GRID WAVE ===== */
+.gridWave .grid-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+.gridWave .grid-cell {
+  width: 20px;
+  height: 20px;
+  animation: bounce var(--speed) ease-in-out infinite alternate;
+}
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+/* ===== POLYGON ROTATE ===== */
+.polygonRotate {
+  animation: rotatePoly var(--speed) linear infinite;
+}
+@keyframes rotatePoly {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.polygonRotate .poly-edge {
+  position: absolute;
+  width: 4px;
+  height: var(--size);
+  transform-origin: bottom center;
+}
+
+/* ===== PARTICLE SWIRL ===== */
+.particleSwirl .dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: swirl var(--speed) linear infinite;
+}
+@keyframes swirl {
+  0% { transform: rotate(0deg) translateX(var(--size)/2); }
+  100% { transform: rotate(360deg) translateX(var(--size)/2); }
+}
+
+/* ===== FLOATING CUBES ===== */
+.floatingCubes .cube {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  animation: floatCube var(--speed) ease-in-out infinite alternate;
+}
+@keyframes floatCube {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-30px) rotate(45deg); }
+}
+
+/* ===== BOUNCING LINES ===== */
+.bouncingLines .line {
+  width: 4px;
+  height: 40px;
+  margin: 0 2px;
+  animation: bounceLine var(--speed) ease-in-out infinite alternate;
+}
+@keyframes bounceLine {
+  0% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1.2); }
+  100% { transform: scaleY(0.5); }
+}
+
+/* ===== RINGS TUNNEL ===== */
+.ringsTunnel .ring {
+  position: absolute;
+  width: 60%;
+  height: 60%;
+  border: 2px solid;
+  border-radius: 50%;
+  animation: ringTunnel var(--speed) linear infinite;
+}
+@keyframes ringTunnel {
+  0% { transform: scale(0.5) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1) rotate(180deg); opacity: 0.5; }
+  100% { transform: scale(0.5) rotate(360deg); opacity: 1; }
+}
+
+/* ===== ORBIT TRAILS ===== */
+.orbitTrails .trail-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: orbitTrail var(--speed) linear infinite;
+}
+@keyframes orbitTrail {
+  0% { transform: rotate(0deg) translateX(var(--size)/2); }
+  100% { transform: rotate(360deg) translateX(var(--size)/2); }
 }
