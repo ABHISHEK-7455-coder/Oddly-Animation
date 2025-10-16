@@ -100,5 +100,242 @@
             "#00fff0"
         ],
         "interactive": false
+    },
+    {
+        "id": 11,
+        "type": "rotatingArcs",
+        "count": 5,
+        "arcLength": 0.75,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00fff0"
+        ],
+        "rotationSpeed": 0.01,
+        "radiusStep": 20,
+        "interactive": false
+    },
+    {
+        "id": 12,
+        "type": "gridPulse",
+        "gridSize": 40,
+        "pulseSpeed": 0.005,
+        "shape": "circle",
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 13,
+        "type": "mandalaLines",
+        "spokes": 40,
+        "lineLength": 80,
+        "rotationSpeed": 0.005,
+        "colors": [
+            "#ff6ec4",
+            "#00fff0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 14,
+        "type": "orbitingDots",
+        "rings": 4,
+        "dotsPerRing": 8,
+        "radiusStep": 30,
+        "speedStep": 0.01,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 15,
+        "type": "waveLines",
+        "lineCount": 5,
+        "amplitude": 30,
+        "frequency": 0.05,
+        "speed": 0.03,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 16,
+        "type": "pulseCircles",
+        "count": 5,
+        "maxSize": 100,
+        "minSize": 20,
+        "speed": 0.02,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 17,
+        "type": "glowingParticles",
+        "count": 50,
+        "speedRange": [
+            0.5,
+            2
+        ],
+        "sizeRange": [
+            2,
+            5
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#00fff0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 18,
+        "type": "shiftingLines",
+        "count": 10,
+        "speed": 0.02,
+        "lineWidth": 3,
+        "colors": [
+            "#ff6ec4",
+            "#00fff0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 19,
+        "type": "breathingWave",
+        "lineCount": 15,
+        "maxSize": 200,
+        "speed": 0.02,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 20,
+        "type": "shiftingGrid",
+        "gridSize": 20,
+        "speed": 0.03,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 21,
+        "type": "fadingCircles",
+        "count": 30,
+        "sizeRange": [
+            10,
+            50
+        ],
+        "speedRange": [
+            0.01,
+            0.05
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 22,
+        "type": "ripplingSquares",
+        "count": 25,
+        "sizeRange": [
+            10,
+            50
+        ],
+        "speedRange": [
+            0.05,
+            0.1
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 23,
+        "type": "floatingCubes",
+        "count": 10,
+        "sizeRange": [
+            30,
+            80
+        ],
+        "speedRange": [
+            0.01,
+            0.05
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 24,
+        "type": "colorWave",
+        "count": 6,
+        "speed": 0.02,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 25,
+        "type": "particleAttraction",
+        "count": 100,
+        "speedRange": [
+            0.01,
+            0.03
+        ],
+        "attractionPoint": "mouse",
+        "interactive": true
+    },
+    {
+        "id": 26,
+        "type": "rotatingCubes",
+        "count": 50,
+        "speed": 0.5,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": true
+    },
+    {
+        "id": 27,
+        "type": "fractalTree",
+        "maxDepth": 10,
+        "branchLength": 30,
+        "angle": 25,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 13,
+        "type": "fluidWaves",
+        "count": 100,
+        "noiseFactor": 0.5,
+        "speed": 0.02,
+        "interactive": true
     }
 ]
