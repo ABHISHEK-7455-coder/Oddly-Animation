@@ -690,6 +690,252 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     ctx.stroke();
                     break;
 
+                case "rotatingArcTrail":
+                    if (!canvas.arcData) {
+                        canvas.arcData = { angle: 0, radius: data.radiusRange[0], trail: [] };
+                    }
+                    const arcX2 = canvas.width / 2 + Math.cos(canvas.arcData.angle) * canvas.arcData.radius;
+                    const arcY2 = canvas.height / 2 + Math.sin(canvas.arcData.angle) * canvas.arcData.radius;
+                    canvas.arcData.trail.push({ x: arcX2, y: arcY2 });
+                    if (canvas.arcData.trail.length > data.trailLength) canvas.arcData.trail.shift();
+                    for (let i = 0; i < canvas.arcData.trail.length; i++) {
+                        ctx.lineWidth = 5;
+                        ctx.strokeStyle = `rgba(255, 110, 196, ${1 - i / canvas.arcData.trail.length})`;
+                        ctx.beginPath();
+                        ctx.moveTo(canvas.arcData.trail[i].x, canvas.arcData.trail[i].y);
+                        ctx.lineTo(canvas.arcData.trail[i + 1]?.x || arcX2, canvas.arcData.trail[i + 1]?.y || arcY2);
+                        ctx.stroke();
+                    }
+                    canvas.arcData.angle += data.speedRange[0];
+                    break;
+
+                case "rotatingArcsMultiple":
+                    for (let i = 0; i < data.count; i++) {
+                        if (!canvas.arcData) canvas.arcData = [];
+                        if (!canvas.arcData[i]) {
+                            canvas.arcData[i] = { angle: Math.random() * Math.PI * 2, radius: Math.random() * (data.radiusRange[1] - data.radiusRange[0]) + data.radiusRange[0] };
+                        }
+                        const arcX = canvas.width / 2 + Math.cos(canvas.arcData[i].angle) * canvas.arcData[i].radius;
+                        const arcY = canvas.height / 2 + Math.sin(canvas.arcData[i].angle) * canvas.arcData[i].radius;
+                        ctx.lineWidth = data.arcWidth;
+                        ctx.strokeStyle = data.colors[i % data.colors.length];
+                        ctx.beginPath();
+                        ctx.arc(canvas.width / 2, canvas.height / 2, canvas.arcData[i].radius, 0, Math.PI * 2);
+                        ctx.stroke();
+                        canvas.arcData[i].angle += data.speedRange[0];
+                    }
+                    break;
+
+                case "expandingRotatingArcs":
+                    if (!canvas.arcData) {
+                        canvas.arcData = { angle: 0, radius: data.radiusRange[0] };
+                    }
+                    const arcX3 = canvas.width / 2 + Math.cos(canvas.arcData.angle) * canvas.arcData.radius;
+                    const arcY3 = canvas.height / 2 + Math.sin(canvas.arcData.angle) * canvas.arcData.radius;
+                    ctx.lineWidth = data.arcWidth;
+                    ctx.strokeStyle = data.colors[0];
+                    ctx.beginPath();
+                    ctx.arc(canvas.width / 2, canvas.height / 2, canvas.arcData.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    canvas.arcData.angle += data.speedRange[0];
+                    canvas.arcData.radius += data.expansionSpeed;
+                    if (canvas.arcData.radius > data.radiusRange[1]) canvas.arcData.radius = data.radiusRange[0];
+                    break;
+
+                case "liquidMetalFlow":
+                    if (!canvas.flow) {
+                        canvas.flow = { angle: 0, offsetX: 0, offsetY: 0 };
+                    }
+                    ctx.fillStyle = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle.addColorStop(0, data.colors[0]);
+                    ctx.fillStyle.addColorStop(1, data.colors[1]);
+                    ctx.beginPath();
+                    ctx.arc(canvas.width / 2 + Math.sin(canvas.flow.angle) * canvas.flow.offsetX, canvas.height / 2 + Math.cos(canvas.flow.angle) * canvas.flow.offsetY, data.sizeRange[0], 0, Math.PI * 2);
+                    ctx.fill();
+                    canvas.flow.angle += data.speedRange[0];
+                    canvas.flow.offsetX += 0.5;
+                    canvas.flow.offsetY += 0.5;
+                    break;
+
+                case "fractalLaserGrid":
+                    if (!canvas.lasers) {
+                        canvas.lasers = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            angle: Math.random() * Math.PI * 2
+                        }));
+                    }
+                    canvas.lasers.forEach(laser => {
+                        const x2 = laser.x + Math.cos(laser.angle) * 50;
+                        const y2 = laser.y + Math.sin(laser.angle) * 50;
+                        ctx.strokeStyle = data.colors[Math.floor(Math.random() * data.colors.length)];
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(laser.x, laser.y);
+                        ctx.lineTo(x2, y2);
+                        ctx.stroke();
+                        laser.angle += data.speedRange[0];
+                    });
+                    break;
+
+                case "soundWaveForm":
+                    if (!canvas.waves) {
+                        canvas.waves = Array.from({ length: data.count }, (_, i) => ({
+                            x: i * 100 + 50,
+                            y: Math.random() * canvas.height,
+                            speed: Math.random() * data.speedRange[1] + data.speedRange[0]
+                        }));
+                    }
+                    canvas.waves.forEach(wave => {
+                        ctx.strokeStyle = data.colors[Math.floor(Math.random() * data.colors.length)];
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(wave.x, wave.y);
+                        wave.y += Math.sin(Date.now() * wave.speed) * 20;
+                        ctx.lineTo(wave.x + 50, wave.y);
+                        ctx.stroke();
+                    });
+                    break;
+
+                case "metamorphosisCircles":
+                    if (!canvas.circles) {
+                        canvas.circles = Array.from({ length: data.count }, (_, i) => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            radius: Math.random() * data.sizeRange[1] + data.sizeRange[0],
+                            angle: Math.random() * Math.PI * 2
+                        }));
+                    }
+                    canvas.circles.forEach(circle => {
+                        ctx.fillStyle = data.colors[Math.floor(Math.random() * data.colors.length)];
+                        ctx.beginPath();
+                        ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        circle.radius += Math.sin(Date.now() * 0.001 + circle.angle) * 2;
+                        if (circle.radius > data.sizeRange[1]) circle.radius = data.sizeRange[0];
+                    });
+                    break;
+
+                case "pixelExplosion":
+                    if (!canvas.pixels) {
+                        canvas.pixels = Array.from({ length: data.count }, () => ({
+                            x: canvas.width / 2,
+                            y: canvas.height / 2,
+                            size: Math.random() * 5 + 1,
+                            speedX: Math.random() * 2 - 1,
+                            speedY: Math.random() * 2 - 1
+                        }));
+                    }
+                    canvas.pixels.forEach(pixel => {
+                        ctx.fillStyle = data.colors[Math.floor(Math.random() * data.colors.length)];
+                        ctx.beginPath();
+                        ctx.arc(pixel.x, pixel.y, pixel.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        pixel.x += pixel.speedX;
+                        pixel.y += pixel.speedY;
+                        pixel.size *= 0.98;
+                    });
+                    break;
+
+                    case "cosmicDrift":
+    if (!canvas.particles) {
+        canvas.particles = Array.from({ length: data.count }, () => ({
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: Math.random() * 3 + 1,
+            angle: Math.random() * 2 * Math.PI,
+            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],
+            color: data.colors[Math.floor(Math.random() * data.colors.length)]
+        }));
+    }
+    canvas.particles.forEach(p => {
+        p.x += Math.cos(p.angle) * p.speed;
+        p.y += Math.sin(p.angle) * p.speed;
+        p.size *= 0.99;
+
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.size < 1) {
+            p.x = canvas.width / 2;
+            p.y = canvas.height / 2;
+            p.size = Math.random() * 3 + 1;
+        }
+    });
+    break;
+
+    case "clockworkGeometry":
+    const centrX = canvas.width / 2;
+    const centrY = canvas.height / 2;
+    const radius = data.size;
+    const angleIncrement = Math.PI / 8;
+    const totalShapes = 8;
+
+    for (let i = 0; i < totalShapes; i++) {
+        const angle = i * angleIncrement + Date.now() * 0.0005;
+        const x = centrX + Math.cos(angle) * radius;
+        const y = centrY + Math.sin(angle) * radius;
+        const size = Math.sin(angle) * radius / 2 + 10;
+
+        ctx.fillStyle = data.colors[i % data.colors.length];
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    break;
+
+    case "quantumPulse":
+    if (!canvas.pulse) {
+        canvas.pulse = { x: canvas.width / 2, y: canvas.height / 2, size: 10, growing: true };
+    }
+
+    if (canvas.pulse.growing) {
+        canvas.pulse.size += 2;
+        if (canvas.pulse.size > canvas.width / 2) canvas.pulse.growing = false;
+    } else {
+        canvas.pulse.size -= 2;
+        if (canvas.pulse.size < 10) canvas.pulse.growing = true;
+    }
+
+    const gradient = ctx.createRadialGradient(canvas.pulse.x, canvas.pulse.y, 0, canvas.pulse.x, canvas.pulse.y, canvas.pulse.size);
+    gradient.addColorStop(0, data.colors[0]);
+    gradient.addColorStop(0.5, data.colors[1]);
+    gradient.addColorStop(1, data.colors[2]);
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(canvas.pulse.x, canvas.pulse.y, canvas.pulse.size, 0, Math.PI * 2);
+    ctx.fill();
+    break;
+
+    case "liquidCrystalWaves":
+    if (!canvas.waves) {
+        canvas.waves = Array.from({ length: data.count }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            amplitude: Math.random() * 20 + 5,
+            speed: Math.random() * 0.1 + 0.05
+        }));
+    }
+
+    canvas.waves.forEach(wave => {
+        wave.x += Math.cos(Date.now() * wave.speed) * wave.amplitude;
+        wave.y += Math.sin(Date.now() * wave.speed) * wave.amplitude;
+
+        const gradient = ctx.createRadialGradient(wave.x, wave.y, 0, wave.x, wave.y, wave.amplitude);
+        gradient.addColorStop(0, data.colors[0]);
+        gradient.addColorStop(0.5, data.colors[1]);
+        gradient.addColorStop(1, data.colors[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(wave.x, wave.y, wave.amplitude, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    break;
+
                 default:
                     break;
             }

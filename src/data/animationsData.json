@@ -331,11 +331,202 @@
         "interactive": false
     },
     {
-        "id": 13,
+        "id": 28,
         "type": "fluidWaves",
         "count": 100,
         "noiseFactor": 0.5,
         "speed": 0.02,
+        "interactive": true
+    },
+    {
+        "id": 29,
+        "type": "rotatingArcTrail",
+        "count": 1,
+        "arcWidth": 10,
+        "radiusRange": [
+            40,
+            120
+        ],
+        "trailLength": 30,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "speedRange": [
+            0.02,
+            0.08
+        ],
+        "interactive": false
+    },
+    {
+        "id": 30,
+        "type": "rotatingArcsMultiple",
+        "count": 3,
+        "arcWidth": 8,
+        "radiusRange": [
+            30,
+            100
+        ],
+        "angleRange": [
+            0,
+            16
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00fff0"
+        ],
+        "speedRange": [
+            0.01,
+            0.03
+        ],
+        "interactive": false
+    },
+    {
+        "id": 31,
+        "type": "expandingRotatingArcs",
+        "count": 1,
+        "arcWidth": 8,
+        "radiusRange": [
+            50,
+            250
+        ],
+        "expansionSpeed": 0.2,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "speedRange": [
+            0.02,
+            0.05
+        ],
+        "interactive": false
+    },
+    {
+        "id": 32,
+        "type": "liquidMetalFlow",
+        "count": 1,
+        "sizeRange": [
+            30,
+            100
+        ],
+        "speedRange": [
+            0.1,
+            0.3
+        ],
+        "colors": [
+            "#00fff0",
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 33,
+        "type": "fractalLaserGrid",
+        "count": 20,
+        "speedRange": [
+            0.05,
+            0.1
+        ],
+        "colors": [
+            "#00fff0",
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 34,
+        "type": "soundWaveForm",
+        "count": 5,
+        "speedRange": [
+            0.05,
+            0.1
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#00fff0"
+        ],
+        "interactive": true
+    },
+    {
+        "id": 35,
+        "type": "metamorphosisCircles",
+        "count": 10,
+        "sizeRange": [
+            30,
+            80
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00fff0"
+        ],
+        "speedRange": [
+            0.05,
+            0.1
+        ],
+        "interactive": false
+    },
+    {
+        "id": 36,
+        "type": "pixelExplosion",
+        "count": 300,
+        "speedRange": [
+            0.5,
+            1
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00fff0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 37,
+        "type": "cosmicDrift",
+        "count": 100,
+        "speedRange": [
+            0.1,
+            0.5
+        ],
+        "colors": [
+            "#00f",
+            "#ff6ec4",
+            "#ffef00"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 39,
+        "type": "quantumPulse",
+        "count": 1,
+        "speedRange": [
+            0.01,
+            0.1
+        ],
+        "colors": [
+            "#00f",
+            "#ff0",
+            "#ff00ff"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 40,
+        "type": "liquidCrystalWaves",
+        "count": 50,
+        "speedRange": [
+            0.02,
+            0.05
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00f"
+        ],
         "interactive": true
     }
 ]
