@@ -837,104 +837,550 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     });
                     break;
 
-                    case "cosmicDrift":
-    if (!canvas.particles) {
-        canvas.particles = Array.from({ length: data.count }, () => ({
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            size: Math.random() * 3 + 1,
-            angle: Math.random() * 2 * Math.PI,
-            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],
-            color: data.colors[Math.floor(Math.random() * data.colors.length)]
-        }));
-    }
-    canvas.particles.forEach(p => {
-        p.x += Math.cos(p.angle) * p.speed;
-        p.y += Math.sin(p.angle) * p.speed;
-        p.size *= 0.99;
+                case "cosmicDrift":
+                    if (!canvas.particles) {
+                        canvas.particles = Array.from({ length: data.count }, () => ({
+                            x: canvas.width / 2,
+                            y: canvas.height / 2,
+                            size: Math.random() * 3 + 1,
+                            angle: Math.random() * 2 * Math.PI,
+                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],
+                            color: data.colors[Math.floor(Math.random() * data.colors.length)]
+                        }));
+                    }
+                    canvas.particles.forEach(p => {
+                        p.x += Math.cos(p.angle) * p.speed;
+                        p.y += Math.sin(p.angle) * p.speed;
+                        p.size *= 0.99;
 
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
 
-        if (p.size < 1) {
-            p.x = canvas.width / 2;
-            p.y = canvas.height / 2;
-            p.size = Math.random() * 3 + 1;
-        }
-    });
-    break;
+                        if (p.size < 1) {
+                            p.x = canvas.width / 2;
+                            p.y = canvas.height / 2;
+                            p.size = Math.random() * 3 + 1;
+                        }
+                    });
+                    break;
 
-    case "clockworkGeometry":
-    const centrX = canvas.width / 2;
-    const centrY = canvas.height / 2;
-    const radius = data.size;
-    const angleIncrement = Math.PI / 8;
-    const totalShapes = 8;
+                case "clockworkGeometry":
+                    const centrX = canvas.width / 2;
+                    const centrY = canvas.height / 2;
+                    const radius = data.size;
+                    const angleIncrement = Math.PI / 8;
+                    const totalShapes = 8;
 
-    for (let i = 0; i < totalShapes; i++) {
-        const angle = i * angleIncrement + Date.now() * 0.0005;
-        const x = centrX + Math.cos(angle) * radius;
-        const y = centrY + Math.sin(angle) * radius;
-        const size = Math.sin(angle) * radius / 2 + 10;
+                    for (let i = 0; i < totalShapes; i++) {
+                        const angle = i * angleIncrement + Date.now() * 0.0005;
+                        const x = centrX + Math.cos(angle) * radius;
+                        const y = centrY + Math.sin(angle) * radius;
+                        const size = Math.sin(angle) * radius / 2 + 10;
 
-        ctx.fillStyle = data.colors[i % data.colors.length];
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    break;
+                        ctx.fillStyle = data.colors[i % data.colors.length];
+                        ctx.beginPath();
+                        ctx.arc(x, y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
 
-    case "quantumPulse":
-    if (!canvas.pulse) {
-        canvas.pulse = { x: canvas.width / 2, y: canvas.height / 2, size: 10, growing: true };
-    }
+                case "quantumPulse":
+                    if (!canvas.pulse) {
+                        canvas.pulse = { x: canvas.width / 2, y: canvas.height / 2, size: 10, growing: true };
+                    }
 
-    if (canvas.pulse.growing) {
-        canvas.pulse.size += 2;
-        if (canvas.pulse.size > canvas.width / 2) canvas.pulse.growing = false;
-    } else {
-        canvas.pulse.size -= 2;
-        if (canvas.pulse.size < 10) canvas.pulse.growing = true;
-    }
+                    if (canvas.pulse.growing) {
+                        canvas.pulse.size += 2;
+                        if (canvas.pulse.size > canvas.width / 2) canvas.pulse.growing = false;
+                    } else {
+                        canvas.pulse.size -= 2;
+                        if (canvas.pulse.size < 10) canvas.pulse.growing = true;
+                    }
 
-    const gradient = ctx.createRadialGradient(canvas.pulse.x, canvas.pulse.y, 0, canvas.pulse.x, canvas.pulse.y, canvas.pulse.size);
-    gradient.addColorStop(0, data.colors[0]);
-    gradient.addColorStop(0.5, data.colors[1]);
-    gradient.addColorStop(1, data.colors[2]);
+                    const gradient = ctx.createRadialGradient(canvas.pulse.x, canvas.pulse.y, 0, canvas.pulse.x, canvas.pulse.y, canvas.pulse.size);
+                    gradient.addColorStop(0, data.colors[0]);
+                    gradient.addColorStop(0.5, data.colors[1]);
+                    gradient.addColorStop(1, data.colors[2]);
 
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(canvas.pulse.x, canvas.pulse.y, canvas.pulse.size, 0, Math.PI * 2);
-    ctx.fill();
-    break;
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(canvas.pulse.x, canvas.pulse.y, canvas.pulse.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
 
-    case "liquidCrystalWaves":
-    if (!canvas.waves) {
-        canvas.waves = Array.from({ length: data.count }, () => ({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            amplitude: Math.random() * 20 + 5,
-            speed: Math.random() * 0.1 + 0.05
-        }));
-    }
+                case "liquidCrystalWaves":
+                    if (!canvas.waves) {
+                        canvas.waves = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            amplitude: Math.random() * 20 + 5,
+                            speed: Math.random() * 0.1 + 0.05
+                        }));
+                    }
 
-    canvas.waves.forEach(wave => {
-        wave.x += Math.cos(Date.now() * wave.speed) * wave.amplitude;
-        wave.y += Math.sin(Date.now() * wave.speed) * wave.amplitude;
+                    canvas.waves.forEach(wave => {
+                        wave.x += Math.cos(Date.now() * wave.speed) * wave.amplitude;
+                        wave.y += Math.sin(Date.now() * wave.speed) * wave.amplitude;
 
-        const gradient = ctx.createRadialGradient(wave.x, wave.y, 0, wave.x, wave.y, wave.amplitude);
-        gradient.addColorStop(0, data.colors[0]);
-        gradient.addColorStop(0.5, data.colors[1]);
-        gradient.addColorStop(1, data.colors[2]);
+                        const gradient = ctx.createRadialGradient(wave.x, wave.y, 0, wave.x, wave.y, wave.amplitude);
+                        gradient.addColorStop(0, data.colors[0]);
+                        gradient.addColorStop(0.5, data.colors[1]);
+                        gradient.addColorStop(1, data.colors[2]);
 
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(wave.x, wave.y, wave.amplitude, 0, Math.PI * 2);
-        ctx.fill();
-    });
-    break;
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(wave.x, wave.y, wave.amplitude, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    break;
+
+                case "expandingSpiral":
+                    if (!canvas.spiral) {
+                        canvas.spiral = {
+                            angle: 0,
+                            radius: 1,
+                            speed: Math.random() * 0.05 + 0.01,
+                            growth: 0.5
+                        };
+                    }
+
+                    const spiral = canvas.spiral;
+                    spiral.angle += spiral.speed;
+                    spiral.radius += spiral.growth;
+
+                    const x = canvas.width / 2 + spiral.radius * Math.cos(spiral.angle);
+                    const y = canvas.height / 2 + spiral.radius * Math.sin(spiral.angle);
+
+                    const gradientt = ctx.createRadialGradient(x, y, 0, x, y, spiral.radius);
+                    gradientt.addColorStop(0, data.colors[0]);
+                    gradientt.addColorStop(1, data.colors[1]);
+
+                    ctx.fillStyle = gradientt;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+
+                case "fallingParticles":
+                    if (!canvas.particles) {
+                        canvas.particles = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            size: Math.random() * 3 + 2,
+                            speed: Math.random() * 0.5 + 0.2
+                        }));
+                    }
+
+                    canvas.particles.forEach(particle => {
+                        particle.y += particle.speed;
+                        if (particle.y > canvas.height) {
+                            particle.y = -particle.size;
+                        }
+
+                        const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size);
+                        gradient.addColorStop(0, data.colors[0]);
+                        gradient.addColorStop(1, data.colors[1]);
+
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    break;
+
+                case "wavingRectangles":
+                    if (!canvas.rectangles) {
+                        canvas.rectangles = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            width: Math.random() * 60 + 20,
+                            height: Math.random() * 40 + 20,
+                            speed: Math.random() * 0.02 + 0.01,
+                            waveAmplitude: Math.random() * 10 + 5
+                        }));
+                    }
+
+                    canvas.rectangles.forEach(rect => {
+                        rect.y += Math.sin(Date.now() * rect.speed) * rect.waveAmplitude;
+
+                        const gradient = ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+                        gradient.addColorStop(0, data.colors[0]);
+                        gradient.addColorStop(1, data.colors[1]);
+
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+                    });
+                    break;
+
+                case "smoothColorFlow":
+                    if (!canvas.flow) {
+                        canvas.flow = {
+                            time: 0
+                        };
+                    }
+
+                    const flow = canvas.flow;
+                    flow.time += 0.01;
+
+                    const gradienttt = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                    gradienttt.addColorStop(0, data.colors[0]);
+                    gradienttt.addColorStop(0.5, data.colors[1]);
+                    gradienttt.addColorStop(1, data.colors[2]);
+
+                    ctx.fillStyle = gradienttt;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    break;
+
+                case "slowRippleCircles":
+                    if (!canvas.ripples) {
+                        canvas.ripples = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            size: Math.random() * (data.maxSize - data.minSize) + data.minSize,
+                            speed: Math.random() * 0.02 + 0.01
+                        }));
+                    }
+
+                    canvas.ripples.forEach(ripple => {
+                        ripple.size += ripple.speed;
+                        if (ripple.size > data.maxSize) {
+                            ripple.size = data.minSize;
+                        }
+
+                        const gradient = ctx.createRadialGradient(ripple.x, ripple.y, 0, ripple.x, ripple.y, ripple.size);
+                        gradient.addColorStop(0, data.colors[0]);
+                        gradient.addColorStop(1, data.colors[1]);
+
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(ripple.x, ripple.y, ripple.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    break;
+
+                case "gravityParticles":
+                    if (!canvas.particles) {
+                        canvas.particles = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            velocityX: Math.random() * 2 - 1,
+                            velocityY: Math.random() * 2 - 1,
+                            size: Math.random() * 5 + 3,
+                            gravity: 0.1,
+                            friction: 0.98
+                        }));
+                    }
+
+                    canvas.particles.forEach(particle => {
+                        // Apply gravity to the particle's vertical velocity
+                        particle.velocityY += particle.gravity;
+
+                        // Apply friction to slow down horizontal movement
+                        particle.velocityX *= particle.friction;
+
+                        // Update particle position
+                        particle.x += particle.velocityX;
+                        particle.y += particle.velocityY;
+
+                        // Check for collision with the canvas borders
+                        if (particle.x > canvas.width || particle.x < 0) {
+                            particle.velocityX = -particle.velocityX;
+                        }
+                        if (particle.y > canvas.height) {
+                            particle.velocityY = -particle.velocityY * 0.7; // bounce with reduced speed
+                            particle.y = canvas.height;
+                        }
+
+                        // Draw the particle
+                        const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size);
+                        gradient.addColorStop(0, data.colors[0]);
+                        gradient.addColorStop(1, data.colors[1]);
+
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    break;
+
+                case "windParticles":
+                    if (!canvas.particles) {
+                        canvas.particles = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            velocityX: Math.random() * 2 - 1,
+                            velocityY: Math.random() * 2 - 1,
+                            size: Math.random() * 5 + 3,
+                            windSpeed: Math.random() * 0.5 + 0.1
+                        }));
+                    }
+
+                    canvas.particles.forEach(particle => {
+                        // Apply wind force to the horizontal velocity
+                        particle.velocityX += particle.windSpeed;
+
+                        // Update particle position
+                        particle.x += particle.velocityX;
+                        particle.y += particle.velocityY;
+
+                        // Check for border collisions
+                        if (particle.x > canvas.width || particle.x < 0) {
+                            particle.velocityX = -particle.velocityX;
+                        }
+                        if (particle.y > canvas.height) {
+                            particle.velocityY = -particle.velocityY;
+                            particle.y = canvas.height;
+                        }
+
+                        // Draw the particle
+                        const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size);
+                        gradient.addColorStop(0, data.colors[0]);
+                        gradient.addColorStop(1, data.colors[1]);
+
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    break;
+
+                case "interactiveGravityParticles":
+                    if (!canvas.particles) {
+                        canvas.particles = Array.from({ length: data.count }, () => ({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            velocityX: Math.random() * 2 - 1,
+                            velocityY: Math.random() * 2 - 1,
+                            size: Math.random() * 5 + 2,
+                            gravity: 0.1,
+                            friction: 0.98
+                        }));
+                    }
+
+                    canvas.particles.forEach(particle => {
+                        // Apply gravity
+                        particle.velocityY += particle.gravity;
+
+                        // Apply friction
+                        particle.velocityX *= particle.friction;
+                        particle.velocityY *= particle.friction;
+
+                        // Calculate attraction towards mouse (interactive)
+                        const mouseX = canvas.mouse.x;
+                        const mouseY = canvas.mouse.y;
+                        const dx = mouseX - particle.x;
+                        const dy = mouseY - particle.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const force = Math.min(100, 1 / distance * 0.1);
+
+                        particle.velocityX += dx * force;
+                        particle.velocityY += dy * force;
+
+                        // Update position
+                        particle.x += particle.velocityX;
+                        particle.y += particle.velocityY;
+
+                        // Boundary conditions
+                        if (particle.x > canvas.width || particle.x < 0) {
+                            particle.velocityX = -particle.velocityX;
+                        }
+                        if (particle.y > canvas.height) {
+                            particle.velocityY = -particle.velocityY;
+                            particle.y = canvas.height;
+                        }
+
+                        // Draw the particle
+                        const gradient = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size);
+                        gradient.addColorStop(0, data.colors[0]);
+                        gradient.addColorStop(1, data.colors[1]);
+
+                        ctx.fillStyle = gradient;
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    break;
+
+                case "rotatingSquares":
+                    if (!canvas.squares) {
+                        const squareCount = 120;
+                        const canvasCenterX = canvas.width / 2;
+                        const canvasCenterY = canvas.height / 2;
+                        canvas.squares = Array.from({ length: squareCount }, (_, i) => {
+                            const square = {
+                                size: 38,
+                                rotationSpeed: 20,
+                                delay: i * 0.5,
+                                hueRotation: 3 * i,
+                                borderWidth: 2 // Setting border width
+                            };
+
+                            // Centering the squares
+                            if (i < 40) {
+                                square.x = canvasCenterX + (i * 6) - 142;
+                                square.y = canvasCenterY + 100;
+                            } else if (i < 80) {
+                                square.x = canvasCenterX + (i * -3) + 220;
+                                square.y = canvasCenterY + (i * -5) + 305;
+                            } else if (i < 120) {
+                                square.x = canvasCenterX + (i * 3) - 260;
+                                square.y = canvasCenterY + (i * 5) - 500;
+                            }
+
+                            if (!isFinite(square.x) || !isFinite(square.y)) {
+                                console.error(`Invalid position for square ${i}`);
+                                square.x = 0;
+                                square.y = 0;
+                            }
+
+                            return square;
+                        });
+                    }
+
+                    const timee = Date.now() / 1000;
+
+                    // Background animation (same as previous)
+                    const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                    // bgGradient.addColorStop(0, `hsl(${timee * 5 % 360}, 100%, 30%)`);
+                    // bgGradient.addColorStop(1, `hsl(${(timee * 5 + 180) % 360}, 100%, 30%)`);
+                    // ctx.fillStyle = bgGradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    canvas.squares.forEach((square, i) => {
+                        // Rotation & Hue Calculation
+                        const angle = (timee * 360 / square.rotationSpeed + square.delay) % 360;
+                        const hue = (square.hueRotation + (timee * 10)) % 360;
+
+                        // Create a border color gradient
+                        const gradient = ctx.createLinearGradient(square.x, square.y, square.x + square.size, square.y + square.size);
+                        gradient.addColorStop(0, `hsl(${hue}, 100%, 50%)`);
+                        gradient.addColorStop(1, `hsl(${(hue + 20) % 360}, 100%, 50%)`);
+
+                        ctx.save();
+                        ctx.translate(square.x + square.size / 2, square.y + square.size / 2);
+                        ctx.rotate((angle * Math.PI) / 180);
+
+                        // Set the border width and color, leave the fill transparent
+                        ctx.lineWidth = square.borderWidth;
+                        ctx.strokeStyle = gradient;  // Apply gradient to border
+                        ctx.fillStyle = 'transparent'; // Ensure background is transparent
+                        ctx.beginPath();
+                        ctx.rect(-square.size / 2, -square.size / 2, square.size, square.size);
+                        ctx.stroke(); // Draw border
+                        ctx.restore();
+                    });
+                    break;
+
+                case "rotatingSquares":
+                    if (!canvas.squares) {
+                        canvas.squares = Array.from({ length: data.count }, () => ({
+                            x: canvas.width / 2,  // center of the canvas
+                            y: canvas.height / 2, // center of the canvas
+                            size: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // size control
+                            rotation: 0,
+                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // speed control
+                            color: data.colors[Math.floor(Math.random() * data.colors.length)],
+                        }));
+                    }
+
+                    canvas.squares.forEach(square => {
+                        square.rotation += square.speed;  // rotate the square
+
+                        ctx.save();
+                        ctx.translate(square.x, square.y);
+                        ctx.rotate(square.rotation);
+
+                        ctx.fillStyle = square.color;
+                        ctx.fillRect(-square.size / 2, -square.size / 2, square.size, square.size);  // square centered around (x, y)
+
+                        ctx.restore();
+                    });
+                    break;
+
+                case "pulsingCircles":
+                    if (!canvas.circles) {
+                        canvas.circles = Array.from({ length: data.count }, () => ({
+                            x: canvas.width / 2,  // center of the canvas
+                            y: canvas.height / 2, // center of the canvas
+                            minSize: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // min size
+                            maxSize: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // max size
+                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // speed control
+                            color: data.colors[Math.floor(Math.random() * data.colors.length)],
+                            currentSize: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],
+                            growing: true,  // circle starts by growing
+                        }));
+                    }
+
+                    canvas.circles.forEach(circle => {
+                        // Toggle between growing and shrinking
+                        if (circle.growing) {
+                            circle.currentSize += circle.speed;
+                            if (circle.currentSize >= circle.maxSize) {
+                                circle.growing = false;
+                            }
+                        } else {
+                            circle.currentSize -= circle.speed;
+                            if (circle.currentSize <= circle.minSize) {
+                                circle.growing = true;
+                            }
+                        }
+
+                        ctx.beginPath();
+                        ctx.arc(circle.x, circle.y, circle.currentSize, 0, Math.PI * 2);
+                        ctx.fillStyle = circle.color;
+                        ctx.fill();
+                    });
+                    break;
+
+                case "orbitingParticles":
+                    if (!canvas.particles) {
+                        canvas.particles = Array.from({ length: data.count }, () => ({
+                            angle: Math.random() * Math.PI * 2,  // Random initial angle for orbit
+                            radius: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // Radius control (size)
+                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // Speed control
+                            color: data.colors[Math.floor(Math.random() * data.colors.length)],
+                        }));
+                    }
+
+                    canvas.particles.forEach(particle => {
+                        // Update the position of each particle based on angle and speed
+                        particle.angle += particle.speed;  // Increase the angle for orbiting effect
+                        particle.x = canvas.width / 2 + Math.cos(particle.angle) * particle.radius;
+                        particle.y = canvas.height / 2 + Math.sin(particle.angle) * particle.radius;
+
+                        // Draw the particle (a small circle)
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, 5, 0, Math.PI * 2);
+                        ctx.fillStyle = particle.color;
+                        ctx.fill();
+                    });
+                    break;
+
+                case "waveGrid":
+                    const gridsize = 10;  // Define grid size (adjustable for control)
+                    if (!canvas.gridSquares) {
+                        canvas.gridSquares = Array.from({ length: gridsize * gridsize }, (_, i) => ({
+                            x: (i % gridsize) * (canvas.width / gridsize),
+                            y: Math.floor(i / gridsize) * (canvas.height / gridsize),
+                            size: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // Square size control
+                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // Speed control
+                            offset: Math.random() * Math.PI * 2,  // Random phase for wave effect
+                            color: data.colors[Math.floor(Math.random() * data.colors.length)],
+                        }));
+                    }
+
+                    canvas.gridSquares.forEach(square => {
+                        // Calculate new position based on sine wave for wave effect
+                        const waveEffect = Math.sin(Date.now() * square.speed + square.offset);
+                        square.y += waveEffect * 10;  // Change the vertical position
+
+                        // Draw the square with the wave effect
+                        ctx.fillStyle = square.color;
+                        ctx.fillRect(square.x, square.y, square.size, square.size);
+                    });
+                    break;
 
                 default:
                     break;

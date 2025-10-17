@@ -528,5 +528,195 @@
             "#00f"
         ],
         "interactive": true
+    },
+    {
+        "id": 41,
+        "type": "expandingSpiral",
+        "count": 1,
+        "speedRange": [
+            0.01,
+            0.05
+        ],
+        "color": "#7873f5",
+        "spiralGrowth": 0.2,
+        "interactive": false
+    },
+    {
+        "id": 42,
+        "type": "fallingParticles",
+        "count": 100,
+        "speedRange": [
+            0.01,
+            0.03
+        ],
+        "sizeRange": [
+            2,
+            5
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 43,
+        "type": "wavingRectangles",
+        "count": 5,
+        "speed": 0.02,
+        "sizeRange": [
+            20,
+            80
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#00fff0"
+        ],
+        "waveAmplitude": 10,
+        "interactive": false
+    },
+    {
+        "id": 44,
+        "type": "smoothColorFlow",
+        "count": 1,
+        "speedRange": [
+            0.02,
+            0.1
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00fff0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 45,
+        "type": "slowRippleCircles",
+        "count": 10,
+        "speed": 0.9,
+        "maxSize": 100,
+        "minSize": 20,
+        "colors": [
+            "#ff6ec4",
+            "#00fff0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 47,
+        "type": "gravityParticles",
+        "count": 100,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 48,
+        "type": "windParticles",
+        "count": 100,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 49,
+        "type": "interactiveGravityParticles",
+        "count": 100,
+        "colors": [
+            "#ff6ec4",
+            "#7873f5"
+        ],
+        "interactive": true
+    },
+    {
+        "id": 50,
+        "type": "rotatingSquares",
+        "count": 181,
+        "size": 38,
+        "colors": [
+            "#fa0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 51,
+        "type": "rotatingSquares2",
+        "count": 10,
+        "sizeRange": [
+            30,
+            80
+        ],
+        "speedRange": [
+            0.01,
+            0.05
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#00f",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 52,
+        "type": "pulsingCircles",
+        "count": 5,
+        "sizeRange": [
+            40,
+            120
+        ],
+        "speedRange": [
+            0.1,
+            0.5
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#00f",
+            "#7873f5"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 53,
+        "type": "orbitingParticles",
+        "count": 50,
+        "sizeRange": [
+            5,
+            20
+        ],
+        "speedRange": [
+            0.01,
+            0.05
+        ],
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00fff0"
+        ],
+        "interactive": false
+    },
+    {
+        "id": 54,
+        "type": "waveGrid",
+        "count": 100, 
+        "sizeRange": [
+            10,
+            50
+        ], 
+        "speedRange": [
+            0.02,
+            0.05
+        ], 
+        "colors": [
+            "#ff6ec4",
+            "#7873f5",
+            "#00fff0"
+        ], 
+        "interactive": false
     }
 ]

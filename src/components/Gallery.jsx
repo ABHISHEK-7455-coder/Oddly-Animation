@@ -4,7 +4,7 @@ import animationsData from "../data/animationsData.json"; // 50 animations ka da
 import "./Gallery.css";
 
 const Gallery = () => {
-    const [selectedAnimation, setSelectedAnimation] = useState("floatingSpheres");
+    const [selectedAnimation, setSelectedAnimation] = useState("fractalLaserGrid");
     const [color, setColor] = useState("#ef8bf4ff");
     const [size, setSize] = useState(50);
     const [speed, setSpeed] = useState(2.5);
