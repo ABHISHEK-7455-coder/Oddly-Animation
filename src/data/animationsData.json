@@ -111,7 +111,7 @@
             "#7873f5",
             "#00fff0"
         ],
-        "rotationSpeed": 0.01,
+        "rotationSpeed": 0.5,
         "radiusStep": 20,
         "interactive": false
     },
@@ -720,3 +720,5 @@
         "interactive": false
     }
 ]
+
+

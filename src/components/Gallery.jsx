@@ -5,9 +5,9 @@ import "./Gallery.css";
 
 const Gallery = () => {
     const [selectedAnimation, setSelectedAnimation] = useState("fractalLaserGrid");
-    const [color, setColor] = useState("#ef8bf4ff");
+    const [color, setColor] = useState("#ef8bf4");
     const [size, setSize] = useState(50);
-    const [speed, setSpeed] = useState(2.5);
+    const [speed, setSpeed] = useState(0.01);
 
     return (
         <div className="gallery-container">
@@ -56,8 +56,8 @@ const Gallery = () => {
                         Speed:
                         <input
                             type="range"
-                            min="0.5"
-                            max="10"
+                            min="0.01"
+                            max="2.5"
                             step="0.1"
                             value={speed}
                             onChange={(e) => setSpeed(parseFloat(e.target.value))}

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import animationsData from "../data/animationsData.json";
 
-const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
+const Animation = ({ type, color = "#ff6ec4", size = 50, speed }) => {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const [mouse, setMouse] = useState({ x: 0, y: 0 });
@@ -37,20 +37,42 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
 
             switch (data?.type) {
                 case "floatingSpheres":
-                    for (let i = 0; i < (data.count || 10); i++) {
-                        const x = Math.random() * canvas.width;
-                        const y = Math.random() * canvas.height;
-                        const sz = Math.random() * (size) + size / 2;
-                        const gradient = ctx.createRadialGradient(x, y, 0, x, y, sz);
-                        gradient.addColorStop(0, color);
-                        gradient.addColorStop(1, "transparent");
-                        ctx.fillStyle = gradient;
-                        ctx.beginPath();
-                        ctx.arc(x, y, sz, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    break;
+    if (!canvas.spheres) {
+        // Create spheres with random properties including velocity
+        canvas.spheres = Array.from({ length: data.count || 10 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * (size) + size / 2,
+            speedX: Math.random() * 2 - 1,  // Horizontal velocity (-1 to 1)
+            speedY: Math.random() * 2 - 1,  // Vertical velocity (-1 to 1)
+        }));
+    }
 
+    // Apply a global speed factor to all spheres
+    const globalSpeed = 2;  // Adjust this value to control the overall speed
+
+    // Update positions and draw the spheres
+    canvas.spheres.forEach(sphere => {
+        // Move the spheres based on their speed and the global speed factor
+        sphere.x += sphere.speedX * speed;
+        sphere.y += sphere.speedY * speed;
+
+        // Apply boundary bounce (reverse direction if hitting edges)
+        if (sphere.x <= 0 || sphere.x >= canvas.width) sphere.speedX = -sphere.speedX;
+        if (sphere.y <= 0 || sphere.y >= canvas.height) sphere.speedY = -sphere.speedY;
+
+        // Create radial gradient for each sphere
+        const gradient = ctx.createRadialGradient(sphere.x, sphere.y, 0, sphere.x, sphere.y, sphere.size);
+        gradient.addColorStop(0, color);
+        gradient.addColorStop(1, "transparent");
+
+        // Draw the sphere
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(sphere.x, sphere.y, sphere.size, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    break;
 
                 case "waveParticles":
                     if (!canvas.particles) {
@@ -63,8 +85,9 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         }));
                     }
                     canvas.particles.forEach(p => {
-                        p.y += Math.sin(p.angle) * 0.5;
-                        p.x += Math.cos(p.angle) * 0.5;
+                        p.y += Math.sin(p.angle) * speed;
+                        p.x += Math.cos(p.angle) * speed;
+                        // variable
                         p.angle += p.speed;
                         const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
                         gradient.addColorStop(0, data.colors[0]);
@@ -116,8 +139,8 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     ctx.fillStyle = data.colors[0] || "#ff6ec4";
                     ctx.beginPath();
                     canvas.slimePoints.forEach((p, i) => {
-                        p.dx += (mouse.x - p.x) * 0.002;
-                        p.dy += (mouse.y - p.y) * 0.002;
+                        p.dx += (mouse.x - p.x) * speed;
+                        p.dy += (mouse.y - p.y) * speed;
                         p.x += (p.dx *= 0.9);
                         p.y += (p.dy *= 0.9);
                     });
@@ -145,7 +168,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         }));
                     }
                     canvas.stars.forEach(s => {
-                        s.z -= data.speed || 2;
+                        s.z -= speed; //variable
                         if (s.z <= 0) {
                             s.z = canvas.width;
                             s.x = Math.random() * canvas.width;
@@ -170,7 +193,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                                 canvas.dots.push({
                                     x: c * size,
                                     y: r * size,
-                                    dy: Math.random() * 2 + 1
+                                    dy: Math.random() * speed
                                 });
                             }
                         }
@@ -178,7 +201,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     canvas.dots.forEach(d => {
                         ctx.fillStyle = "#ff6ec4";
                         ctx.beginPath();
-                        ctx.arc(d.x, d.y, 3, 0, Math.PI * 2);
+                        ctx.arc(d.x, d.y, 3, 0, Math.PI * speed);
                         ctx.fill();
                         d.y += d.dy;
                         if (d.y > canvas.height) d.y = 0;
@@ -194,7 +217,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             offset: Math.random() * 0.5
                         }));
                     }
-                    ctx.fillStyle = data.colors ? data.colors[0] : "#ff6ec4";
+                    ctx.fillStyle = data.colors ? data.colors[0] : color;
                     ctx.beginPath();
                     const centerX = canvas.width / 2;
                     const centerY = canvas.height / 2;
@@ -253,7 +276,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         }));
                     }
                     canvas.arcs.forEach((arc, i) => {
-                        arc.angle += data.rotationSpeed;
+                        arc.angle += speed;
                         const color = data.colors[i % data.colors.length];
                         ctx.strokeStyle = color;
                         ctx.lineWidth = 5;
@@ -270,34 +293,36 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     break;
 
                 case "gridPulse":
-                    const time = Date.now();
-                    const gridSize = data.gridSize;
-                    const cols = Math.ceil(canvas.width / gridSize);
-                    const rows = Math.ceil(canvas.height / gridSize);
+    const time = Date.now();
+    const gridSize = data.gridSize;
+    const cols = Math.ceil(canvas.width / gridSize);
+    const rows = Math.ceil(canvas.height / gridSize);
 
-                    for (let r = 0; r < rows; r++) {
-                        for (let c = 0; c < cols; c++) {
-                            const phase = Math.sin((time + (r + c) * 100) * data.pulseSpeed);
-                            const size = (gridSize / 2) * (0.5 + 0.5 * phase);
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const phase = Math.sin((time + (r + c) * 100) * speed);  // Use the 'speed' variable
+            const size = (gridSize / 2) * (0.5 + 0.5 * phase);
 
-                            const x = c * gridSize + gridSize / 2;
-                            const y = r * gridSize + gridSize / 2;
+            const x = c * gridSize + gridSize / 2;
+            const y = r * gridSize + gridSize / 2;
 
-                            ctx.fillStyle = data.colors[(r + c) % data.colors.length];
+            ctx.fillStyle = data.colors[(r + c) % data.colors.length];
 
-                            if (data.shape === "circle") {
-                                ctx.beginPath();
-                                ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-                                ctx.fill();
-                            } else {
-                                ctx.fillRect(x - size / 2, y - size / 2, size, size);
-                            }
-                        }
-                    }
-                    break;
+            if (data.shape === "circle") {
+                ctx.beginPath();
+                ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillRect(x - size / 2, y - size / 2, size, size);
+            }
+        }
+    }
+    break;
+
+
                 case "mandalaLines":
                     if (!canvas.angle) canvas.angle = 0;
-                    canvas.angle += data.rotationSpeed;
+                    canvas.angle += speed;
 
                     const X = canvas.width / 2;
                     const Y = canvas.height / 2;
@@ -354,7 +379,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
 
                     for (let i = 0; i < data.lineCount; i++) {
                         const offset = canvas.offsets[i];
-                        const waveY = Math.sin(Date.now() * data.speed + offset) * data.amplitude + canvas.height / 2;
+                        const waveY = Math.sin(Date.now() * speed + offset) * data.amplitude + canvas.height / 2;
                         const x1 = i * step;
                         const y1 = waveY;
 
@@ -390,7 +415,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         ctx.arc(centerX3, centerY3, p.radius, 0, Math.PI * 2);
                         ctx.fill();
 
-                        p.radius += p.direction * data.speed;
+                        p.radius += p.direction * speed;
 
                         if (p.radius >= data.maxSize || p.radius <= data.minSize) {
                             p.direction *= -1;
@@ -411,8 +436,8 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     }
 
                     canvas.particles.forEach(p => {
-                        p.x += p.dx * p.speed;
-                        p.y += p.dy * p.speed;
+                        p.x += p.dx * speed;
+                        p.y += p.dy * speed;
 
                         if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
                         if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
@@ -428,7 +453,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     if (!canvas.lines) {
                         canvas.lines = Array.from({ length: data.count }, () => ({
                             x: Math.random() * canvas.width,
-                            speed: Math.random() * data.speed
+                            speed: Math.random() * speed
                         }));
                     }
 
@@ -472,13 +497,14 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         wave.angle += 0.01;
                     });
                     break;
+
                 case "shiftingGrid":
                     if (!canvas.gridLines) {
                         canvas.gridLines = Array.from({ length: canvas.width / data.gridSize }, () => ({
                             x: Math.random() * canvas.width,
                             y: Math.random() * canvas.height,
-                            dx: Math.random() * data.speed * 2 - data.speed,
-                            dy: Math.random() * data.speed * 2 - data.speed
+                            dx: Math.random() * speed * 2 - speed,
+                            dy: Math.random() * speed * 2 - speed
                         }));
                     }
 
@@ -510,7 +536,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             y: Math.random() * canvas.height,
                             size: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],
                             opacity: 1,
-                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0]
+                            speed: Math.random() * (speed)
                         }));
                     }
 
@@ -531,8 +557,8 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             x: Math.random() * canvas.width,
                             y: Math.random() * canvas.height,
                             size: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],
-                            dx: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],
-                            dy: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0]
+                           dx: Math.random() * (speed * 2) - speed, 
+            dy: Math.random() * (speed * 2) - speed
                         }));
                     }
 
@@ -558,7 +584,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             z: Math.random() * 100,
                             size: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],
                             rotation: Math.random() * Math.PI * 2,
-                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0]
+                            speed: speed
                         }));
                     }
 
@@ -578,7 +604,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     if (!canvas.waves) {
                         canvas.waves = Array.from({ length: data.count }, () => ({
                             offset: Math.random() * Math.PI * 2,
-                            speed: data.speed
+                            speed: speed
                         }));
                     }
 
@@ -610,7 +636,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         const X = mouse.x - p.x;
                         const Y = mouse.y - p.y;
                         const dist = Math.sqrt(X * X + Y * Y);
-                        const force = Math.min(1 / dist, 0.05); // Attraction force
+                        const force = Math.min(1 / dist, 0.05) * speed; // Attraction force
                         p.dx += (X / dist) * force;
                         p.dy += (Y / dist) * force;
 
@@ -631,8 +657,8 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                 case "rotatingCubes":
                     const centreX = canvas.width / 2;
                     const centreY = canvas.height / 2;
-                    const angleX = Date.now() * 0.001;
-                    const angleY = Date.now() * 0.001;
+                    const angleX = Date.now() * 0.001 * speed;
+                    const angleY = Date.now() * 0.001 * speed;
 
                     for (let i = 0; i < data.count; i++) {
                         const size = Math.random() * 50 + 20;
@@ -650,25 +676,33 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
 
                 // Fractal Tree Growth Animation
                 case "fractalTree":
-                    const drawTree = (x, y, angle, depth) => {
-                        if (depth === 0) return;
-                        const length = data.branchLength * (depth / data.maxDepth);
-                        const endX = x + Math.cos(angle) * length;
-                        const endY = y + Math.sin(angle) * length;
+    const drawTree = (x, y, angle, depth) => {
+        if (depth === 0) return;
 
-                        ctx.beginPath();
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(endX, endY);
-                        ctx.strokeStyle = data.colors[depth % data.colors.length];
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
+        // Adjust the branch length based on the speed variable
+        const length = data.branchLength * (depth / data.maxDepth) * speed;
 
-                        // Recursively draw branches
-                        drawTree(endX, endY, angle - data.angle, depth - 1);
-                        drawTree(endX, endY, angle + data.angle, depth - 1);
-                    };
-                    drawTree(canvas.width / 2, canvas.height, -Math.PI / 2, data.maxDepth);
-                    break;
+        // Calculate end point of the branch
+        const endX = x + Math.cos(angle) * length;
+        const endY = y + Math.sin(angle) * length;
+
+        // Draw the branch
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = data.colors[depth % data.colors.length];
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Recursively draw the left and right branches, adjusted by angle and depth
+        drawTree(endX, endY, angle - data.angle * speed, depth - 1);  // Adjust angle by speed
+        drawTree(endX, endY, angle + data.angle * speed, depth - 1);  // Adjust angle by speed
+    };
+
+    // Start drawing from the center bottom of the canvas, with an initial angle of -π/2 (upwards)
+    drawTree(canvas.width / 2, canvas.height, -Math.PI / 2, data.maxDepth);
+    break;
+
 
                 // Fluid Dynamic Waves with Perlin Noise
                 case "fluidWaves":
@@ -683,7 +717,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     ctx.lineWidth = 2;
                     ctx.beginPath();
                     canvas.waves.forEach((w, i) => {
-                        w.y = canvas.height / 2 + Math.sin(Date.now() * 0.002 + w.phase + i) * 50;
+                        w.y = canvas.height / 2 + Math.sin(Date.now() * 0.002 * speed + w.phase + i) * 50;
                         if (i === 0) ctx.moveTo(w.x, w.y);
                         else ctx.lineTo(w.x, w.y);
                     });
@@ -706,7 +740,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         ctx.lineTo(canvas.arcData.trail[i + 1]?.x || arcX2, canvas.arcData.trail[i + 1]?.y || arcY2);
                         ctx.stroke();
                     }
-                    canvas.arcData.angle += data.speedRange[0];
+                    canvas.arcData.angle += data.speedRange[0] * speed;
                     break;
 
                 case "rotatingArcsMultiple":
@@ -722,7 +756,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         ctx.beginPath();
                         ctx.arc(canvas.width / 2, canvas.height / 2, canvas.arcData[i].radius, 0, Math.PI * 2);
                         ctx.stroke();
-                        canvas.arcData[i].angle += data.speedRange[0];
+                        canvas.arcData[i].angle += data.speedRange[0] * speed;
                     }
                     break;
 
@@ -737,8 +771,8 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     ctx.beginPath();
                     ctx.arc(canvas.width / 2, canvas.height / 2, canvas.arcData.radius, 0, Math.PI * 2);
                     ctx.stroke();
-                    canvas.arcData.angle += data.speedRange[0];
-                    canvas.arcData.radius += data.expansionSpeed;
+                    canvas.arcData.angle += data.speedRange[0] * speed;
+                    canvas.arcData.radius += data.expansionSpeed * speed;
                     if (canvas.arcData.radius > data.radiusRange[1]) canvas.arcData.radius = data.radiusRange[0];
                     break;
 
@@ -774,7 +808,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         ctx.moveTo(laser.x, laser.y);
                         ctx.lineTo(x2, y2);
                         ctx.stroke();
-                        laser.angle += data.speedRange[0];
+                        laser.angle += speed;
                     });
                     break;
 
@@ -783,7 +817,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         canvas.waves = Array.from({ length: data.count }, (_, i) => ({
                             x: i * 100 + 50,
                             y: Math.random() * canvas.height,
-                            speed: Math.random() * data.speedRange[1] + data.speedRange[0]
+                            speed: Math.random() * speed
                         }));
                     }
                     canvas.waves.forEach(wave => {
@@ -811,7 +845,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         ctx.beginPath();
                         ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
                         ctx.fill();
-                        circle.radius += Math.sin(Date.now() * 0.001 + circle.angle) * 2;
+                        circle.radius += Math.sin(Date.now() * speed * 0.001 + circle.angle) * 2;
                         if (circle.radius > data.sizeRange[1]) circle.radius = data.sizeRange[0];
                     });
                     break;
@@ -822,8 +856,8 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             x: canvas.width / 2,
                             y: canvas.height / 2,
                             size: Math.random() * 5 + 1,
-                            speedX: Math.random() * 2 - 1,
-                            speedY: Math.random() * 2 - 1
+                            speedX: (Math.random() * 2 - 1) * data.speed, // Speed in the X direction, adjusted by the speed variable
+            speedY: (Math.random() * 2 - 1) * data.speed,
                         }));
                     }
                     canvas.pixels.forEach(pixel => {
@@ -844,7 +878,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             y: canvas.height / 2,
                             size: Math.random() * 3 + 1,
                             angle: Math.random() * 2 * Math.PI,
-                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],
+                            speed: Math.random() * (speed) + data.speedRange[0],
                             color: data.colors[Math.floor(Math.random() * data.colors.length)]
                         }));
                     }
@@ -874,7 +908,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     const totalShapes = 8;
 
                     for (let i = 0; i < totalShapes; i++) {
-                        const angle = i * angleIncrement + Date.now() * 0.0005;
+                        const angle = i * angleIncrement + Date.now() *speed;
                         const x = centrX + Math.cos(angle) * radius;
                         const y = centrY + Math.sin(angle) * radius;
                         const size = Math.sin(angle) * radius / 2 + 10;
@@ -892,10 +926,10 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     }
 
                     if (canvas.pulse.growing) {
-                        canvas.pulse.size += 2;
+                        canvas.pulse.size +=  speed;
                         if (canvas.pulse.size > canvas.width / 2) canvas.pulse.growing = false;
                     } else {
-                        canvas.pulse.size -= 2;
+                        canvas.pulse.size -= speed;
                         if (canvas.pulse.size < 10) canvas.pulse.growing = true;
                     }
 
@@ -916,7 +950,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             x: Math.random() * canvas.width,
                             y: Math.random() * canvas.height,
                             amplitude: Math.random() * 20 + 5,
-                            speed: Math.random() * 0.1 + 0.05
+                            // speed: Math.random() * 0.1 + 0.05
                         }));
                     }
 
@@ -941,7 +975,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         canvas.spiral = {
                             angle: 0,
                             radius: 1,
-                            speed: Math.random() * 0.05 + 0.01,
+                            // speed: Math.random() * 0.05 + 0.01,
                             growth: 0.5
                         };
                     }
@@ -969,7 +1003,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             x: Math.random() * canvas.width,
                             y: Math.random() * canvas.height,
                             size: Math.random() * 3 + 2,
-                            speed: Math.random() * 0.5 + 0.2
+                            // speed: Math.random() * 0.5 + 0.2
                         }));
                     }
 
@@ -997,7 +1031,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             y: Math.random() * canvas.height,
                             width: Math.random() * 60 + 20,
                             height: Math.random() * 40 + 20,
-                            speed: Math.random() * 0.02 + 0.01,
+                            // speed: Math.random() * 0.02 + 0.01,
                             waveAmplitude: Math.random() * 10 + 5
                         }));
                     }
@@ -1022,7 +1056,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                     }
 
                     const flow = canvas.flow;
-                    flow.time += 0.01;
+                    flow.time += speed;
 
                     const gradienttt = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
                     gradienttt.addColorStop(0, data.colors[0]);
@@ -1039,7 +1073,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             x: Math.random() * canvas.width,
                             y: Math.random() * canvas.height,
                             size: Math.random() * (data.maxSize - data.minSize) + data.minSize,
-                            speed: Math.random() * 0.02 + 0.01
+                            // speed: Math.random() * 0.02 + 0.01
                         }));
                     }
 
@@ -1212,7 +1246,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             const square = {
                                 size: 38,
                                 rotationSpeed: 20,
-                                delay: i * 0.5,
+                                delay: speed,
                                 hueRotation: 3 * i,
                                 borderWidth: 2 // Setting border width
                             };
@@ -1280,7 +1314,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             y: canvas.height / 2, // center of the canvas
                             size: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // size control
                             rotation: 0,
-                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // speed control
+                            // speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // speed control
                             color: data.colors[Math.floor(Math.random() * data.colors.length)],
                         }));
                     }
@@ -1306,7 +1340,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             y: canvas.height / 2, // center of the canvas
                             minSize: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // min size
                             maxSize: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // max size
-                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // speed control
+                            // speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // speed control
                             color: data.colors[Math.floor(Math.random() * data.colors.length)],
                             currentSize: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],
                             growing: true,  // circle starts by growing
@@ -1339,7 +1373,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                         canvas.particles = Array.from({ length: data.count }, () => ({
                             angle: Math.random() * Math.PI * 2,  // Random initial angle for orbit
                             radius: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // Radius control (size)
-                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // Speed control
+                            // speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // Speed control
                             color: data.colors[Math.floor(Math.random() * data.colors.length)],
                         }));
                     }
@@ -1365,7 +1399,7 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
                             x: (i % gridsize) * (canvas.width / gridsize),
                             y: Math.floor(i / gridsize) * (canvas.height / gridsize),
                             size: Math.random() * (data.sizeRange[1] - data.sizeRange[0]) + data.sizeRange[0],  // Square size control
-                            speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // Speed control
+                            // speed: Math.random() * (data.speedRange[1] - data.speedRange[0]) + data.speedRange[0],  // Speed control
                             offset: Math.random() * Math.PI * 2,  // Random phase for wave effect
                             color: data.colors[Math.floor(Math.random() * data.colors.length)],
                         }));
@@ -1405,3 +1439,43 @@ const Animation = ({ type, color = "#ff6ec4", size = 50, speed = 2.5 }) => {
 };
 
 export default Animation;
+
+// AnimationRenderer.js
+// import React from 'react';
+// import { animationsData } from '../data/animationsData'; // Importing animation data
+
+// const AnimationRenderer = () => {
+//   return (
+//     <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '50px' }}>
+//       {animationsData.map((animation) => {
+//         // Dynamically creating the CSS for each animation
+//         const animationStyle = `
+//           @keyframes ${animation.name} {
+//             ${animation.keyframes}
+//           }
+          
+//           .${animation.name} {
+//             animation: ${animation.name} ${animation.duration} infinite alternate;
+//           }
+//         `;
+
+//         return (
+//           <div key={animation.id}>
+//             <style>{animationStyle}</style> {/* Injecting the CSS into the document */}
+//             <div
+//               className={animation.name} // Applying the animation class
+//               style={{
+//                 width: `${animation.size}px`,
+//                 height: `${animation.size}px`,
+//                 backgroundColor: animation.color,
+//                 borderRadius: '50%',
+//               }}
+//             />
+//           </div>
+//         );
+//       })}
+//     </div>
+//   );
+// };
+
+// export default AnimationRenderer;
