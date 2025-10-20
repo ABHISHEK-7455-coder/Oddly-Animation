@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import animationsData from "../data/animationsData.json";
 
-const Animation = ({ type, color = "#ff6ec4", size = 50, speed }) => {
+const Animation = ({ type, color = "#ff6ec4", size, speed }) => {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const [mouse, setMouse] = useState({ x: 0, y: 0 });
