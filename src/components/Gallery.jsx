@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Animation from "../components/Animation";
-import animationsData from "../data/animationsData.json"; // 50 animations ka data
+import {animationData} from "../data/animationConfig.js"; // 50 animations ka data
 import "./Gallery.css";
 
 const Gallery = () => {
@@ -12,21 +12,21 @@ const Gallery = () => {
     return (
         <div className="gallery-container">
 
-            <div>
+            {/* <div>
                 <h3>Animations</h3>
-                {/* Gallery Cards */}
+                {/* Gallery Cards 
             <div className="gallery">
-                {animationsData.map((animation, index) => (
+                {animationData.map((animation, index) => (
                     <div
                         key={index}
                         className={`gallery-card ${selectedAnimation === animation.type ? "active" : ""}`}
                         onClick={() => setSelectedAnimation(animation.type)}
                     >
-                        <h4>{animation.type}</h4>
+                        <h4>{animation.name}</h4>
                     </div>
                 ))}
             </div>
-            </div>
+            </div> */}
 
             {/* Controls */}
             <div className="controls">
