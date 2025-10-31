@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Animation from "../components/Animation";
-import {animationData} from "../data/animationConfig.js"; // 50 animations ka data
+import { animationData } from "../data/animationConfig.js"; // 50 animations ka data
 import "./Gallery.css";
 
 const Gallery = () => {
@@ -30,7 +30,7 @@ const Gallery = () => {
 
             {/* Controls */}
             <div className="controls">
-                <div className="control-bar">
+                {/* <div className="control-bar">
                     <label className="color">
                         Color:
                         <input
@@ -65,7 +65,7 @@ const Gallery = () => {
                         {speed}s
                     </label>
 
-                </div>
+                </div> */}
                 {/* Selected Animation */}
                 <div className="selected-animation">
                     <Animation

@@ -1,42 +1,8 @@
-// // animationConfig.js
-// export const animationData = [
-//   {
-//     id: "sphere1",
-//     type: "sphere",
-//     color: "#00FFFF",
-//     position: [0, 0, 0],
-//     scale: [1, 1, 1],
-//     animation: {
-//       rotate: [0.01, 0.02, 0],
-//       bounce: false,
-//     },
-//     material: {
-//       metalness: 0.6,
-//       roughness: 0.2,
-//     },
-//   },
-//   {
-//     id: "cube1",
-//     type: "box",
-//     color: "#FF00AA",
-//     position: [2, 0, 0],
-//     scale: [1, 1, 1],
-//     animation: {
-//       rotate: [0.02, 0.01, 0],
-//       bounce: true,
-//     },
-//     material: {
-//       metalness: 0.3,
-//       roughness: 0.6,
-//     },
-//   },
-// ];
-
-// Fully data-driven animation configurations
 export const animationData = [
     {
         id: 0,
         name: '🌊 Wave Pool',
+        audio: "/sounds/floating.mp3",
         config: {
             cols: 50,
             rows: 30,
@@ -81,6 +47,7 @@ export const animationData = [
     {
         id: 1,
         name: '🎯 Orbit Dance',
+        audio: "/sounds/waves.mp3",
         config: {
             count: 8,
             baseRadius: 100,
@@ -134,6 +101,7 @@ export const animationData = [
     {
         id: 2,
         name: '✨ Particle Rain',
+        audio:"/sounds/Heart-Of-The-Ocean(chosic.com).mp3",
         config: {
             count: 100,
             baseSpeed: 2,
@@ -183,6 +151,7 @@ export const animationData = [
     {
         id: 3,
         name: '🌀 Spiral Galaxy',
+        audio:"/sounds/pad-gentle-and-soothing-strings-background-358649.mp3",
         config: {
             particleCount: 200,
             spiralTurns: 8,
@@ -234,6 +203,7 @@ export const animationData = [
     {
         id: 4,
         name: '💫 Bouncing Balls',
+        audio:"/sounds/Lovely-Long-Version-chosic.com_.mp3",
         config: {
             count: 30,
             baseRadius: 10,
@@ -289,6 +259,7 @@ export const animationData = [
     {
         id: 5,
         name: '🌟 Star Field',
+        audio:"/sounds/Downpour-Sad-Dramatic-Music-chosic.com_.mp3",
         config: {
             starCount: 200,
             baseSpeed: 5,
@@ -337,6 +308,7 @@ export const animationData = [
     {
         id: 6,
         name: '🧲 Magnetic Particles',
+        audio:"/sounds/tokyo-music-walker-day-off-chosic.com_.mp3",
         config: {
             particleCount: 100,
             magnetForce: 0.1,
@@ -397,61 +369,63 @@ export const animationData = [
             });
         }
     },
-    {
-        id: 7,
-        name: '🎭 Ripple Effect',
-        config: {
-            rippleSpeed: 3,
-            maxRadius: 200,
-            lineWidth: 3,
-            baseHue: 0,
-            trailColor: 'rgba(0, 0, 0, 0.05)',
-            saturation: 70,
-            lightness: 60
-        },
-        init: (canvas, config) => {
-            const ripples = [];
+    // {
+    //     id: 7,
+    //     name: '🎭 Ripple Effect',
+    //     audio:"/sounds/Constellations-chosic.com_.mp3",
+    //     config: {
+    //         rippleSpeed: 3,
+    //         maxRadius: 200,
+    //         lineWidth: 3,
+    //         baseHue: 0,
+    //         trailColor: 'rgba(0, 0, 0, 0.05)',
+    //         saturation: 70,
+    //         lightness: 60
+    //     },
+    //     init: (canvas, config) => {
+    //         const ripples = [];
 
-            const handleClick = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                ripples.push({
-                    x: e.clientX - rect.left,
-                    y: e.clientY - rect.top,
-                    radius: 0,
-                    maxRadius: config.maxRadius * config.size,
-                    baseHue: config.baseHue + Math.random() * 360
-                });
-            };
+    //         const handleClick = (e) => {
+    //             const rect = canvas.getBoundingClientRect();
+    //             ripples.push({
+    //                 x: e.clientX - rect.left,
+    //                 y: e.clientY - rect.top,
+    //                 radius: 0,
+    //                 maxRadius: config.maxRadius * config.size,
+    //                 baseHue: config.baseHue + Math.random() * 360
+    //             });
+    //         };
 
-            canvas.addEventListener('click', handleClick);
+    //         canvas.addEventListener('click', handleClick);
 
-            return { ripples, cleanup: () => canvas.removeEventListener('click', handleClick) };
-        },
-        animate: (ctx, canvas, config, state) => {
-            ctx.fillStyle = config.trailColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //         return { ripples, cleanup: () => canvas.removeEventListener('click', handleClick) };
+    //     },
+    //     animate: (ctx, canvas, config, state) => {
+    //         ctx.fillStyle = config.trailColor;
+    //         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            state.ripples.forEach((ripple, index) => {
-                ripple.radius += config.rippleSpeed * config.speed;
-                const alpha = 1 - ripple.radius / ripple.maxRadius;
+    //         state.ripples.forEach((ripple, index) => {
+    //             ripple.radius += config.rippleSpeed * config.speed;
+    //             const alpha = 1 - ripple.radius / ripple.maxRadius;
 
-                ctx.strokeStyle = `hsl(${(ripple.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
-                ctx.globalAlpha = alpha;
-                ctx.lineWidth = config.lineWidth * config.size;
-                ctx.beginPath();
-                ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.globalAlpha = 1;
+    //             ctx.strokeStyle = `hsl(${(ripple.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+    //             ctx.globalAlpha = alpha;
+    //             ctx.lineWidth = config.lineWidth * config.size;
+    //             ctx.beginPath();
+    //             ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+    //             ctx.stroke();
+    //             ctx.globalAlpha = 1;
 
-                if (ripple.radius >= ripple.maxRadius) {
-                    state.ripples.splice(index, 1);
-                }
-            });
-        }
-    },
+    //             if (ripple.radius >= ripple.maxRadius) {
+    //                 state.ripples.splice(index, 1);
+    //             }
+    //         });
+    //     }
+    // },
     {
         id: 8,
         name: '🌈 Color Waves',
+        audio:"/sounds/Magical-Moments-chosic.com_.mp3",
         config: {
             spacing: 5,
             wave1Frequency: 0.01,
@@ -487,6 +461,7 @@ export const animationData = [
     {
         id: 9,
         name: '🌀 Vortex Flow',
+        audio:"/sounds/Satellite-chosic.com_.mp3",
         config: {
             particleCount: 200,
             maxRadius: 300,
@@ -544,9 +519,11 @@ export const animationData = [
             });
         }
     },
+
     {
         id: 10,
         name: '✨ Sparkle Trail',
+        audio:"/sounds/Constellations-chosic.com_.mp3",
         config: {
             sparklesPerFrame: 3,
             autoSparkles: 2,
@@ -640,168 +617,671 @@ export const animationData = [
     },
     {
         id: 11,
-        name: '🌊 Wave Particle Flow',
+        name: '🫧 Floating Bubbles',
+        audio:"/sounds/Elevated-chosic.com_.mp3",
         config: {
-            particlesPerFrame: 4,
-            autoParticles: 3,
-            waveRadius: 120,
-            waveAmplitude: 50,
-            waveSpeed: 0.08,
-            particleLife: 80,
-            baseSize: 3,
-            sizeVariation: 3,
-            baseVelocity: 1.5,
-            glowAmount: 8,
+            bubbleCount: 50,
+            baseSize: 10,
+            sizeVariation: 30,
+            baseSpeed: 1,
+            speedVariation: 2,
+            wobbleSpeed: 0.05,
+            wobbleAmount: 2,
             baseHue: 180,
-            trailColor: 'rgba(0, 0, 0, 0.15)',
-            saturation: 80,
-            lightness: 55
+            trailColor: 'rgba(230, 240, 255, 0.05)',
+            saturation: 50,
+            lightness: 70
         },
         init: (canvas, config) => {
-            const particles = [];
-            const mousePos = { x: canvas.width / 2, y: canvas.height / 2 };
-            const wave = { x: canvas.width / 2, angle: 0 };
+            const bubbles = [];
+            for (let i = 0; i < config.bubbleCount; i++) {
+                bubbles.push({
+                    x: Math.random() * canvas.width,
+                    y: canvas.height + Math.random() * 100,
+                    size: (config.baseSize + Math.random() * config.sizeVariation) * config.size,
+                    speed: (config.baseSpeed + Math.random() * config.speedVariation) * config.speed,
+                    wobble: Math.random() * Math.PI * 2,
+                    baseHue: config.baseHue + Math.random() * 40
+                });
+            }
+            return { bubbles };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const handleMouseMove = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                mousePos.x = e.clientX - rect.left;
-                mousePos.y = e.clientY - rect.top;
+            state.bubbles.forEach(bubble => {
+                bubble.y -= bubble.speed;
+                bubble.wobble += config.wobbleSpeed * config.speed;
+                const wobbleX = Math.sin(bubble.wobble) * config.wobbleAmount;
 
-                for (let i = 0; i < config.particlesPerFrame; i++) {
-                    particles.push({
-                        x: mousePos.x + (Math.random() - 0.5) * 12,
-                        y: mousePos.y + (Math.random() - 0.5) * 12,
-                        vx: (Math.random() - 0.5) * config.baseVelocity,
-                        vy: (Math.random() - 0.5) * config.baseVelocity,
-                        life: config.particleLife,
-                        size: (config.baseSize + Math.random() * config.sizeVariation),
-                        baseHue: config.baseHue + Math.random() * 60
-                    });
+                if (bubble.y + bubble.size < 0) {
+                    bubble.y = canvas.height + bubble.size;
+                    bubble.x = Math.random() * canvas.width;
                 }
-            };
 
-            canvas.addEventListener('mousemove', handleMouseMove);
+                ctx.strokeStyle = `hsl(${(bubble.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.6;
+                ctx.beginPath();
+                ctx.arc(bubble.x + wobbleX, bubble.y, bubble.size, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            });
+        }
+    },
+    {
+        id: 12,
+        name: '🌸 Petal Fall',
+        audio:"/sounds/Oddity-chosic.com_.mp3",
+        config: {
+            petalCount: 60,
+            baseSize: 8,
+            sizeVariation: 6,
+            fallSpeed: 1,
+            swayAmount: 3,
+            swaySpeed: 0.03,
+            rotationSpeed: 0.05,
+            baseHue: 330,
+            trailColor: 'rgba(255, 240, 245, 0.08)',
+            saturation: 70,
+            lightness: 75
+        },
+        init: (canvas, config) => {
+            const petals = [];
+            for (let i = 0; i < config.petalCount; i++) {
+                petals.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: (config.baseSize + Math.random() * config.sizeVariation) * config.size,
+                    rotation: Math.random() * Math.PI * 2,
+                    sway: Math.random() * Math.PI * 2,
+                    speed: config.fallSpeed * (0.5 + Math.random() * 0.5),
+                    baseHue: config.baseHue + Math.random() * 30
+                });
+            }
+            return { petals };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            state.petals.forEach(petal => {
+                petal.y += petal.speed * config.speed;
+                petal.sway += config.swaySpeed * config.speed;
+                petal.rotation += config.rotationSpeed * config.speed;
+                petal.x += Math.sin(petal.sway) * config.swayAmount;
+
+                if (petal.y > canvas.height) {
+                    petal.y = -20;
+                    petal.x = Math.random() * canvas.width;
+                }
+
+                ctx.save();
+                ctx.translate(petal.x, petal.y);
+                ctx.rotate(petal.rotation);
+                ctx.fillStyle = `hsl(${(petal.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, petal.size, petal.size * 0.6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+    },
+    {
+        id: 13,
+        name: '🌊 Ocean Waves',
+        config: {
+            waveCount: 5,
+            baseAmplitude: 40,
+            amplitudeIncrement: 10,
+            frequency: 0.005,
+            baseSpeed: 1,
+            speedIncrement: 0.3,
+            baseHue: 200,
+            hueIncrement: 10,
+            trailColor: 'rgba(10, 30, 60, 0.1)',
+            saturation: 60,
+            lightness: 60
+        },
+        init: (canvas, config) => {
+            const waves = [];
+            for (let i = 0; i < config.waveCount; i++) {
+                waves.push({
+                    amplitude: (config.baseAmplitude + i * config.amplitudeIncrement) * config.size,
+                    offset: 0,
+                    speed: (config.baseSpeed + i * config.speedIncrement) * config.speed,
+                    yPosition: canvas.height / 2 + i * 30,
+                    baseHue: config.baseHue + i * config.hueIncrement,
+                    alpha: 0.3 + (i * 0.15)
+                });
+            }
+            return { waves };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.waves.forEach(wave => {
+                wave.offset += wave.speed;
+                ctx.strokeStyle = `hsl(${(wave.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.lineWidth = 3 * config.size;
+                ctx.globalAlpha = wave.alpha;
+                ctx.beginPath();
+
+                for (let x = 0; x <= canvas.width; x += 5) {
+                    const y = wave.yPosition + Math.sin(x * config.frequency + wave.offset * 0.02) * wave.amplitude;
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            });
+        }
+    },
+    {
+        id: 14,
+        name: '❄️ Snowfall',
+        config: {
+            flakeCount: 100,
+            baseSize: 3,
+            sizeVariation: 5,
+            fallSpeed: 1,
+            driftSpeed: 0.5,
+            baseHue: 200,
+            trailColor: 'rgba(20, 30, 50, 0.1)',
+            saturation: 30,
+            lightness: 90
+        },
+        init: (canvas, config) => {
+            const flakes = [];
+            for (let i = 0; i < config.flakeCount; i++) {
+                flakes.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: (config.baseSize + Math.random() * config.sizeVariation) * config.size,
+                    speed: config.fallSpeed * (0.3 + Math.random() * 0.7),
+                    drift: (Math.random() - 0.5) * config.driftSpeed,
+                    baseHue: config.baseHue + Math.random() * 20
+                });
+            }
+            return { flakes };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.flakes.forEach(flake => {
+                flake.y += flake.speed * config.speed;
+                flake.x += flake.drift * config.speed;
+
+                if (flake.y > canvas.height) {
+                    flake.y = -10;
+                    flake.x = Math.random() * canvas.width;
+                }
+
+                ctx.fillStyle = `hsl(${(flake.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.beginPath();
+                ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+        }
+    },
+    {
+        id: 15,
+        name: '🔮 Crystal Growth',
+        config: {
+            segments: 12,
+            maxRadius: 200,
+            growthSpeed: 0.5,
+            rotationSpeed: 0.01,
+            baseHue: 280,
+            trailColor: 'rgba(20, 0, 40, 0.05)',
+            saturation: 70,
+            lightness: 60
+        },
+        init: (canvas, config) => {
             return {
-                particles,
-                mousePos,
-                wave,
-                cleanup: () => canvas.removeEventListener('mousemove', handleMouseMove)
+                centerX: canvas.width / 2,
+                centerY: canvas.height / 2,
+                radius: 0,
+                rotation: 0
             };
         },
         animate: (ctx, canvas, config, state) => {
             ctx.fillStyle = config.trailColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            state.wave.angle += config.waveSpeed;
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+            state.radius += config.growthSpeed * config.speed;
+            state.rotation += config.rotationSpeed * config.speed;
 
-            for (let i = 0; i < config.autoParticles; i++) {
-                const x = centerX + Math.cos(state.wave.angle + i) * config.waveRadius;
-                const y = centerY + Math.sin(state.wave.angle * 2 + i) * config.waveAmplitude;
-
-                state.particles.push({
-                    x: x + (Math.random() - 0.5) * 10,
-                    y: y + (Math.random() - 0.5) * 10,
-                    vx: (Math.random() - 0.5) * config.baseVelocity,
-                    vy: (Math.random() - 0.5) * config.baseVelocity,
-                    life: config.particleLife,
-                    size: (config.baseSize + Math.random() * config.sizeVariation),
-                    baseHue: (state.wave.angle * 70 + i * 20) % 360
-                });
+            if (state.radius > config.maxRadius * config.size) {
+                state.radius = 0;
             }
 
-            state.particles.forEach((p, index) => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= config.waveSpeed;
+            for (let i = 0; i < config.segments; i++) {
+                const angle = (Math.PI * 2 / config.segments) * i + state.rotation;
+                const x = state.centerX + Math.cos(angle) * state.radius;
+                const y = state.centerY + Math.sin(angle) * state.radius;
 
-                const alpha = p.life / config.particleLife;
-                const color = `hsl(${p.baseHue % 360}, ${config.saturation}%, ${config.lightness}%)`;
-                ctx.fillStyle = color;
-                ctx.globalAlpha = alpha;
-                ctx.shadowBlur = config.glowAmount;
-                ctx.shadowColor = color;
+                ctx.strokeStyle = `hsl(${(config.baseHue + i * 30 + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.lineWidth = 2 * config.size;
+                ctx.globalAlpha = 1 - state.radius / (config.maxRadius * config.size);
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
+                ctx.moveTo(state.centerX, state.centerY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
                 ctx.globalAlpha = 1;
+            }
+        }
+    },
+    {
+        id: 16,
+        name: '🌙 Moon Phases',
+        config: {
+            moonSize: 80,
+            orbitRadius: 150,
+            orbitSpeed: 0.02,
+            shadowSpeed: 0.015,
+            baseHue: 50,
+            trailColor: 'rgba(10, 10, 30, 0.1)',
+            saturation: 30,
+            lightness: 80
+        },
+        init: (canvas, config) => {
+            return {
+                centerX: canvas.width / 2,
+                centerY: canvas.height / 2,
+                angle: 0,
+                shadowAngle: 0
+            };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                if (p.life <= 0) {
-                    state.particles.splice(index, 1);
+            state.angle += config.orbitSpeed * config.speed;
+            state.shadowAngle += config.shadowSpeed * config.speed;
+
+            const x = state.centerX + Math.cos(state.angle) * config.orbitRadius * config.size;
+            const y = state.centerY + Math.sin(state.angle) * config.orbitRadius * config.size;
+
+            ctx.fillStyle = `hsl(${(config.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.beginPath();
+            ctx.arc(x, y, config.moonSize * config.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(10, 10, 30, 0.7)';
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(x + Math.cos(state.shadowAngle) * config.moonSize * config.size * 0.5,
+                y,
+                config.moonSize * config.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    },
+    {
+        id: 17,
+        name: '🎨 Paint Drips',
+        config: {
+            dripCount: 15,
+            baseSpeed: 2,
+            maxLength: 200,
+            width: 10,
+            baseHue: 0,
+            trailColor: 'rgba(240, 240, 245, 0.05)',
+            saturation: 70,
+            lightness: 60
+        },
+        init: (canvas, config) => {
+            const drips = [];
+            for (let i = 0; i < config.dripCount; i++) {
+                drips.push({
+                    x: (canvas.width / config.dripCount) * i + canvas.width / (config.dripCount * 2),
+                    y: 0,
+                    length: 0,
+                    speed: config.baseSpeed * (0.5 + Math.random() * 0.5),
+                    baseHue: (360 / config.dripCount) * i
+                });
+            }
+            return { drips };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.drips.forEach(drip => {
+                drip.length += drip.speed * config.speed;
+
+                if (drip.length > config.maxLength * config.size) {
+                    drip.length = 0;
                 }
+
+                ctx.fillStyle = `hsl(${(drip.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.fillRect(drip.x - config.width * config.size / 2, drip.y, config.width * config.size, drip.length);
             });
         }
     },
     {
-    id: 12,
-    name: '✨ Lissajous Particle Flow',
-    config: {
-        particlesCount: 150,
-        amplitudeX: 200,
-        amplitudeY: 150,
-        freqX: 3,
-        freqY: 2,
-        phase: 0,
-        speed: 0.02,
-        particleLife: 200,
-        baseSize: 2,
-        sizeVariation: 1.5,
-        glowAmount: 12,
-        baseHue: 210,
-        trailColor: 'rgba(0,0,0,0.12)',
-        saturation: 80,
-        lightness: 55
+        id: 18,
+        name: '🌺 Mandala Bloom',
+        config: {
+            petals: 16,
+            layers: 5,
+            pulseSpeed: 0.03,
+            rotationSpeed: 0.005,
+            baseSize: 15,
+            baseHue: 300,
+            trailColor: 'rgba(20, 0, 20, 0.05)',
+            saturation: 70,
+            lightness: 60
+        },
+        init: (canvas, config) => {
+            return {
+                centerX: canvas.width / 2,
+                centerY: canvas.height / 2,
+                pulse: 0,
+                rotation: 0
+            };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.pulse += config.pulseSpeed * config.speed;
+            state.rotation += config.rotationSpeed * config.speed;
+            const pulseScale = 0.8 + Math.sin(state.pulse) * 0.2;
+
+            for (let layer = 0; layer < config.layers; layer++) {
+                for (let i = 0; i < config.petals; i++) {
+                    const angle = (Math.PI * 2 / config.petals) * i + state.rotation + layer * 0.2;
+                    const radius = (50 + layer * 30) * config.size * pulseScale;
+                    const x = state.centerX + Math.cos(angle) * radius;
+                    const y = state.centerY + Math.sin(angle) * radius;
+
+                    ctx.fillStyle = `hsl(${(config.baseHue + layer * 15 + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                    ctx.globalAlpha = 0.6;
+                    ctx.beginPath();
+                    ctx.arc(x, y, config.baseSize * config.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
     },
-    init: (canvas, config) => {
-        const particles = [];
-        for (let i = 0; i < config.particlesCount; i++) {
-            const t = (i / config.particlesCount) * Math.PI * 2;
-            particles.push({
-                t, // phase along Lissajous curve
-                life: config.particleLife,
-                size: config.baseSize + (i % config.sizeVariation),
-                baseHue: (config.baseHue + i * 2) % 360
+    {
+        id: 19,
+        name: '💎 Diamond Rain',
+        config: {
+            diamondCount: 40,
+            baseSize: 8,
+            sizeVariation: 8,
+            fallSpeed: 2,
+            rotationSpeed: 0.1,
+            sparkleChance: 0.02,
+            baseHue: 180,
+            trailColor: 'rgba(10, 10, 30, 0.1)',
+            saturation: 80,
+            lightness: 70
+        },
+        init: (canvas, config) => {
+            const diamonds = [];
+            for (let i = 0; i < config.diamondCount; i++) {
+                diamonds.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: (config.baseSize + Math.random() * config.sizeVariation) * config.size,
+                    rotation: Math.random() * Math.PI * 2,
+                    speed: config.fallSpeed * (0.5 + Math.random() * 0.5),
+                    baseHue: config.baseHue + Math.random() * 60,
+                    sparkle: false
+                });
+            }
+            return { diamonds };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.diamonds.forEach(diamond => {
+                diamond.y += diamond.speed * config.speed;
+                diamond.rotation += config.rotationSpeed * config.speed;
+
+                if (Math.random() < config.sparkleChance) {
+                    diamond.sparkle = true;
+                    setTimeout(() => diamond.sparkle = false, 100);
+                }
+
+                if (diamond.y > canvas.height) {
+                    diamond.y = -20;
+                    diamond.x = Math.random() * canvas.width;
+                }
+
+                ctx.save();
+                ctx.translate(diamond.x, diamond.y);
+                ctx.rotate(diamond.rotation);
+
+                if (diamond.sparkle) {
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = `hsl(${(diamond.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                }
+
+                ctx.fillStyle = `hsl(${(diamond.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.beginPath();
+                ctx.moveTo(0, -diamond.size);
+                ctx.lineTo(diamond.size * 0.7, 0);
+                ctx.lineTo(0, diamond.size);
+                ctx.lineTo(-diamond.size * 0.7, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.restore();
             });
         }
-        return { particles };
     },
-    animate: (ctx, canvas, config, state) => {
-        ctx.fillStyle = config.trailColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    {
+        id: 20,
+        name: '🌟 Starburst',
+        config: {
+            rayCount: 20,
+            pulseSpeed: 0.05,
+            rotationSpeed: 0.01,
+            maxLength: 150,
+            baseHue: 50,
+            trailColor: 'rgba(0, 0, 0, 0.1)',
+            saturation: 80,
+            lightness: 70
+        },
+        init: (canvas, config) => {
+            return {
+                centerX: canvas.width / 2,
+                centerY: canvas.height / 2,
+                pulse: 0,
+                rotation: 0
+            };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
+            state.pulse += config.pulseSpeed * config.speed;
+            state.rotation += config.rotationSpeed * config.speed;
+            const length = (Math.sin(state.pulse) * 0.5 + 0.5) * config.maxLength * config.size;
 
-        state.particles.forEach((p) => {
-            // Deterministic Lissajous motion
-            p.t += config.speed;
-            const x = centerX + config.amplitudeX * Math.sin(config.freqX * p.t + config.phase);
-            const y = centerY + config.amplitudeY * Math.sin(config.freqY * p.t);
+            for (let i = 0; i < config.rayCount; i++) {
+                const angle = (Math.PI * 2 / config.rayCount) * i + state.rotation;
+                const x = state.centerX + Math.cos(angle) * length;
+                const y = state.centerY + Math.sin(angle) * length;
 
-            // Draw particle
-            const alpha = p.life / config.particleLife;
-            const color = `hsl(${p.baseHue}, ${config.saturation}%, ${config.lightness}%)`;
-            ctx.fillStyle = color;
-            ctx.globalAlpha = alpha;
-            ctx.shadowBlur = config.glowAmount;
-            ctx.shadowColor = color;
-            ctx.beginPath();
-            ctx.arc(x, y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1;
+                const gradient = ctx.createLinearGradient(state.centerX, state.centerY, x, y);
+                gradient.addColorStop(0, `hsl(${(config.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`);
+                gradient.addColorStop(1, `hsla(${(config.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%, 0)`);
 
-            p.life -= 1;
-            if (p.life <= 0) {
-                p.life = config.particleLife;
-                p.t = 0;
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 3 * config.size;
+                ctx.beginPath();
+                ctx.moveTo(state.centerX, state.centerY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
             }
-        });
+        }
+    },
+    {
+        id: 21,
+        name: '🦋 Butterfly Swarm',
+        config: {
+            butterflyCount: 25,
+            baseSpeed: 2,
+            wingFlapSpeed: 0.2,
+            wanderAmount: 2,
+            baseSize: 8,
+            baseHue: 280,
+            trailColor: 'rgba(240, 230, 255, 0.08)',
+            saturation: 70,
+            lightness: 65
+        },
+        init: (canvas, config) => {
+            const butterflies = [];
+            for (let i = 0; i < config.butterflyCount; i++) {
+                butterflies.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * config.baseSpeed,
+                    vy: (Math.random() - 0.5) * config.baseSpeed,
+                    wingPhase: Math.random() * Math.PI * 2,
+                    baseHue: config.baseHue + Math.random() * 80
+                });
+            }
+            return { butterflies };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.butterflies.forEach(butterfly => {
+                butterfly.vx += (Math.random() - 0.5) * config.wanderAmount * config.speed;
+                butterfly.vy += (Math.random() - 0.5) * config.wanderAmount * config.speed;
+                butterfly.x += butterfly.vx * config.speed;
+                butterfly.y += butterfly.vy * config.speed;
+                butterfly.wingPhase += config.wingFlapSpeed * config.speed;
+
+                if (butterfly.x < 0) butterfly.x = canvas.width;
+                if (butterfly.x > canvas.width) butterfly.x = 0;
+                if (butterfly.y < 0) butterfly.y = canvas.height;
+                if (butterfly.y > canvas.height) butterfly.y = 0;
+
+                const wingSpread = Math.sin(butterfly.wingPhase) * config.baseSize * config.size;
+
+                ctx.fillStyle = `hsl(${(butterfly.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.beginPath();
+                ctx.ellipse(butterfly.x - wingSpread / 2, butterfly.y, Math.abs(wingSpread), config.baseSize * config.size, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(butterfly.x + wingSpread / 2, butterfly.y, Math.abs(wingSpread), config.baseSize * config.size, 0, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+    },
+    {
+        id: 22,
+        name: '🌀 DNA Helix',
+        config: {
+            strands: 2,
+            pointsPerStrand: 100,
+            amplitude: 80,
+            frequency: 0.1,
+            scrollSpeed: 2,
+            baseHue: 180,
+            trailColor: 'rgba(0, 20, 30, 0.1)',
+            saturation: 70,
+            lightness: 60
+        },
+        init: (canvas, config) => {
+            return { offset: 0 };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.offset += config.scrollSpeed * config.speed;
+
+            for (let strand = 0; strand < config.strands; strand++) {
+                const phaseShift = (Math.PI * 2 / config.strands) * strand;
+
+                for (let i = 0; i < config.pointsPerStrand; i++) {
+                    const x = (canvas.width / config.pointsPerStrand) * i;
+                    const wave = Math.sin(i * config.frequency + state.offset * 0.02 + phaseShift) * config.amplitude * config.size;
+                    const y = canvas.height / 2 + wave;
+
+                    ctx.fillStyle = `hsl(${(config.baseHue + strand * 180 + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5 * config.size, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    if (i % 5 === 0 && Math.abs(wave) < 10) {
+                        const otherWave = Math.sin(i * config.frequency + state.offset * 0.02 + phaseShift + Math.PI) * config.amplitude * config.size;
+                        const y2 = canvas.height / 2 + otherWave;
+
+                        ctx.strokeStyle = `hsla(${(config.baseHue + 90 + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%, 0.3)`;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x, y2);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+    },
+    {
+        id: 23,
+        name: '🎪 Carousel',
+        config: {
+            seats: 12,
+            radius: 120,
+            upDownAmplitude: 30,
+            rotationSpeed: 0.02,
+            upDownSpeed: 0.05,
+            seatSize: 12,
+            baseHue: 0,
+            trailColor: 'rgba(30, 20, 40, 0.08)',
+            saturation: 75,
+            lightness: 65
+        },
+        init: (canvas, config) => {
+            return {
+                centerX: canvas.width / 2,
+                centerY: canvas.height / 2,
+                rotation: 0,
+                upDownPhase: 0
+            };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            state.rotation += config.rotationSpeed * config.speed;
+            state.upDownPhase += config.upDownSpeed * config.speed;
+
+            for (let i = 0; i < config.seats; i++) {
+                const angle = (Math.PI * 2 / config.seats) * i + state.rotation;
+                const upDown = Math.sin(state.upDownPhase + i * 0.5) * config.upDownAmplitude * config.size;
+                const x = state.centerX + Math.cos(angle) * config.radius * config.size;
+                const y = state.centerY + Math.sin(angle) * config.radius * config.size + upDown;
+
+                ctx.fillStyle = `hsl(${((360 / config.seats) * i + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.beginPath();
+                ctx.arc(x, y, config.seatSize * config.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
     }
-},
-
-
 ];
