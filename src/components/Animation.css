@@ -1,0 +1,437 @@
+.main-container {
+    /* display: flex; */
+    height: 82.5vh;
+    width: 87vw;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.container {
+    display: flex;
+    height: 85%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: rgba(20, 20, 40, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    overflow-y: auto;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    border-radius: 20px;
+}
+
+.sidebar-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 30px;
+    text-align: center;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Controls */
+.controls {
+    margin: auto;
+    padding: 15px;
+    background: rgb(22, 22, 49);
+    border-radius: 12px;
+    border: 1px solid rgba(100, 100, 255, 0.2);
+    position: sticky;
+    top: 0;
+    width: 96%;
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controls label {
+    color: #fff;
+    font-size: 16px;
+
+}
+
+.controls input[type="range"] {
+    width: 50%;
+    accent-color: #667eea;
+    margin-bottom: 8px;
+    margin-left: 8px;
+}
+
+.size {
+    width: 30%;
+}
+
+.color {
+    width: 30%;
+}
+
+.record-btn {
+    width: 15%;
+    padding: 10px;
+    margin-top: 0px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+}
+
+.record-btn.start {
+    background: #4caf50;
+}
+
+.record-btn.stop {
+    background: #f44336;
+}
+
+/* Recordings List */
+.recordings-list {
+    margin-top: 12px;
+}
+
+.recordings-list h3 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.recordings-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recording-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 0px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.play-btn {
+    flex: 1;
+    text-align: left;
+    background: transparent;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.download-btn {
+    margin-left: 8px;
+    background: rgba(0, 200, 0, 0.2);
+    color: #00ff99;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-weight: bold;
+}
+
+.delete-btn {
+    margin-left: 8px;
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff5555;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-weight: bold;
+}
+
+/* Animation Buttons */
+.animation-btn {
+    width: 90%;
+    padding: 10px;
+    margin: 8px auto;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+}
+
+.animation-btn.active {
+    background: rgba(102, 126, 234, 0.3);
+}
+
+.audio-toggle {
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* Canvas / Video Area */
+.canvas-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+}
+
+.animation-canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.video-player {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    background: #000;
+    object-fit: cover;
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #667eea;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+    .main-container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: none;
+        padding: 15px;
+        overflow-y: visible;
+    }
+
+    .controls {
+        position: relative;
+        top: auto;
+    }
+
+    .animation-btn {
+        width: 100%;
+        margin: 6px 0;
+    }
+
+    .canvas-area {
+        width: 100%;
+        height: 70vh;
+        padding: 10px;
+    }
+}
+
+/* 🌐 Mobile Dropdowns */
+.mobile-dropdowns {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px;
+}
+
+.dropdown-section {
+  background: rgba(30, 30, 60, 0.95);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.dropdown-section summary {
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 16px;
+  background: rgba(102, 126, 234, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-section[open] summary {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+.dropdown-content {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-section.inner summary {
+  background: rgba(100, 100, 255, 0.2);
+  font-size: 15px;
+}
+
+/* Hide Desktop layout on mobile */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-dropdowns {
+    display: flex !important;
+  }
+
+  .canvas-area {
+    height: 65vh;
+  }
+}
+
+
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        height: auto;
+        width: 100%;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .sidebar-title {
+        font-size: 20px;
+    }
+
+    .controls label {
+        font-size: 14px;
+    }
+
+    .record-btn {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .animation-btn {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .audio-toggle {
+        font-size: 14px;
+    }
+
+    .recording-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 8px;
+    }
+
+    .play-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .download-btn,
+    .delete-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .canvas-area {
+        height: 60vh;
+        padding: 10px;
+    }
+
+    .animation-canvas,
+    .video-player {
+        border-radius: 10px;
+    }
+
+    .back-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        padding: 10px;
+    }
+
+    .controls {
+        padding: 10px;
+         display: block;
+    }
+    .size {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .color {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+        font-size: 18px;
+    }
+
+    .record-btn {
+        font-size: 13px;
+        width: 50%;
+    }
+
+    .animation-btn {
+        font-size: 12px;
+    }
+
+    .controls label {
+        font-size: 13px;
+    }
+
+    details {
+        margin-top: 8px;
+    }
+
+    .back-btn {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .recording-item {
+        display: flex;
+        flex-direction: row;
+        margin-top: 4px;
+    }
+
+    .play-btn {
+        width: fit-content;
+    }
+
+    .download-btn {
+        width: fit-content;
+    }
+
+    .delete-btn {
+        width: fit-content;
+    }
+}

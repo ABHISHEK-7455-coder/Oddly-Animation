@@ -47,12 +47,12 @@
     padding: 20px;
     /* border: 2px solid #ccc; */
     border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: start;
-    background: none;
-    width: 65%;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: center; */
+    /* justify-content: start; */
+    /* background: none; */
+    /* width: 65%; */
 }
 
 .controls h2 {
@@ -88,7 +88,7 @@
 
 .control-bar input[type="range"] {
     margin-left: 10px;
-    width: 150px;
+    /* width: 150px; */
 }
 
 /* Display the selected animation */

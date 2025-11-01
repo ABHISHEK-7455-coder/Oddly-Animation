@@ -1,52 +1,75 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "./Header.css";
 
 const Header = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-    return (
-        <header className="header">
-            <div className="logo">
-                <h2>MeloMotion</h2>
-            </div>
+  // Close menu when a link is clicked
+  const handleLinkClick = () => setMenuOpen(false);
 
-            <nav className="nav">
-                <NavLink
-                    exact="true"
-                    to="/"
-                    className="nav-link"
-                    activeclassname="active"
-                >
-                    Home
-                </NavLink>
+  return (
+    <header className="header">
+      {/* Logo */}
+      <div className="logo" onClick={() => navigate("/")}>
+        <h2>MeloMotion</h2>
+      </div>
 
-                <button className="nav-link" onClick={()=>{navigate("/gallery")}}>
-                    Gallery
-                </button>
+      {/* Hamburger Menu (visible on mobile) */}
+      <div
+        className={`menu-toggle ${menuOpen ? "open" : ""}`}
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        <span style={{background:"white"}}></span>
+        <span style={{background:"white"}}></span>
+        <span style={{background:"white"}}></span>
+      </div>
 
-                <NavLink
-                    to="/about"
-                    className="nav-link"
-                    activeclassname="active"
-                >
-                    About
-                </NavLink>
+      {/* Navigation Links */}
+      <nav className={`nav ${menuOpen ? "open" : ""}`}>
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            `nav-link ${isActive ? "active" : ""}`
+          }
+          onClick={handleLinkClick}
+        >
+          Home
+        </NavLink>
 
+        <button
+          className="nav-link"
+          onClick={() => {
+            navigate("/gallery");
+            handleLinkClick();
+          }}
+        >
+          Gallery
+        </button>
 
+        <NavLink
+          to="/about"
+          className={({ isActive }) =>
+            `nav-link ${isActive ? "active" : ""}`
+          }
+          onClick={handleLinkClick}
+        >
+          About
+        </NavLink>
 
-                <NavLink
-                    to="/login"
-                    className="nav-link"
-                    activeclassname="active"
-                >
-                    Login
-                </NavLink>
-
-
-            </nav>
-        </header>
-    );
+        <NavLink
+          to="/login"
+          className={({ isActive }) =>
+            `nav-link ${isActive ? "active" : ""}`
+          }
+          onClick={handleLinkClick}
+        >
+          Login
+        </NavLink>
+      </nav>
+    </header>
+  );
 };
 
 export default Header;
