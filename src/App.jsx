@@ -19,7 +19,7 @@ function App() {
                         <Route path="/" element={<><AnimatedBackground/><Header /><Home /></>} />
                         <Route path="/about" element={<><AnimatedBackground/><Header /><About /></>} />
                         <Route path="/gallery" element={<><Header /><Gallery /></>} />
-                        <Route path="/login" element={<div className='text-center py-20'>Login Page (Coming Soon)</div>} />
+                        <Route path="/login" element={<><Header /><div className='text-center py-20'>Login Page (Coming Soon)</div></>} />
                     </Routes>
                 </Router>
             </div>
