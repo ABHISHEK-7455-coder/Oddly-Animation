@@ -2,7 +2,7 @@ export const animationData = [
     {
         id: 0,
         name: '🌊 Wave Pool',
-        audio: "/sounds/floating.mp3",
+        audio: "/sounds/Fragments(chosic.com).mp3",
         config: {
             cols: 50,
             rows: 30,
@@ -101,7 +101,7 @@ export const animationData = [
     {
         id: 2,
         name: '✨ Particle Rain',
-        audio:"/sounds/Heart-Of-The-Ocean(chosic.com).mp3",
+        audio: "/sounds/Heart-Of-The-Ocean(chosic.com).mp3",
         config: {
             count: 100,
             baseSpeed: 2,
@@ -151,7 +151,7 @@ export const animationData = [
     {
         id: 3,
         name: '🌀 Spiral Galaxy',
-        audio:"/sounds/pad-gentle-and-soothing-strings-background-358649.mp3",
+        audio: "/sounds/pad-gentle-and-soothing-strings-background-358649.mp3",
         config: {
             particleCount: 200,
             spiralTurns: 8,
@@ -203,7 +203,7 @@ export const animationData = [
     {
         id: 4,
         name: '💫 Bouncing Balls',
-        audio:"/sounds/Lovely-Long-Version-chosic.com_.mp3",
+        audio: "/sounds/Lovely-Long-Version-chosic.com_.mp3",
         config: {
             count: 30,
             baseRadius: 10,
@@ -259,7 +259,7 @@ export const animationData = [
     {
         id: 5,
         name: '🌟 Star Field',
-        audio:"/sounds/Downpour-Sad-Dramatic-Music-chosic.com_.mp3",
+        audio: "/sounds/Downpour-Sad-Dramatic-Music-chosic.com_.mp3",
         config: {
             starCount: 200,
             baseSpeed: 5,
@@ -308,7 +308,7 @@ export const animationData = [
     {
         id: 6,
         name: '🧲 Magnetic Particles',
-        audio:"/sounds/tokyo-music-walker-day-off-chosic.com_.mp3",
+        audio: "/sounds/tokyo-music-walker-day-off-chosic.com_.mp3",
         config: {
             particleCount: 100,
             magnetForce: 0.1,
@@ -369,63 +369,57 @@ export const animationData = [
             });
         }
     },
-    // {
-    //     id: 7,
-    //     name: '🎭 Ripple Effect',
-    //     audio:"/sounds/Constellations-chosic.com_.mp3",
-    //     config: {
-    //         rippleSpeed: 3,
-    //         maxRadius: 200,
-    //         lineWidth: 3,
-    //         baseHue: 0,
-    //         trailColor: 'rgba(0, 0, 0, 0.05)',
-    //         saturation: 70,
-    //         lightness: 60
-    //     },
-    //     init: (canvas, config) => {
-    //         const ripples = [];
+    {
+        id: 7,
+        name: '🎪 Carousel',
+        audio: "/sounds/echoes-in-blue-by-tokyo-music-walker-chosic.com_.mp3",
+        config: {
+            seats: 12,
+            radius: 120,
+            upDownAmplitude: 30,
+            rotationSpeed: 0.02,
+            upDownSpeed: 0.05,
+            seatSize: 12,
+            baseHue: 0,
+            trailColor: 'rgba(30, 20, 40, 0.08)',
+            saturation: 75,
+            lightness: 65
+        },
+        init: (canvas, config) => {
+            return {
+                centerX: canvas.width / 2,
+                centerY: canvas.height / 2,
+                rotation: 0,
+                upDownPhase: 0
+            };
+        },
+        animate: (ctx, canvas, config, state) => {
+            ctx.fillStyle = config.trailColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    //         const handleClick = (e) => {
-    //             const rect = canvas.getBoundingClientRect();
-    //             ripples.push({
-    //                 x: e.clientX - rect.left,
-    //                 y: e.clientY - rect.top,
-    //                 radius: 0,
-    //                 maxRadius: config.maxRadius * config.size,
-    //                 baseHue: config.baseHue + Math.random() * 360
-    //             });
-    //         };
+            state.rotation += config.rotationSpeed * config.speed;
+            state.upDownPhase += config.upDownSpeed * config.speed;
 
-    //         canvas.addEventListener('click', handleClick);
+            for (let i = 0; i < config.seats; i++) {
+                const angle = (Math.PI * 2 / config.seats) * i + state.rotation;
+                const upDown = Math.sin(state.upDownPhase + i * 0.5) * config.upDownAmplitude * config.size;
+                const x = state.centerX + Math.cos(angle) * config.radius * config.size;
+                const y = state.centerY + Math.sin(angle) * config.radius * config.size + upDown;
 
-    //         return { ripples, cleanup: () => canvas.removeEventListener('click', handleClick) };
-    //     },
-    //     animate: (ctx, canvas, config, state) => {
-    //         ctx.fillStyle = config.trailColor;
-    //         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    //         state.ripples.forEach((ripple, index) => {
-    //             ripple.radius += config.rippleSpeed * config.speed;
-    //             const alpha = 1 - ripple.radius / ripple.maxRadius;
-
-    //             ctx.strokeStyle = `hsl(${(ripple.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
-    //             ctx.globalAlpha = alpha;
-    //             ctx.lineWidth = config.lineWidth * config.size;
-    //             ctx.beginPath();
-    //             ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
-    //             ctx.stroke();
-    //             ctx.globalAlpha = 1;
-
-    //             if (ripple.radius >= ripple.maxRadius) {
-    //                 state.ripples.splice(index, 1);
-    //             }
-    //         });
-    //     }
-    // },
+                ctx.fillStyle = `hsl(${((360 / config.seats) * i + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.beginPath();
+                ctx.arc(x, y, config.seatSize * config.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+    },
     {
         id: 8,
         name: '🌈 Color Waves',
-        audio:"/sounds/Magical-Moments-chosic.com_.mp3",
+        audio: "/sounds/Magical-Moments-chosic.com_.mp3",
         config: {
             spacing: 5,
             wave1Frequency: 0.01,
@@ -461,7 +455,7 @@ export const animationData = [
     {
         id: 9,
         name: '🌀 Vortex Flow',
-        audio:"/sounds/Satellite-chosic.com_.mp3",
+        audio: "/sounds/Satellite-chosic.com_.mp3",
         config: {
             particleCount: 200,
             maxRadius: 300,
@@ -523,7 +517,7 @@ export const animationData = [
     {
         id: 10,
         name: '✨ Sparkle Trail',
-        audio:"/sounds/Constellations-chosic.com_.mp3",
+        audio: "/sounds/Constellations-chosic.com_.mp3",
         config: {
             sparklesPerFrame: 3,
             autoSparkles: 2,
@@ -618,7 +612,7 @@ export const animationData = [
     {
         id: 11,
         name: '🫧 Floating Bubbles',
-        audio:"/sounds/Elevated-chosic.com_.mp3",
+        audio: "/sounds/Elevated-chosic.com_.mp3",
         config: {
             bubbleCount: 50,
             baseSize: 10,
@@ -673,7 +667,7 @@ export const animationData = [
     {
         id: 12,
         name: '🌸 Petal Fall',
-        audio:"/sounds/Oddity-chosic.com_.mp3",
+        audio: "/sounds/Oddity-chosic.com_.mp3",
         config: {
             petalCount: 60,
             baseSize: 8,
@@ -731,6 +725,7 @@ export const animationData = [
     {
         id: 13,
         name: '🌊 Ocean Waves',
+        audio: "/sounds/Shindao-chosic.com_.mp3",
         config: {
             waveCount: 5,
             baseAmplitude: 40,
@@ -833,6 +828,7 @@ export const animationData = [
     {
         id: 15,
         name: '🔮 Crystal Growth',
+        audio: "/sounds/Sunset-Landscape(chosic.com).mp3",
         config: {
             segments: 12,
             maxRadius: 200,
@@ -881,6 +877,7 @@ export const animationData = [
     {
         id: 16,
         name: '🌙 Moon Phases',
+        audio: "/sounds/Amberlight-chosic.com_.mp3",
         config: {
             moonSize: 80,
             orbitRadius: 150,
@@ -928,6 +925,7 @@ export const animationData = [
     {
         id: 17,
         name: '🎨 Paint Drips',
+        audio: "/sounds/Transcendence-chosic.com_.mp3",
         config: {
             dripCount: 15,
             baseSpeed: 2,
@@ -970,6 +968,7 @@ export const animationData = [
     {
         id: 18,
         name: '🌺 Mandala Bloom',
+        audio: "/sounds/Birds-Of-Passage-Between-The-Hours-Spheria-Rework-chosic.com_.mp3",
         config: {
             petals: 16,
             layers: 5,
@@ -1017,6 +1016,7 @@ export const animationData = [
     {
         id: 19,
         name: '💎 Diamond Rain',
+        audio: "/sounds/Late-at-Night(chosic.com).mp3",
         config: {
             diamondCount: 40,
             baseSize: 8,
@@ -1087,6 +1087,7 @@ export const animationData = [
     {
         id: 20,
         name: '🌟 Starburst',
+        audio: "/sounds/Missing-You(chosic.com).mp3",
         config: {
             rayCount: 20,
             pulseSpeed: 0.05,
@@ -1134,6 +1135,7 @@ export const animationData = [
     {
         id: 21,
         name: '🦋 Butterfly Swarm',
+        audio: "public/sounds/Little-Wishes-chosic.com_.mp3",
         config: {
             butterflyCount: 25,
             baseSpeed: 2,
@@ -1190,6 +1192,7 @@ export const animationData = [
     {
         id: 22,
         name: '🌀 DNA Helix',
+        audio: "/sounds/Sonder(chosic.com).mp3",
         config: {
             strands: 2,
             pointsPerStrand: 100,
@@ -1238,50 +1241,5 @@ export const animationData = [
             }
         }
     },
-    {
-        id: 23,
-        name: '🎪 Carousel',
-        config: {
-            seats: 12,
-            radius: 120,
-            upDownAmplitude: 30,
-            rotationSpeed: 0.02,
-            upDownSpeed: 0.05,
-            seatSize: 12,
-            baseHue: 0,
-            trailColor: 'rgba(30, 20, 40, 0.08)',
-            saturation: 75,
-            lightness: 65
-        },
-        init: (canvas, config) => {
-            return {
-                centerX: canvas.width / 2,
-                centerY: canvas.height / 2,
-                rotation: 0,
-                upDownPhase: 0
-            };
-        },
-        animate: (ctx, canvas, config, state) => {
-            ctx.fillStyle = config.trailColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            state.rotation += config.rotationSpeed * config.speed;
-            state.upDownPhase += config.upDownSpeed * config.speed;
-
-            for (let i = 0; i < config.seats; i++) {
-                const angle = (Math.PI * 2 / config.seats) * i + state.rotation;
-                const upDown = Math.sin(state.upDownPhase + i * 0.5) * config.upDownAmplitude * config.size;
-                const x = state.centerX + Math.cos(angle) * config.radius * config.size;
-                const y = state.centerY + Math.sin(angle) * config.radius * config.size + upDown;
-
-                ctx.fillStyle = `hsl(${((360 / config.seats) * i + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = ctx.fillStyle;
-                ctx.beginPath();
-                ctx.arc(x, y, config.seatSize * config.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            }
-        }
-    }
 ];

@@ -11,13 +11,17 @@ html,
 #root {
   height: 100%;
   margin: 0;
-  background-image: url("./assets/background.png");
+  /* background-image: url("./assets/background.png"); */
   background-position: center;
   background-size: cover;
   font-family: 'Poppins', sans-serif;
   color: #fff;
   box-sizing: border-box;
   width: 100%;
+  
+}
+body{
+  background-color: #000;
 }
 
 .app-wrapper {

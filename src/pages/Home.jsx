@@ -13,7 +13,7 @@ const Home = () => {
           Discover 50+ mesmerizing, interactive, and visually stunning animations created to bring peace and satisfaction.
         </p>
 
-        <div className="bubbles">
+        {/* <div className="bubbles">
           <img src="src/assets/bubble.png" />
           <img src="src/assets/bubble.png" />
           <img src="src/assets/bubble.png" />
@@ -21,7 +21,7 @@ const Home = () => {
           <img src="src/assets/bubble.png" />
           <img src="src/assets/bubble.png" />
           <img src="src/assets/bubble.png" /> 
-        </div>
+        </div> */}
       </section>
     </main>
   );
