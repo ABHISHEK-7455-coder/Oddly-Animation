@@ -448,4 +448,8 @@
     .delete-btn {
         width: fit-content;
     }
+
+    .dropdown-animation {
+    display: block;
+}
 }
