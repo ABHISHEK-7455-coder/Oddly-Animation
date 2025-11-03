@@ -145,7 +145,7 @@ const Animation = () => {
             {/* Responsive Dropdowns for Mobile */}
             <div className="mobile-dropdowns">
                 {/* Sidebar Dropdown */}
-                <details className="dropdown-section">
+                <details className="dropdown-section dropdown-animation">
                     <summary>🎨 Animations</summary>
                     <div className="dropdown-content">
                         {animationData.map((anim) => (
@@ -179,9 +179,9 @@ const Animation = () => {
                 </details>
 
                 {/* Controls Dropdown */}
-                <details className="dropdown-section">
+                <details className="dropdown-section ">
                     <summary>⚙️ Controls</summary>
-                    <div className="dropdown-content">
+                    <div className="dropdown-content dropdown-controls">
                         <div className="size">
                             <label>Size: {size.toFixed(1)}x</label>
                             <input

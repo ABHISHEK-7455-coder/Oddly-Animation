@@ -74,8 +74,8 @@
 }
 
 .record-btn {
-    width: 15%;
-    padding: 10px;
+    width: 12%;
+    padding: 0px;
     margin-top: 0px;
     border: none;
     border-radius: 8px;
@@ -86,6 +86,7 @@
 
 .record-btn.start {
     background: #4caf50;
+
 }
 
 .record-btn.stop {
@@ -249,7 +250,7 @@
 
 /* 🌐 Mobile Dropdowns */
 .mobile-dropdowns {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 12px;
   margin: 12px;
@@ -260,6 +261,15 @@
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+}
+
+.dropdown-animation {
+    display: none;
+}
+
+.dropdown-controls{
+    display: flex;
+    padding: 20px;
 }
 
 .dropdown-section summary {
@@ -284,6 +294,10 @@
 .dropdown-section.inner summary {
   background: rgba(100, 100, 255, 0.2);
   font-size: 15px;
+}
+
+.inner {
+    margin-left: 10px;
 }
 
 /* Hide Desktop layout on mobile */
