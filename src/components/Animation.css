@@ -403,7 +403,7 @@
     }
 
     .color {
-        width: 100%;
+        width: 105%;
         margin-bottom: 8px;
     }
 
@@ -413,7 +413,7 @@
 
     .record-btn {
         font-size: 13px;
-        width: 50%;
+        width: 70%;
     }
 
     .animation-btn {
@@ -431,6 +431,10 @@
     .back-btn {
         font-size: 12px;
         padding: 6px 10px;
+    }
+
+    .recordings-items {
+        margin-left: 0px;
     }
 
     .recording-item {
