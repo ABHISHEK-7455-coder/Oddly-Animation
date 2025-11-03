@@ -179,7 +179,7 @@ const Animation = () => {
                 </details>
 
                 {/* Controls Dropdown */}
-                <details className="dropdown-section ">
+                <details className="dropdown-section">
                     <summary>⚙️ Controls</summary>
                     <div className="dropdown-content dropdown-controls">
                         <div className="size">
