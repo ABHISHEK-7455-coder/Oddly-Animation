@@ -379,62 +379,78 @@ const Animation = () => {
     const [isPlayingSaved, setIsPlayingSaved] = useState(false);
     const [playingVideoSrc, setPlayingVideoSrc] = useState(null);
 
+    const canvasRef = useRef(null);
     const recorderRef = useRef(null);
     const chunksRef = useRef([]);
-    const canvasRef = useRef(null);
     const animationRef = useRef(null);
     const audioRef = useRef(null);
 
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isSamsung = /SamsungBrowser/i.test(navigator.userAgent);
+    const isChrome = /Chrome/i.test(navigator.userAgent);
+
+    // 🌀 Load recordings on mount
     useEffect(() => {
         const saved = JSON.parse(localStorage.getItem("savedRecordings")) || [];
         setRecordingsList(saved);
     }, []);
 
-    // 🎬 Start Recording
-    const startRecording = () => {
+    // 🎬 Start recording
+    const startRecording = async () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const canvasStream = canvas.captureStream(60);
-        const audioStream = audioRef.current
-            ? audioRef.current.captureStream()
-            : null;
+        // Browser compatibility check
+        if (!window.MediaRecorder || isSafari) {
+            alert("🎥 Recording not supported on this browser (Safari / Vivo).");
+            return;
+        }
 
-        const combinedStream = audioStream
-            ? new MediaStream([...canvasStream.getTracks(), ...audioStream.getTracks()])
-            : canvasStream;
+        try {
+            const canvasStream = canvas.captureStream(30);
+            const audioStream = audioRef.current
+                ? audioRef.current.captureStream()
+                : null;
 
-        const mediaRecorder = new MediaRecorder(combinedStream, {
-            mimeType: "video/webm",
-        });
-        chunksRef.current = [];
+            const combinedStream = audioStream
+                ? new MediaStream([...canvasStream.getTracks(), ...audioStream.getTracks()])
+                : canvasStream;
 
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) chunksRef.current.push(e.data);
-        };
+            const mediaRecorder = new MediaRecorder(combinedStream, {
+                mimeType: "video/webm;codecs=vp9,opus",
+            });
 
-        mediaRecorder.onstop = () => {
-            const blob = new Blob(chunksRef.current, { type: "video/webm" });
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
+            chunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunksRef.current.push(e.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(chunksRef.current, { type: "video/webm" });
+                const base64 = await blobToBase64(blob);
                 const newRecording = {
                     id: Date.now(),
                     name: `Recording ${recordingsList.length + 1}`,
-                    data: reader.result,
+                    data: base64,
                 };
-                const updatedList = [newRecording, ...recordingsList];
-                setRecordingsList(updatedList);
-                localStorage.setItem("savedRecordings", JSON.stringify(updatedList));
-            };
-        };
 
-        mediaRecorder.start();
-        recorderRef.current = mediaRecorder;
-        setIsRecording(true);
+                const updated = [newRecording, ...recordingsList];
+                setRecordingsList(updated);
+                localStorage.setItem("savedRecordings", JSON.stringify(updated));
+                alert("✅ Recording saved successfully!");
+            };
+
+            mediaRecorder.start();
+            recorderRef.current = mediaRecorder;
+            setIsRecording(true);
+        } catch (err) {
+            console.error(err);
+            alert("⚠️ Unable to start recording on this browser.");
+        }
     };
 
-    // ⏹️ Stop Recording
+    // ⏹️ Stop recording
     const stopRecording = () => {
         if (recorderRef.current) {
             recorderRef.current.stop();
@@ -442,41 +458,34 @@ const Animation = () => {
         }
     };
 
-    // 🎥 Play Saved Recording
-    const playSavedRecording = (dataURL) => {
+    // 🧩 Convert Blob to Base64
+    const blobToBase64 = (blob) =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+
+    // ▶️ Play Saved Recording
+    const playSavedRecording = (videoSrc) => {
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
         if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.currentTime = 0;
         }
 
-        // ✅ Convert Base64 -> Blob -> ObjectURL (mobile compatible)
-        try {
-            const base64 = dataURL.split(",")[1];
-            const byteChars = atob(base64);
-            const byteNumbers = new Array(byteChars.length)
-                .fill()
-                .map((_, i) => byteChars.charCodeAt(i));
-            const blob = new Blob([new Uint8Array(byteNumbers)], {
-                type: "video/webm",
-            });
-            const videoURL = URL.createObjectURL(blob);
-
-            setPlayingVideoSrc(videoURL);
-            setIsPlayingSaved(true);
-        } catch (err) {
-            console.error("Error playing saved video:", err);
-        }
+        setIsPlayingSaved(true);
+        setPlayingVideoSrc(videoSrc);
     };
 
-    // 🔙 Back to Live Mode
+    // 🔙 Back to Live Animations
     const backToLive = () => {
-        if (playingVideoSrc) URL.revokeObjectURL(playingVideoSrc);
         setIsPlayingSaved(false);
         setPlayingVideoSrc(null);
     };
 
-    // 🌀 Animation Render
+    // 🌀 Main Animation Logic
     useEffect(() => {
         if (isPlayingSaved) return;
 
@@ -497,9 +506,9 @@ const Animation = () => {
 
         if (isAudioPlaying && currentAnim.audio) {
             const audio = new Audio(currentAnim.audio);
-            audio.volume = 0.6;
+            audio.volume = 0.5;
             audio.loop = true;
-            audio.play().catch((err) => console.warn("Audio play failed:", err));
+            audio.play().catch(() => {});
             audioRef.current = audio;
         }
 
@@ -520,33 +529,9 @@ const Animation = () => {
         };
     }, [selectedAnimation, speed, size, hueShift, isAudioPlaying, isPlayingSaved]);
 
-    // 📱 Safe Download (mobile + desktop)
-    const downloadRecording = (rec) => {
-        try {
-            const base64 = rec.data.split(",")[1];
-            const byteChars = atob(base64);
-            const byteNumbers = new Array(byteChars.length)
-                .fill()
-                .map((_, i) => byteChars.charCodeAt(i));
-            const blob = new Blob([new Uint8Array(byteNumbers)], {
-                type: "video/webm",
-            });
-
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `${rec.name}.webm`;
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-        } catch (e) {
-            console.error("Download failed:", e);
-        }
-    };
-
     return (
         <div className="main-container">
+            {/* Mobile Dropdowns */}
             <div className="mobile-dropdowns">
                 <details className="dropdown-section dropdown-animation">
                     <summary>🎨 Animations</summary>
@@ -554,8 +539,7 @@ const Animation = () => {
                         {animationData.map((anim) => (
                             <button
                                 key={anim.id}
-                                className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""
-                                    }`}
+                                className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
                                 onClick={() => {
                                     setIsPlayingSaved(false);
                                     setSelectedAnimation(anim.id);
@@ -609,6 +593,7 @@ const Animation = () => {
                             />
                         </div>
 
+                        {/* Record Buttons */}
                         {!isRecording ? (
                             <button className="record-btn start" onClick={startRecording}>
                                 ⏺️ Start Recording
@@ -619,6 +604,7 @@ const Animation = () => {
                             </button>
                         )}
 
+                        {/* Saved Recordings */}
                         {recordingsList.length > 0 && (
                             <details className="dropdown-section inner">
                                 <summary>🎞 Saved Recordings</summary>
@@ -633,7 +619,14 @@ const Animation = () => {
                                             </button>
                                             <button
                                                 className="download-btn"
-                                                onClick={() => downloadRecording(rec)}
+                                                onClick={() => {
+                                                    const a = document.createElement("a");
+                                                    a.href = rec.data;
+                                                    a.download = `${rec.name}.webm`;
+                                                    document.body.appendChild(a);
+                                                    a.click();
+                                                    document.body.removeChild(a);
+                                                }}
                                             >
                                                 ⬇️
                                             </button>
@@ -663,35 +656,20 @@ const Animation = () => {
                 </details>
             </div>
 
+            {/* Desktop Layout */}
             <div className="container">
                 <div className="sidebar desktop-only">
                     <h1 className="sidebar-title">✨ Animations</h1>
                     {animationData.map((anim) => (
                         <button
                             key={anim.id}
-                            className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""
-                                }`}
+                            className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
                             onClick={() => {
                                 setIsPlayingSaved(false);
                                 setSelectedAnimation(anim.id);
                             }}
                         >
                             {anim.name}
-                            {selectedAnimation === anim.id && (
-                                <button
-                                    className="audio-toggle"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (audioRef.current) {
-                                            if (isAudioPlaying) audioRef.current.pause();
-                                            else audioRef.current.play();
-                                        }
-                                        setIsAudioPlaying(!isAudioPlaying);
-                                    }}
-                                >
-                                    {isAudioPlaying ? "🔊" : "🔇"}
-                                </button>
-                            )}
                         </button>
                     ))}
                 </div>
@@ -703,11 +681,12 @@ const Animation = () => {
                         <>
                             <video
                                 src={playingVideoSrc}
+                                className="video-player"
                                 controls
                                 autoPlay
-                                muted
+                                loop
                                 playsInline
-                                className="video-player"
+                                muted
                             />
                             <button onClick={backToLive} className="back-btn">
                                 🔙 Back to Live
@@ -721,4 +700,3 @@ const Animation = () => {
 };
 
 export default Animation;
-
