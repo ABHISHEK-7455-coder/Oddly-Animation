@@ -324,6 +324,10 @@
         width: 100%;
     }
 
+    .dropdown-animation {
+        display: block;
+    }
+
     .sidebar {
         width: 100%;
         padding: 15px;
