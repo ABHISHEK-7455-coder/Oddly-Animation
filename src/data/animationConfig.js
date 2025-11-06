@@ -2756,7 +2756,7 @@ export const animationData = [
     {
         id: 46,
         name: '🌈 Rainbow Tunnel',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/One-Love-Emotional-Piano-Strings(chosic.com).mp3",
         config: {
             rings: 30,
             rotationSpeed: 0.02,
@@ -2807,7 +2807,7 @@ export const animationData = [
     {
         id: 47,
         name: '🦋 Morphing Butterfly',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/precious-memories(chosic.com).mp3",
         config: {
             wingSegments: 20,
             flapSpeed: 0.1,
@@ -2882,7 +2882,7 @@ export const animationData = [
     {
         id: 48,
         name: '⚡ Electric Field',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Childhood(chosic.com).mp3",
         config: {
             particleCount: 100,
             chargePoints: 3,
