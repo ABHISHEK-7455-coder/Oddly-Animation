@@ -508,7 +508,7 @@ const Animation = () => {
             const audio = new Audio(currentAnim.audio);
             audio.volume = 0.5;
             audio.loop = true;
-            audio.play().catch(() => {});
+            audio.play().catch(() => { });
             audioRef.current = audio;
         }
 

@@ -1244,7 +1244,7 @@ export const animationData = [
     {
         id: 23,
         name: '🌊 Liquid Ripple',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-AgusAlvarez-LYCKEBORN-Horizon(chosic.com).mp3",
         config: {
             rippleCount: 8,
             maxRadius: 300,
@@ -1297,7 +1297,7 @@ export const animationData = [
     {
         id: 24,
         name: '🎪 Ferris Wheel',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Balynt-Memory(chosic.com).mp3",
         config: {
             gondolas: 16,
             wheelRadius: 140,
@@ -1368,7 +1368,7 @@ export const animationData = [
     {
         id: 25,
         name: '🔥 Flame Dance',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-High-Vibration(chosic.com).mp3",
         config: {
             particleCount: 150,
             riseSpeed: 3,
@@ -1423,7 +1423,7 @@ export const animationData = [
     {
         id: 26,
         name: '🌸 Blooming Flowers',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Hangin-On-Palm-Treesmp3(chosic.com).mp3",
         config: {
             flowerCount: 12,
             petalCount: 8,
@@ -1492,7 +1492,7 @@ export const animationData = [
     {
         id: 27,
         name: '⚡ Lightning Storm',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Burning-In-My-Soul(chosic.com).mp3",
         config: {
             boltChance: 0.03,
             segments: 20,
@@ -1565,7 +1565,7 @@ export const animationData = [
     {
         id: 28,
         name: '🧬 Cellular Division',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-AuroraMp3(chosic.com).mp3",
         config: {
             maxCells: 32,
             initialSize: 40,
@@ -1638,7 +1638,7 @@ export const animationData = [
     {
         id: 29,
         name: '🎵 Sound Wave Visualizer',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Bliss(chosic.com).mp3",
         config: {
             bars: 64,
             baseHeight: 20,
@@ -1689,7 +1689,7 @@ export const animationData = [
     {
         id: 30,
         name: '🌀 Hypnotic Spiral',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Ocean(chosic.com).mp3",
         config: {
             segments: 200,
             rotationSpeed: 0.02,
@@ -1742,7 +1742,7 @@ export const animationData = [
     {
         id: 31,
         name: '🎆 Firework Burst',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-x-Lichu-Summer-Breeze(chosic.com).mp3",
         config: {
             maxFireworks: 5,
             particlesPerBurst: 80,
@@ -1820,7 +1820,7 @@ export const animationData = [
     {
         id: 32,
         name: '🌊 Tidal Wave',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Waesto-Follow-The-Sun(chosic.com).mp3",
         config: {
             layers: 7,
             waveSpeed: 2,
@@ -1865,7 +1865,7 @@ export const animationData = [
     {
         id: 33,
         name: '🔮 Magic Orbs',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Dayfox-I´m-Happy(chosic.com).mp3",
         config: {
             orbCount: 7,
             baseRadius: 30,
@@ -1926,7 +1926,7 @@ export const animationData = [
     {
         id: 34,
         name: '🎭 Kaleidoscope',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/puzzle(chosic.com).mp3",
         config: {
             segments: 12,
             particleCount: 50,
@@ -2001,7 +2001,7 @@ export const animationData = [
     {
         id: 35,
         name: '🌌 Nebula Cloud',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-x-Lichu-Summer-Breeze(chosic.com).mp3",
         config: {
             particleCount: 300,
             flowSpeed: 0.3,
@@ -2056,7 +2056,7 @@ export const animationData = [
     {
         id: 36,
         name: '🎪 Juggling Balls',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/roa-music-summer-madness(chosic.com).mp3",
         config: {
             ballCount: 5,
             throwHeight: 200,
@@ -2120,7 +2120,7 @@ export const animationData = [
     {
         id: 37,
         name: '🌸 Cherry Blossom',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/roa-music-walk-around(chosic.com).mp3",
         config: {
             branchCount: 8,
             blossomCount: 60,
@@ -2210,7 +2210,7 @@ export const animationData = [
     {
         id: 38,
         name: '⚛️ Atom Spin',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/life(chosic.com).mp3",
         config: {
             electrons: 12,
             orbitRadius: 100,
@@ -2303,7 +2303,7 @@ export const animationData = [
     {
         id: 39,
         name: '🎨 Color Morph',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Summer-Tropical-House-HEAVEN(chosic.com).mp3",
         config: {
             gridSize: 20,
             morphSpeed: 0.02,
@@ -2348,7 +2348,7 @@ export const animationData = [
     {
         id: 40,
         name: '🌙 Eclipse',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Roa-Serenity-chosic.com_.mp3",
         config: {
             sunSize: 80,
             moonSize: 85,
@@ -2406,7 +2406,7 @@ export const animationData = [
     {
         id: 41,
         name: '🎯 Target Practice',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Soulful_MP3(chosic.com).mp3",
         config: {
             rings: 8,
             pulseSpeed: 0.05,
@@ -2465,7 +2465,7 @@ export const animationData = [
     {
         id: 42,
         name: '🌊 Quantum Waves',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Luke-Bergs-Tropical-Soulmp3(chosic.com).mp3",
         config: {
             particleCount: 80,
             waveLength: 100,
@@ -2529,7 +2529,7 @@ export const animationData = [
     {
         id: 43,
         name: '🎪 Spinning Tops',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Beloved(chosic.com).mp3",
         config: {
             topCount: 9,
             spinSpeed: 0.15,
@@ -2603,7 +2603,7 @@ export const animationData = [
     {
         id: 44,
         name: '🌟 Supernova',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Walking-Home-chosic.com_.mp3",
         config: {
             particleCount: 200,
             expansionSpeed: 3,
@@ -2682,7 +2682,7 @@ export const animationData = [
     {
         id: 45,
         name: '🎨 Ink Drop',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Warm-Memories-Emotional-Inspiring-Piano(chosic.com).mp3",
         config: {
             dropChance: 0.02,
             maxRadius: 200,
