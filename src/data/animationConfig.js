@@ -2976,7 +2976,7 @@ export const animationData = [
     {
         id: 49,
         name: '🌸 Lotus Bloom',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Lights(chosic.com).mp3",
         config: {
             petals: 12,
             layers: 4,
@@ -3045,7 +3045,7 @@ export const animationData = [
     {
         id: 50,
         name: '🎆 Particle Fountain',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/PerituneMaterial_PV_Emotional(chosic.com).mp3",
         config: {
             emissionRate: 5,
             gravity: 0.2,
@@ -3108,7 +3108,7 @@ export const animationData = [
     {
         id: 51,
         name: '🌀 Double Helix',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/roa-music-trees(chosic.com).mp3",
         config: {
             points: 100,
             amplitude: 60,
@@ -3172,7 +3172,7 @@ export const animationData = [
     {
         id: 52,
         name: '🎪 Pendulum Wave',
-        audio: "/sounds/ambient.mp3",
+        audio: "/sounds/Not-Alone(chosic.com).mp3",
         config: {
             pendulumCount: 20,
             baseLength: 80,
