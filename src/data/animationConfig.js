@@ -777,6 +777,7 @@ export const animationData = [
     {
         id: 14,
         name: '❄️ Snowfall',
+        audio:"/sounds/Trip(chosic.com).mp3",
         config: {
             flakeCount: 100,
             baseSize: 3,
