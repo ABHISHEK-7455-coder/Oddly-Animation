@@ -24,3 +24,44 @@ const Gallery = () => {
 };
 
 export default Gallery;
+
+// import React from "react";
+// import { useNavigate } from "react-router-dom";
+// import { animationData } from "../data/animationConfig";
+// import "./Gallery.css";
+
+// const Gallery = () => {
+//     const navigate = useNavigate();
+
+//     return (
+//         <div className="gallery-screen">
+//             <div className="gallery-header">
+//                 <h2>My Animations</h2>
+//                 <button className="add-btn">+</button>
+//             </div>
+
+//             <div className="animation-grid">
+//                 {animationData.map((anim) => (
+//                     <div
+//                         key={anim.id}
+//                         className="anim-card"
+//                         style={{ backgroundImage: `url(${anim.thumbnail})` }}
+//                         onClick={() => navigate(`/animation/${anim.id}`)}
+//                     >
+//                         <img src={anim.image} alt="" />
+//                         <div className="anim-title">{anim.name}</div>
+//                     </div>
+//                 ))}
+//             </div>
+
+//             <div className="bottom-nav">
+//                 <button onClick={() => navigate("/")} className="nav-item">Home</button>
+//                 <button className="nav-item active">Animations</button>
+//                 <button onClick={() => navigate("/profile")} className="nav-item">Profile</button>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default Gallery;
+

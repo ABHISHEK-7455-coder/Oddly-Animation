@@ -572,6 +572,7 @@ const Animation = () => {
                         <div className="size">
                             <label>Size: {size.toFixed(1)}x</label>
                             <input
+                                className="range"
                                 type="range"
                                 min="0.3"
                                 max="2"
@@ -584,6 +585,7 @@ const Animation = () => {
                         <div className="color">
                             <label>Color Shift : {hueShift}°</label>
                             <input
+                                className="range"
                                 type="range"
                                 min="0"
                                 max="360"
@@ -670,6 +672,21 @@ const Animation = () => {
                             }}
                         >
                             {anim.name}
+                            {selectedAnimation === anim.id && (
+                                <button
+                                    className="audio-toggle"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (audioRef.current) {
+                                            if (isAudioPlaying) audioRef.current.pause();
+                                            else audioRef.current.play();
+                                        }
+                                        setIsAudioPlaying(!isAudioPlaying);
+                                    }}
+                                >
+                                    {isAudioPlaying ? "🔊" : "🔇"}
+                                </button>
+                            )}
                         </button>
                     ))}
                 </div>

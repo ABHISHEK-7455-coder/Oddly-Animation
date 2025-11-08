@@ -1,5 +1,5 @@
-/* Styling for the Gallery */
-.gallery-container {
+/*Styling for the Gallery */
+ .gallery-container {
     text-align: center;
     padding: 20px;
     width: 100%;
@@ -35,13 +35,13 @@
 }
 
 .gallery-card.active {
-  /* border: 2px solid #4caf50; */
+  /* border: 2px solid #4caf50;*/
   transform: scale(1.05);
   transition: all 0.2s ease;
 }
 
 
-/* Horizontal Control Bar Styling */
+/* Horizontal Control Bar Styling*/
 .controls {
     /* margin-top: 20px; */
     /* padding: 20px; */
@@ -73,7 +73,7 @@
     display: flex;
     align-items: center;
     color: #0A173A;
-    /* border: 2px solid #0A173A; */
+    /* border: 2px solid #0A173A;*/ 
     border-radius: 20px;
     padding: 0px 5px;
     background: white;
@@ -88,19 +88,19 @@
 
 .control-bar input[type="range"] {
     /* margin-left: 10px; */
-    /* width: 150px; */
+    /* width: 150px;*/ 
 }
 
-/* Display the selected animation */
+/* Display the selected animation*/ 
 .selected-animation {
     /* margin-top: 50px; */
     /* padding-top: 120px; */
     /* border: 2px solid #ccc;
-    border-radius: 10px;*/
+    border-radius: 10px;
      background-color: black;
-    /* display: flex;
+    /* display: flex;*/
     justify-content: left;
-    align-items: center; */
+    align-items: center; 
     text-align: center;
     width: 100%;
     margin: auto;
@@ -109,3 +109,100 @@
 .selected-animation h3 {
     margin-bottom: 20px;
 }
+
+/* :root {
+    --bg: #0d0b18;
+    --card-bg: #1b1830;
+    --text: #ffffff;
+    --primary: #9f77ff;
+}
+
+.gallery-screen {
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 30px;
+    padding-bottom: 80px;
+    color: var(--text);
+    width: 87%;
+    margin: auto;
+}
+
+.gallery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.gallery-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.add-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.animation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.anim-card {
+    height: 170px;
+    border-radius: 18px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    background-image: url("");
+}
+
+.anim-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent);
+}
+
+.anim-title {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    /* display: flex; *
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 14px;
+}
+
+.nav-item.active {
+    color: var(--primary);
+    font-weight: 600;
+} */
