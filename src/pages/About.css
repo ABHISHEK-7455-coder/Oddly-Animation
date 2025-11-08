@@ -348,6 +348,11 @@ margin-bottom: -38px;
 .back-icon {
   font-size: 26px;
   cursor: pointer;
+  color: #6a5c84;
+}
+
+.about-header h2 {
+  color: #6a5c84;
 }
 
 /* Main Content */
@@ -355,6 +360,7 @@ margin-bottom: -38px;
   font-size: 34px;
   margin-top: 20px;
   font-weight: 700;
+  
 }
 
 .about-section p {

@@ -1639,7 +1639,7 @@ export const animationData = [
     },
     {
         id: 29,
-        name: '🎵 Sound Wave Visualizer',
+        name: '🎵 Sound Wave',
         audio: "/sounds/Luke-Bergs-Bliss(chosic.com).mp3",
         config: {
             bars: 64,

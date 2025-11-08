@@ -366,7 +366,7 @@ import { useState, useEffect, useRef } from "react";
 import "./Animation.css";
 
 const Animation = () => {
-    const [selectedAnimation, setSelectedAnimation] = useState(0);
+    const [selectedAnimation, setSelectedAnimation] = useState(2);
     const [speed, setSpeed] = useState(1);
     const [size, setSize] = useState(1);
     const [hueShift, setHueShift] = useState(0);
@@ -567,7 +567,7 @@ const Animation = () => {
                 </details>
 
                 <details className="dropdown-section">
-                    <summary>⚙️ Controls</summary>
+                    <summary>⚙️ Customize Here</summary>
                     <div className="dropdown-content dropdown-controls">
                         <div className="size">
                             <label>Size: {size.toFixed(1)}x</label>
@@ -661,8 +661,9 @@ const Animation = () => {
             {/* Desktop Layout */}
             <div className="container">
                 <div className="sidebar desktop-only">
-                    <h1 className="sidebar-title">✨ Animations</h1>
-                    {animationData.map((anim) => (
+                    <h1 className="sidebar-title">✨ Explore more ...</h1>
+                    <div className="animations">
+                        {animationData.map((anim) => (
                         <button
                             key={anim.id}
                             className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
@@ -689,6 +690,7 @@ const Animation = () => {
                             )}
                         </button>
                     ))}
+                    </div>
                 </div>
 
                 <div className="canvas-area">
