@@ -71,7 +71,7 @@
 .controls {
     margin: auto;
     padding: 15px;
-    background: rgb(22, 22, 49);
+    background: white;
     border-radius: 12px;
     border: 1px solid rgba(100, 100, 255, 0.2);
     position: sticky;
@@ -84,7 +84,7 @@
 }
 
 .controls label {
-    color: #fff;
+    color: #764ba2;
     font-size: 16px;
 
 }
@@ -98,10 +98,20 @@
 
 .size {
     width: 30%;
+    color: #764ba2;
 }
 
 .color {
     width: 30%;
+    color: #764ba2;
+}
+
+.size label {
+    color: #764ba2;
+}
+
+.color label {
+    color: #764ba2;
 }
 
 .record-btn {
@@ -201,7 +211,8 @@
 
 .animation-btn.active {
     /* background: rgba(102, 126, 234, 0.3); */
-    border: 2px solid #764ba2;
+    /* border: 2px solid #764ba2; */
+    box-shadow: 2px 2px 9px black;
 }
 
 .anim-name{
@@ -329,7 +340,7 @@
 
 .dropdown-content {
     padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.05);
+    background: white;
 }
 
 .dropdown-section.inner summary {
