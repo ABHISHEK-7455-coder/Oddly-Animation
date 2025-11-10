@@ -664,32 +664,35 @@ const Animation = () => {
                     <h1 className="sidebar-title">✨ Explore more ...</h1>
                     <div className="animations">
                         {animationData.map((anim) => (
-                        <button
-                            key={anim.id}
-                            className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
-                            onClick={() => {
-                                setIsPlayingSaved(false);
-                                setSelectedAnimation(anim.id);
-                            }}
-                        >
-                            {anim.name}
-                            {selectedAnimation === anim.id && (
-                                <button
-                                    className="audio-toggle"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (audioRef.current) {
-                                            if (isAudioPlaying) audioRef.current.pause();
-                                            else audioRef.current.play();
-                                        }
-                                        setIsAudioPlaying(!isAudioPlaying);
-                                    }}
-                                >
-                                    {isAudioPlaying ? "🔊" : "🔇"}
-                                </button>
-                            )}
-                        </button>
-                    ))}
+                            <button
+                                key={anim.id}
+                                className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
+                                onClick={() => {
+                                    setIsPlayingSaved(false);
+                                    setSelectedAnimation(anim.id);
+                                }}
+                            >
+                                <img src={anim.image} alt="" width="100px" height="100px" style={{borderRadius:"10px"}}/>
+                                <div className="anim-name">
+                                    {anim.name}
+                                    {selectedAnimation === anim.id && (
+                                        <button
+                                            className="audio-toggle"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (audioRef.current) {
+                                                    if (isAudioPlaying) audioRef.current.pause();
+                                                    else audioRef.current.play();
+                                                }
+                                                setIsAudioPlaying(!isAudioPlaying);
+                                            }}
+                                        >
+                                            {isAudioPlaying ? "🔊" : "🔇"}
+                                        </button>
+                                    )}
+                                </div>
+                            </button>
+                        ))}
                     </div>
                 </div>
 
