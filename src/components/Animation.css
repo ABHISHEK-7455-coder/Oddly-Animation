@@ -5,17 +5,19 @@
     background: linear-gradient(135deg, #e8f7ef, #fdfcff);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     /* padding: 20px; */
+    margin-top: 81px;
 }
 
 .container {
     display: flex;
-    height: 88%;
-    flex-direction: column-reverse;
+    height: 100%;
+    /* flex-direction: column-reverse; */
+    padding: 20px 0px 0px 20px;
 }
 
 /* Sidebar */
 .sidebar {
-    width: 97%;
+    width: 23%;
     background: white;
     backdrop-filter: blur(10px);
     padding: 0px 8px 0px 8px;
@@ -32,7 +34,7 @@
     flex-direction: column;
     gap: 20px;
     scrollbar-width: none;
-    
+    height: 100%;
 }
 
 .sidebar-title {
@@ -62,8 +64,8 @@
     /* border-radius: 20px; */
     margin: auto;
     display: flex;
-    /* flex-direction: column; */
-    gap: 20px;
+    flex-direction: column;
+    gap: 15px;
     scrollbar-width: none;
 }
 
@@ -97,12 +99,12 @@
 }
 
 .size {
-    width: 30%;
+    width: 100%;
     color: #764ba2;
 }
 
 .color {
-    width: 30%;
+    width: 100%;
     color: #764ba2;
 }
 
@@ -115,7 +117,8 @@
 }
 
 .record-btn {
-    width: 12%;
+    width: 20%;
+    height: fit-content;
     padding: 0px;
     margin-top: 0px;
     border: none;
@@ -195,7 +198,7 @@
 
 /* Animation Buttons */
 .animation-btn {
-    width: 250px;
+    width: 95%;
     height: fit-content;
     padding: 3px 4px;
     margin: 8px auto;
@@ -213,10 +216,12 @@
     /* background: rgba(102, 126, 234, 0.3); */
     /* border: 2px solid #764ba2; */
     box-shadow: 2px 2px 9px black;
+    width: 100%;
 }
 
 .anim-name{
     display: flex;
+    padding: 5px 5px;
 }
 
 .audio-toggle {
@@ -231,9 +236,10 @@
 .canvas-area {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 0px 20px 5px 20px;
     position: relative;
 }
 
@@ -241,7 +247,7 @@
     width: 100%;
     height: 100%;
     border-radius: 16px;
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    /* box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5); */
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -302,7 +308,7 @@
 
 /* 🌐 Mobile Dropdowns */
 .mobile-dropdowns {
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 12px;
     margin: 12px;
@@ -321,7 +327,16 @@
 
 .dropdown-controls {
     display: flex;
+    flex-direction: column;
     padding: 20px;
+    width: 100%;
+    border-radius: 20px;
+    margin-top: 15px;
+}
+
+.record-saved {
+    display: flex;
+    justify-content: space-between;
 }
 
 .dropdown-section summary {

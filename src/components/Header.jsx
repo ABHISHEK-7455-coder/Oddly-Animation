@@ -38,15 +38,17 @@ const Header = () => {
           Home
         </NavLink>
 
-        <button
-          className="nav-link"
+        <NavLink
+        to="/gallery"
+          className={({ isActive }) =>
+            `nav-link ${isActive ? "active" : ""}`
+          }
           onClick={() => {
-            navigate("/gallery");
             handleLinkClick();
           }}
         >
           Gallery
-        </button>
+        </NavLink>
 
         <NavLink
           to="/about"

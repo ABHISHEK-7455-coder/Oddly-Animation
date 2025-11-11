@@ -1,48 +1,53 @@
 export const animationData = [
     {
         id: 0,
-        name: '🌊 Wave Pool',
-        image:"/pictures/wave motion.png",
-        audio: "/sounds/Fragments(chosic.com).mp3",
+        name: '✨Particle Rain',
+        audio: "/sounds/Heart-Of-The-Ocean(chosic.com).mp3",
+        image:"public/pictures/particle rain.png",
         config: {
-            cols: 50,
-            rows: 30,
-            baseSpeed: 0.03,
-            baseAmplitude: 20,
-            baseParticleSize: 3,
-            baseHue: 200,
-            offsetMultiplier: 0.1,
-            trailColor: 'rgba(10, 10, 30, 0.1)',
+            count: 100,
+            baseSpeed: 2,
+            speedVariation: 3,
+            baseLength: 10,
+            lengthVariation: 20,
+            baseHue: 180,
+            hueVariation: 60,
+            lineWidth: 2,
+            trailColor: 'rgba(0, 0, 20, 0.1)',
             saturation: 70,
             lightness: 60
         },
         init: (canvas, config) => {
-            const particles = [];
-            for (let i = 0; i < config.cols; i++) {
-                for (let j = 0; j < config.rows; j++) {
-                    particles.push({
-                        x: (canvas.width / config.cols) * i,
-                        y: (canvas.height / config.rows) * j,
-                        baseY: (canvas.height / config.rows) * j,
-                        offset: (i + j) * config.offsetMultiplier
-                    });
-                }
+            const drops = [];
+            for (let i = 0; i < config.count; i++) {
+                drops.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    speed: (config.baseSpeed + Math.random() * config.speedVariation) * config.speed,
+                    length: (config.baseLength + Math.random() * config.lengthVariation) * config.size,
+                    baseHue: config.baseHue + Math.random() * config.hueVariation
+                });
             }
-            return { particles, time: 0 };
+            return { drops };
         },
         animate: (ctx, canvas, config, state) => {
             ctx.fillStyle = config.trailColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            state.particles.forEach(p => {
-                const wave = Math.sin(state.time + p.offset) * config.baseAmplitude * config.size;
-                ctx.fillStyle = `hsl(${(config.baseHue + wave * 2 + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+            state.drops.forEach(drop => {
+                ctx.strokeStyle = `hsl(${(drop.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
+                ctx.lineWidth = config.lineWidth * config.size;
                 ctx.beginPath();
-                ctx.arc(p.x, p.baseY + wave, config.baseParticleSize * config.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
+                ctx.moveTo(drop.x, drop.y);
+                ctx.lineTo(drop.x, drop.y + drop.length);
+                ctx.stroke();
 
-            state.time += config.baseSpeed * config.speed;
+                drop.y += drop.speed;
+                if (drop.y > canvas.height) {
+                    drop.y = -drop.length;
+                    drop.x = Math.random() * canvas.width;
+                }
+            });
         }
     },
     {
@@ -102,53 +107,48 @@ export const animationData = [
     },
     {
         id: 2,
-        name: '✨Particle Rain',
-        audio: "/sounds/Heart-Of-The-Ocean(chosic.com).mp3",
-        image:"public/pictures/particle rain.png",
+        name: '🌊 Wave Pool',
+        image:"/pictures/wave motion.png",
+        audio: "/sounds/Fragments(chosic.com).mp3",
         config: {
-            count: 100,
-            baseSpeed: 2,
-            speedVariation: 3,
-            baseLength: 10,
-            lengthVariation: 20,
-            baseHue: 180,
-            hueVariation: 60,
-            lineWidth: 2,
-            trailColor: 'rgba(0, 0, 20, 0.1)',
+            cols: 50,
+            rows: 30,
+            baseSpeed: 0.03,
+            baseAmplitude: 20,
+            baseParticleSize: 3,
+            baseHue: 200,
+            offsetMultiplier: 0.1,
+            trailColor: 'rgba(10, 10, 30, 0.1)',
             saturation: 70,
             lightness: 60
         },
         init: (canvas, config) => {
-            const drops = [];
-            for (let i = 0; i < config.count; i++) {
-                drops.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    speed: (config.baseSpeed + Math.random() * config.speedVariation) * config.speed,
-                    length: (config.baseLength + Math.random() * config.lengthVariation) * config.size,
-                    baseHue: config.baseHue + Math.random() * config.hueVariation
-                });
+            const particles = [];
+            for (let i = 0; i < config.cols; i++) {
+                for (let j = 0; j < config.rows; j++) {
+                    particles.push({
+                        x: (canvas.width / config.cols) * i,
+                        y: (canvas.height / config.rows) * j,
+                        baseY: (canvas.height / config.rows) * j,
+                        offset: (i + j) * config.offsetMultiplier
+                    });
+                }
             }
-            return { drops };
+            return { particles, time: 0 };
         },
         animate: (ctx, canvas, config, state) => {
             ctx.fillStyle = config.trailColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            state.drops.forEach(drop => {
-                ctx.strokeStyle = `hsl(${(drop.baseHue + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
-                ctx.lineWidth = config.lineWidth * config.size;
+            state.particles.forEach(p => {
+                const wave = Math.sin(state.time + p.offset) * config.baseAmplitude * config.size;
+                ctx.fillStyle = `hsl(${(config.baseHue + wave * 2 + config.hueShift) % 360}, ${config.saturation}%, ${config.lightness}%)`;
                 ctx.beginPath();
-                ctx.moveTo(drop.x, drop.y);
-                ctx.lineTo(drop.x, drop.y + drop.length);
-                ctx.stroke();
-
-                drop.y += drop.speed;
-                if (drop.y > canvas.height) {
-                    drop.y = -drop.length;
-                    drop.x = Math.random() * canvas.width;
-                }
+                ctx.arc(p.x, p.baseY + wave, config.baseParticleSize * config.size, 0, Math.PI * 2);
+                ctx.fill();
             });
+
+            state.time += config.baseSpeed * config.speed;
         }
     },
     {
@@ -1595,7 +1595,7 @@ export const animationData = [
         id: 28,
         name: '🧬 Cellular Division',
         audio: "/sounds/Luke-Bergs-AuroraMp3(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/cellular division.png",
         config: {
             maxCells: 32,
             initialSize: 40,
@@ -1669,7 +1669,7 @@ export const animationData = [
         id: 29,
         name: '🎵 Sound Wave',
         audio: "/sounds/Luke-Bergs-Bliss(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/sound wave.png",
         config: {
             bars: 64,
             baseHeight: 20,
@@ -1721,7 +1721,7 @@ export const animationData = [
         id: 30,
         name: '🌀 Hypnotic Spiral',
         audio: "/sounds/Luke-Bergs-Ocean(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/hypnotic spiral.png",
         config: {
             segments: 200,
             rotationSpeed: 0.02,
@@ -1775,7 +1775,7 @@ export const animationData = [
         id: 31,
         name: '🎆 Firework Burst',
         audio: "/sounds/Luke-Bergs-x-Lichu-Summer-Breeze(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/firework burst.png",
         config: {
             maxFireworks: 5,
             particlesPerBurst: 80,
@@ -1854,7 +1854,7 @@ export const animationData = [
         id: 32,
         name: '🌊 Tidal Wave',
         audio: "/sounds/Luke-Bergs-Waesto-Follow-The-Sun(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/tidal wave.png",
         config: {
             layers: 7,
             waveSpeed: 2,
@@ -1900,7 +1900,7 @@ export const animationData = [
         id: 33,
         name: '🔮 Magic Orbs',
         audio: "/sounds/Luke-Bergs-Dayfox-I´m-Happy(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/magic orbs.png",
         config: {
             orbCount: 7,
             baseRadius: 30,
@@ -1962,7 +1962,7 @@ export const animationData = [
         id: 34,
         name: '🎭 Kaleidoscope',
         audio: "/sounds/puzzle(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/kaleidoscope.png",
         config: {
             segments: 12,
             particleCount: 50,
@@ -2038,7 +2038,7 @@ export const animationData = [
         id: 35,
         name: '🌌 Nebula Cloud',
         audio: "/sounds/Luke-Bergs-x-Lichu-Summer-Breeze(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/nebula cloud.png",
         config: {
             particleCount: 300,
             flowSpeed: 0.3,
@@ -2094,7 +2094,7 @@ export const animationData = [
         id: 36,
         name: '🎪 Juggling Balls',
         audio: "/sounds/roa-music-summer-madness(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/juggling balls.png",
         config: {
             ballCount: 5,
             throwHeight: 200,
@@ -2159,7 +2159,7 @@ export const animationData = [
         id: 37,
         name: '🌸 Cherry Blossom',
         audio: "/sounds/roa-music-walk-around(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/cherry blossom.png",
         config: {
             branchCount: 8,
             blossomCount: 60,
@@ -2250,7 +2250,7 @@ export const animationData = [
         id: 38,
         name: '⚛️ Atom Spin',
         audio: "/sounds/life(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/atom spin.png",
         config: {
             electrons: 12,
             orbitRadius: 100,
@@ -2344,7 +2344,7 @@ export const animationData = [
         id: 39,
         name: '🎨 Color Morph',
         audio: "/sounds/Summer-Tropical-House-HEAVEN(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/color morph.png",
         config: {
             gridSize: 20,
             morphSpeed: 0.02,
@@ -2390,7 +2390,7 @@ export const animationData = [
         id: 40,
         name: '🌙 Eclipse',
         audio: "/sounds/Roa-Serenity-chosic.com_.mp3",
-        image:"",
+        image:"public/pictures/eclipse.png",
         config: {
             sunSize: 80,
             moonSize: 85,
@@ -2449,7 +2449,7 @@ export const animationData = [
         id: 41,
         name: '🎯 Target Practice',
         audio: "/sounds/Luke-Bergs-Soulful_MP3(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/target practice.png",
         config: {
             rings: 8,
             pulseSpeed: 0.05,
@@ -2509,7 +2509,7 @@ export const animationData = [
         id: 42,
         name: '🌊 Quantum Waves',
         audio: "/sounds/Luke-Bergs-Tropical-Soulmp3(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/quantumn waves.png",
         config: {
             particleCount: 80,
             waveLength: 100,
@@ -2574,7 +2574,7 @@ export const animationData = [
         id: 43,
         name: '🎪 Spinning Tops',
         audio: "/sounds/Beloved(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/spinning tops.png",
         config: {
             topCount: 9,
             spinSpeed: 0.15,
@@ -2649,7 +2649,7 @@ export const animationData = [
         id: 44,
         name: '🌟 Supernova',
         audio: "/sounds/Walking-Home-chosic.com_.mp3",
-        image:"",
+        image:"public/pictures/supernova.png",
         config: {
             particleCount: 200,
             expansionSpeed: 3,
@@ -2729,7 +2729,7 @@ export const animationData = [
         id: 45,
         name: '🎨 Ink Drop',
         audio: "/sounds/Warm-Memories-Emotional-Inspiring-Piano(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/ink drop.png",
         config: {
             dropChance: 0.02,
             maxRadius: 200,
@@ -2804,7 +2804,7 @@ export const animationData = [
         id: 46,
         name: '🌈 Rainbow Tunnel',
         audio: "/sounds/One-Love-Emotional-Piano-Strings(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/rainbow tunnel.png",
         config: {
             rings: 30,
             rotationSpeed: 0.02,
@@ -2856,7 +2856,7 @@ export const animationData = [
         id: 47,
         name: '🦋 Morphing Butterfly',
         audio: "/sounds/precious-memories(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/morphing butterfly.png",
         config: {
             wingSegments: 20,
             flapSpeed: 0.1,
@@ -2932,7 +2932,7 @@ export const animationData = [
         id: 48,
         name: '⚡ Electric Field',
         audio: "/sounds/Childhood(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/electric field.png",
         config: {
             particleCount: 100,
             chargePoints: 3,
@@ -3027,7 +3027,7 @@ export const animationData = [
         id: 49,
         name: '🌸 Lotus Bloom',
         audio: "/sounds/Lights(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/lotus bloom.png",
         config: {
             petals: 12,
             layers: 4,
@@ -3097,7 +3097,7 @@ export const animationData = [
         id: 50,
         name: '🎆 Particle Fountain',
         audio: "/sounds/PerituneMaterial_PV_Emotional(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/particle fountain.png",
         config: {
             emissionRate: 5,
             gravity: 0.2,
@@ -3161,7 +3161,7 @@ export const animationData = [
         id: 51,
         name: '🌀 Double Helix',
         audio: "/sounds/roa-music-trees(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/double helix.png",
         config: {
             points: 100,
             amplitude: 60,
@@ -3226,7 +3226,7 @@ export const animationData = [
         id: 52,
         name: '🎪 Pendulum Wave',
         audio: "/sounds/Not-Alone(chosic.com).mp3",
-        image:"",
+        image:"public/pictures/pendulum wave.png",
         config: {
             pendulumCount: 20,
             baseLength: 80,

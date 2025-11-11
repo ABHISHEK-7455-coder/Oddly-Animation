@@ -366,7 +366,7 @@ import { useState, useEffect, useRef } from "react";
 import "./Animation.css";
 
 const Animation = () => {
-    const [selectedAnimation, setSelectedAnimation] = useState(2);
+    const [selectedAnimation, setSelectedAnimation] = useState(0);
     const [speed, setSpeed] = useState(1);
     const [size, setSize] = useState(1);
     const [hueShift, setHueShift] = useState(0);
@@ -568,93 +568,7 @@ const Animation = () => {
 
                 <details className="dropdown-section">
                     <summary>⚙️ Customize Here</summary>
-                    <div className="dropdown-content dropdown-controls">
-                        <div className="size">
-                            <label>Size: {size.toFixed(1)}x</label>
-                            <input
-                                className="range"
-                                type="range"
-                                min="0.3"
-                                max="2"
-                                step="0.1"
-                                value={size}
-                                onChange={(e) => setSize(parseFloat(e.target.value))}
-                            />
-                        </div>
 
-                        <div className="color">
-                            <label>Color Shift : {hueShift}°</label>
-                            <input
-                                className="range"
-                                type="range"
-                                min="0"
-                                max="360"
-                                step="10"
-                                value={hueShift}
-                                onChange={(e) => setHueShift(parseInt(e.target.value))}
-                            />
-                        </div>
-
-                        {/* Record Buttons */}
-                        {!isRecording ? (
-                            <button className="record-btn start" onClick={startRecording}>
-                                ⏺️ Start Recording
-                            </button>
-                        ) : (
-                            <button className="record-btn stop" onClick={stopRecording}>
-                                ⏹️ Stop Recording
-                            </button>
-                        )}
-
-                        {/* Saved Recordings */}
-                        {recordingsList.length > 0 && (
-                            <details className="dropdown-section inner">
-                                <summary>🎞 Saved Recordings</summary>
-                                <div className="recordings-items">
-                                    {recordingsList.map((rec) => (
-                                        <div key={rec.id} className="recording-item">
-                                            <button
-                                                className="play-btn"
-                                                onClick={() => playSavedRecording(rec.data)}
-                                            >
-                                                ▶️ {rec.name}
-                                            </button>
-                                            <button
-                                                className="download-btn"
-                                                onClick={() => {
-                                                    const a = document.createElement("a");
-                                                    a.href = rec.data;
-                                                    a.download = `${rec.name}.webm`;
-                                                    document.body.appendChild(a);
-                                                    a.click();
-                                                    document.body.removeChild(a);
-                                                }}
-                                            >
-                                                ⬇️
-                                            </button>
-                                            <button
-                                                className="delete-btn"
-                                                onClick={() => {
-                                                    if (window.confirm(`Delete "${rec.name}"?`)) {
-                                                        const updated = recordingsList.filter(
-                                                            (r) => r.id !== rec.id
-                                                        );
-                                                        setRecordingsList(updated);
-                                                        localStorage.setItem(
-                                                            "savedRecordings",
-                                                            JSON.stringify(updated)
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                ❌
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </details>
-                        )}
-                    </div>
                 </details>
             </div>
 
@@ -672,7 +586,7 @@ const Animation = () => {
                                     setSelectedAnimation(anim.id);
                                 }}
                             >
-                                <img src={anim.image} alt="" width="100px" height="100px" style={{borderRadius:"10px"}}/>
+                                <img src={anim.image} alt="" width="100%" height="100px" style={{ borderRadius: "10px" }} />
                                 <div className="anim-name">
                                     {anim.name}
                                     {selectedAnimation === anim.id && (
@@ -715,6 +629,96 @@ const Animation = () => {
                             </button>
                         </>
                     )}
+
+                    <div className="dropdown-content dropdown-controls">
+                        <div className="size">
+                            <label>Size: {size.toFixed(1)}x</label>
+                            <input
+                                className="range"
+                                type="range"
+                                min="0.3"
+                                max="2"
+                                step="0.1"
+                                value={size}
+                                onChange={(e) => setSize(parseFloat(e.target.value))}
+                            />
+                        </div>
+
+                        <div className="color">
+                            <label>Color Shift : {hueShift}°</label>
+                            <input
+                                className="range"
+                                type="range"
+                                min="0"
+                                max="360"
+                                step="10"
+                                value={hueShift}
+                                onChange={(e) => setHueShift(parseInt(e.target.value))}
+                            />
+                        </div>
+
+                        <div className="record-saved">
+                            {/* Record Buttons */}
+                            {!isRecording ? (
+                                <button className="record-btn start" onClick={startRecording}>
+                                    ⏺️ Start Recording
+                                </button>
+                            ) : (
+                                <button className="record-btn stop" onClick={stopRecording}>
+                                    ⏹️ Stop Recording
+                                </button>
+                            )}
+
+                            {/* Saved Recordings */}
+                            {recordingsList.length > 0 && (
+                                <details className="dropdown-section inner">
+                                    <summary>🎞 Saved Recordings</summary>
+                                    <div className="recordings-items">
+                                        {recordingsList.map((rec) => (
+                                            <div key={rec.id} className="recording-item">
+                                                <button
+                                                    className="play-btn"
+                                                    onClick={() => playSavedRecording(rec.data)}
+                                                >
+                                                    ▶️ {rec.name}
+                                                </button>
+                                                <button
+                                                    className="download-btn"
+                                                    onClick={() => {
+                                                        const a = document.createElement("a");
+                                                        a.href = rec.data;
+                                                        a.download = `${rec.name}.webm`;
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        document.body.removeChild(a);
+                                                    }}
+                                                >
+                                                    ⬇️
+                                                </button>
+                                                <button
+                                                    className="delete-btn"
+                                                    onClick={() => {
+                                                        if (window.confirm(`Delete "${rec.name}"?`)) {
+                                                            const updated = recordingsList.filter(
+                                                                (r) => r.id !== rec.id
+                                                            );
+                                                            setRecordingsList(updated);
+                                                            localStorage.setItem(
+                                                                "savedRecordings",
+                                                                JSON.stringify(updated)
+                                                            );
+                                                        }
+                                                    }}
+                                                >
+                                                    ❌
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </details>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

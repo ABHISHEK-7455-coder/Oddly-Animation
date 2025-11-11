@@ -4,6 +4,7 @@
 /* Reset & Base Layout */
 * {
   box-sizing: border-box;
+  padding: 0;
 }
 
 body,
@@ -11,7 +12,7 @@ html,
 #root {
   height: 100%;
   margin: 0;
-  /* background-image: url("./assets/background.png"); */
+  background-image: url("./assets/background 2.png");
   background-position: center;
   background-size: cover;
   font-family: 'Poppins', sans-serif;
