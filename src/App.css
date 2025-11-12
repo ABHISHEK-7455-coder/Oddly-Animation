@@ -12,7 +12,7 @@ html,
 #root {
   height: 100%;
   margin: 0;
-  background-image: url("./assets/background 2.png");
+  /* background-image: url("./assets/background 2.png"); */
   background-position: center;
   background-size: cover;
   font-family: 'Poppins', sans-serif;

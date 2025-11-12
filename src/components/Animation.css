@@ -2,27 +2,28 @@
     /* display: flex; */
     height:85vh;
     width: 84vw;
-    background: linear-gradient(135deg, #e8f7ef, #fdfcff);
+    background: #1A1A1A;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     /* padding: 20px; */
-    margin-top: 81px;
+    margin-top: 90px;
 }
 
 .container {
     display: flex;
-    height: 88%;
-    flex-direction: column-reverse;
+    height: 100%;
+    /* flex-direction: column-reverse; */
+    padding: 20px 0px 0px 20px;
 }
 
 /* Sidebar */
 .sidebar {
-    width: 97%;
-    background: white;
+    width: 20%;
+    background: #0A0A0A;
     backdrop-filter: blur(10px);
     padding: 0px 8px 0px 8px;
     overflow-x: auto;
     box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid #0A0A0A;
     /* margin-top: 20px;
     margin-left: 20px;
     margin-bottom: 50px;
@@ -31,9 +32,9 @@
     margin: auto;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    /* gap: 20px; */
     scrollbar-width: none;
-    
+    height: 100%;
 }
 
 .sidebar-title {
@@ -52,19 +53,19 @@
     width: 100%;
     /* background: rgba(20, 20, 40, 0.95);
     backdrop-filter: blur(10px); */
-    padding: 0px 10px;
+    padding: 0px 0px;
     overflow-x: auto;
     /* box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);*/
-    border: 5px solid rgba(255, 255, 255, 0.1); 
-    margin-top: 20px;
+    /* border: 5px solid rgba(255, 255, 255, 0.1);  */
+    margin-top: 0px;
     margin-left: 20px;
     margin-bottom: 50px;
     margin-right: 20px;
     /* border-radius: 20px; */
     margin: auto;
     display: flex;
-    /* flex-direction: column; */
-    gap: 20px;
+    flex-direction: column;
+    gap: 0px;
     scrollbar-width: none;
 }
 
@@ -85,38 +86,50 @@
 }
 
 .controls label {
-    color: #764ba2;
+    color: #2ACCED;
     font-size: 16px;
 
 }
 
 .range {
     width: 50%;
-    accent-color: #a34bff;
+    accent-color: #FF007F;
     margin-bottom: 8px;
     margin-left: 8px;
 }
 
 .size {
-    width: 30%;
-    color: #764ba2;
+    width: 100%;
+    color: #FF007F;
+    gap: 20px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .color {
-    width: 30%;
-    color: #764ba2;
+    width: 100%;
+    color: #FF007F;
+    display: flex;
+    justify-content: space-between;
 }
 
 .size label {
-    color: #764ba2;
+    color: white;
 }
 
 .color label {
-    color: #764ba2;
+    color: white;
+}
+
+.input {
+    width: 70%;
+    text-align: right;
+    /* color: #39FF14; */
 }
 
 .record-btn {
-    width: 12%;
+    width: fit-content;
+    height: fit-content;
     padding: 0px;
     margin-top: 0px;
     border: none;
@@ -127,15 +140,15 @@
 }
 
 .record-btn.start {
-    background: #4caf50;
+    background: #2ACCED;
     height: fit-content;
-    padding: 14px 0px;
+    padding: 10px 5px;
 }
 
 .record-btn.stop {
     background: #f44336;
     height: fit-content;
-    padding: 14px 0px;
+    padding: 10px 5px;
 }
 
 /* Recordings List */
@@ -196,14 +209,14 @@
 
 /* Animation Buttons */
 .animation-btn {
-    width: 250px;
-    height: fit-content;
-    padding: 3px 4px;
+    width: 95%;
+    height: 50%;
+    padding: 8px 8px;
     margin: 8px auto;
-    background: rgba(255, 255, 255, 0.1);
-    color: #764ba2;
+    /* background: rgba(255, 255, 255, 0.1); */
+    /* color: #764ba2; */
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -211,13 +224,17 @@
 }
 
 .animation-btn.active {
-    /* background: rgba(102, 126, 234, 0.3); */
-    /* border: 2px solid #764ba2; */
-    box-shadow: 2px 2px 9px black;
+    background: #3B0821;
+    border: 2px solid #F00178;
+    /* box-shadow: 0px 8px 20px black; */
+    width: 100%;
 }
 
 .anim-name{
     display: flex;
+    padding: 5px 5px;
+    justify-content: space-between;
+    color: white;
 }
 
 .audio-toggle {
@@ -232,19 +249,23 @@
 .canvas-area {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 0px 20px 5px 20px;
     position: relative;
+    height: fit-content;
+   
 }
 
 .animation-canvas {
     width: 100%;
-    height: 100%;
+    height: 450px;
     border-radius: 16px;
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 5px 5px 20px #F00178;;
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.1);
+
 }
 
 .video-player {
@@ -303,7 +324,7 @@
 
 /* 🌐 Mobile Dropdowns */
 .mobile-dropdowns {
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 12px;
     margin: 12px;
@@ -322,7 +343,27 @@
 
 .dropdown-controls {
     display: flex;
+    /* flex-direction: column; */
     padding: 20px;
+    width: 100%;
+    border-radius: 20px;
+    margin-top: 15px;
+    background-color: #0A0A0A;
+    gap: 20px;
+}
+
+.size-color {
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.record-saved {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 30px;
 }
 
 .dropdown-section summary {
@@ -341,7 +382,8 @@
 
 .dropdown-content {
     padding: 10px 14px;
-    background: white;
+    background: #0A0A0A;
+    height: fit-content;
 }
 
 .dropdown-section.inner summary {

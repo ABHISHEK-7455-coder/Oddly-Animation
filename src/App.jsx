@@ -53,7 +53,7 @@ function App() {
                         path="/" 
                         element={
                             <>
-                                {/* <AnimatedBackground /> */}
+                                <AnimatedBackground />
                                 <Header />
                                 <Home />
                             </>
@@ -65,7 +65,7 @@ function App() {
                         path="/about" 
                         element={
                             <>
-                                {/* <AnimatedBackground /> */}
+                                <AnimatedBackground />
                                 <Header />
                                 <About />
                             </>
