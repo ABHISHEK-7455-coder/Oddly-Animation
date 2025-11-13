@@ -534,7 +534,9 @@ const Animation = () => {
             {/* Mobile Dropdowns */}
             <div className="mobile-dropdowns">
                 <details className="dropdown-section dropdown-animation">
-                    <summary>🎨 Animations</summary>
+                    <summary>
+                        <span className="material-symbols-outlined">palette</span> Animations
+                    </summary>
                     <div className="dropdown-content">
                         {animationData.map((anim) => (
                             <button
@@ -558,7 +560,9 @@ const Animation = () => {
                                             setIsAudioPlaying(!isAudioPlaying);
                                         }}
                                     >
-                                        {isAudioPlaying ? "🔊" : "🔇"}
+                                        <span className="material-symbols-outlined">
+                                            {isAudioPlaying ? "volume_up" : "volume_off"}
+                                        </span>
                                     </button>
                                 )}
                             </button>
@@ -567,15 +571,18 @@ const Animation = () => {
                 </details>
 
                 <details className="dropdown-section">
-                    <summary>⚙️ Customize Here</summary>
-
+                    <summary>
+                        <span className="material-symbols-outlined">tune</span> Customize Here
+                    </summary>
                 </details>
             </div>
 
             {/* Desktop Layout */}
             <div className="container">
                 <div className="sidebar desktop-only">
-                    <h1 className="sidebar-title">✨ Explore more ...</h1>
+                    <h1 className="sidebar-title">
+                        <span className="material-symbols-outlined">auto_awesome</span> Explore more ...
+                    </h1>
                     <div className="animations">
                         {animationData.map((anim) => (
                             <button
@@ -601,7 +608,9 @@ const Animation = () => {
                                                 setIsAudioPlaying(!isAudioPlaying);
                                             }}
                                         >
-                                            {isAudioPlaying ? "🔊" : "🔇"}
+                                            <span className="material-symbols-outlined">
+                                                {isAudioPlaying ? "volume_up" : "volume_off"}
+                                            </span>
                                         </button>
                                     )}
                                 </div>
@@ -625,7 +634,7 @@ const Animation = () => {
                                 muted
                             />
                             <button onClick={backToLive} className="back-btn">
-                                🔙 Back to Live
+                                <span className="material-symbols-outlined">arrow_back</span> Back to Live
                             </button>
                         </>
                     )}
@@ -669,18 +678,20 @@ const Animation = () => {
                             {/* Record Buttons */}
                             {!isRecording ? (
                                 <button className="record-btn start" onClick={startRecording}>
-                                    ⏺️ Start Recording
+                                    <span className="material-symbols-outlined">fiber_manual_record</span> Start Recording
                                 </button>
                             ) : (
                                 <button className="record-btn stop" onClick={stopRecording}>
-                                    ⏹️ Stop Recording
+                                    <span className="material-symbols-outlined">stop_circle</span> Stop Recording
                                 </button>
                             )}
 
                             {/* Saved Recordings */}
                             {recordingsList.length > 0 && (
                                 <details className="dropdown-section inner">
-                                    <summary>🎞 Saved Recordings</summary>
+                                    <summary>
+                                        <span className="material-symbols-outlined">movie</span> Saved Recordings
+                                    </summary>
                                     <div className="recordings-items">
                                         {recordingsList.map((rec) => (
                                             <div key={rec.id} className="recording-item">
@@ -688,7 +699,7 @@ const Animation = () => {
                                                     className="play-btn"
                                                     onClick={() => playSavedRecording(rec.data)}
                                                 >
-                                                    ▶️ {rec.name}
+                                                    <span className="material-symbols-outlined">play_arrow</span> <span>{rec.name}</span>
                                                 </button>
                                                 <button
                                                     className="download-btn"
@@ -701,7 +712,7 @@ const Animation = () => {
                                                         document.body.removeChild(a);
                                                     }}
                                                 >
-                                                    ⬇️
+                                                    <span className="material-symbols-outlined">download</span>
                                                 </button>
                                                 <button
                                                     className="delete-btn"
@@ -718,7 +729,7 @@ const Animation = () => {
                                                         }
                                                     }}
                                                 >
-                                                    ❌
+                                                    <span className="material-symbols-outlined">delete</span>
                                                 </button>
                                             </div>
                                         ))}
@@ -730,6 +741,7 @@ const Animation = () => {
                 </div>
             </div>
         </div>
+
     );
 };
 
