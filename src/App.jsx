@@ -77,7 +77,7 @@ function App() {
                         path="/gallery" 
                         element={
                             <>
-                                <Header />
+                                {/* <Header /> */}
                                 <Gallery />
                             </>
                         } 

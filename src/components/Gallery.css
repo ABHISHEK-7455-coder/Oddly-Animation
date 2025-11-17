@@ -8,6 +8,7 @@
     justify-content: space-around;
     background-color: #1A1A1A;
     height: auto;
+    color: white;
    
 }
 
@@ -19,7 +20,13 @@
     height: auto;
     overflow-x: scroll;
     scrollbar-width: none;
-    color: #0A173A;
+    /* color: #0A173A; */
+}
+
+.gallery-container .logo {
+  color: black;
+  background-color: white;
+  height: 90px;
 }
 
 .gallery-card {

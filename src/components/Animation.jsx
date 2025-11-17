@@ -593,7 +593,7 @@ const Animation = () => {
                                     setSelectedAnimation(anim.id);
                                 }}
                             >
-                                <img src={anim.image} alt="" width="100%" height="150px" style={{ borderRadius: "5px" }} />
+                                <img src={anim.image} width="100%" height="150px" style={{ borderRadius: "0px" }} />
                                 <div className="anim-name">
                                     {anim.name}
                                     {selectedAnimation === anim.id && (

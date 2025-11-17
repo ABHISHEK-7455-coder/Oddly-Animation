@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, } from "react";
+import { useNavigate } from "react-router-dom";
 import Animation from "../components/Animation";
 import { animationData } from "../data/animationConfig.js"; // 50 animations ka data
 import "./Gallery.css";
@@ -9,9 +10,13 @@ const Gallery = () => {
     const [size, setSize] = useState(50);
     const [speed, setSpeed] = useState(0.01);
 
+    const navigate = useNavigate();
+
     return (
         <div className="gallery-container">
-
+            <div className="logo" onClick={() => navigate("/")}>
+                <h2>MeloMotion</h2>
+            </div>
             <Animation
                 type={selectedAnimation}
                 color={color}
