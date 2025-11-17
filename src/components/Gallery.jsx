@@ -14,9 +14,9 @@ const Gallery = () => {
 
     return (
         <div className="gallery-container">
-            <div className="logo" onClick={() => navigate("/")}>
+            {/* <div className="logo" onClick={() => navigate("/")}>
                 <h2>MeloMotion</h2>
-            </div>
+            </div> */}
             <Animation
                 type={selectedAnimation}
                 color={color}

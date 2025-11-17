@@ -379,6 +379,11 @@ const Animation = () => {
     const [isPlayingSaved, setIsPlayingSaved] = useState(false);
     const [playingVideoSrc, setPlayingVideoSrc] = useState(null);
 
+    const [search, setSearch] = useState("");
+
+    const [editingId, setEditingId] = useState(null);
+    const [newName, setNewName] = useState("");
+
     const canvasRef = useRef(null);
     const recorderRef = useRef(null);
     const chunksRef = useRef([]);
@@ -529,6 +534,25 @@ const Animation = () => {
         };
     }, [selectedAnimation, speed, size, hueShift, isAudioPlaying, isPlayingSaved]);
 
+    const filteredAnimations = animationData.filter(anim =>
+        anim.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const startEditing = (item) => {
+        setEditingId(item.id);
+        setNewName(item.name);
+    };
+
+    const saveNewName = (id) => {
+        const updated = savedList.map(item =>
+            item.id === id ? { ...item, name: newName } : item
+        );
+
+        setSavedList(updated);
+        localStorage.setItem("savedAnimations", JSON.stringify(updated));
+        setEditingId(null);
+    };
+
     return (
         <div className="main-container">
             {/* Mobile Dropdowns */}
@@ -538,7 +562,7 @@ const Animation = () => {
                         <span className="material-symbols-outlined">palette</span> Animations
                     </summary>
                     <div className="dropdown-content">
-                        {animationData.map((anim) => (
+                        {filteredAnimations.map((anim) => (
                             <button
                                 key={anim.id}
                                 className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
@@ -584,7 +608,7 @@ const Animation = () => {
                         <span className="material-symbols-outlined">auto_awesome</span> Explore more ...
                     </h1>
                     <div className="animations">
-                        {animationData.map((anim) => (
+                        {filteredAnimations.map((anim) => (
                             <button
                                 key={anim.id}
                                 className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
@@ -620,6 +644,14 @@ const Animation = () => {
                 </div>
 
                 <div className="canvas-area">
+                    <div className="search-box">
+                        <input
+                            type="text"
+                            placeholder="Search animations..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
                     {!isPlayingSaved ? (
                         <canvas ref={canvasRef} className="animation-canvas" />
                     ) : (
@@ -678,7 +710,8 @@ const Animation = () => {
                             {/* Record Buttons */}
                             {!isRecording ? (
                                 <button className="record-btn start" onClick={startRecording}>
-                                    <span className="material-symbols-outlined">fiber_manual_record</span> Start Recording
+                                    {/* <span className="material-symbols-outlined">arrow_down</span>  */}
+                                    Start Recording
                                 </button>
                             ) : (
                                 <button className="record-btn stop" onClick={stopRecording}>
@@ -692,50 +725,114 @@ const Animation = () => {
                                     <summary>
                                         <span className="material-symbols-outlined">movie</span> Saved Recordings
                                     </summary>
+
                                     <div className="recordings-items">
                                         {recordingsList.map((rec) => (
                                             <div key={rec.id} className="recording-item">
-                                                <button
-                                                    className="play-btn"
-                                                    onClick={() => playSavedRecording(rec.data)}
-                                                >
-                                                    <span className="material-symbols-outlined">play_arrow</span> <span>{rec.name}</span>
-                                                </button>
-                                                <button
-                                                    className="download-btn"
-                                                    onClick={() => {
-                                                        const a = document.createElement("a");
-                                                        a.href = rec.data;
-                                                        a.download = `${rec.name}.webm`;
-                                                        document.body.appendChild(a);
-                                                        a.click();
-                                                        document.body.removeChild(a);
-                                                    }}
-                                                >
-                                                    <span className="material-symbols-outlined">download</span>
-                                                </button>
-                                                <button
-                                                    className="delete-btn"
-                                                    onClick={() => {
-                                                        if (window.confirm(`Delete "${rec.name}"?`)) {
-                                                            const updated = recordingsList.filter(
-                                                                (r) => r.id !== rec.id
-                                                            );
-                                                            setRecordingsList(updated);
-                                                            localStorage.setItem(
-                                                                "savedRecordings",
-                                                                JSON.stringify(updated)
-                                                            );
-                                                        }
-                                                    }}
-                                                >
-                                                    <span className="material-symbols-outlined">delete</span>
-                                                </button>
+
+                                                {/* If editing this item */}
+                                                {editingId === rec.id ? (
+                                                    <>
+                                                        <input
+                                                            type="text"
+                                                            className="rename-input"
+                                                            value={newName}
+                                                            onChange={(e) => setNewName(e.target.value)}
+                                                        />
+
+                                                        <button
+                                                            className="save-btn"
+                                                            onClick={() => {
+                                                                const updated = recordingsList.map((r) =>
+                                                                    r.id === rec.id ? { ...r, name: newName } : r
+                                                                );
+
+                                                                setRecordingsList(updated);
+                                                                localStorage.setItem(
+                                                                    "savedRecordings",
+                                                                    JSON.stringify(updated)
+                                                                );
+
+                                                                setEditingId(null);
+                                                                setNewName("");
+                                                            }}
+                                                        >
+                                                            <span className="material-symbols-outlined">check</span>
+                                                        </button>
+
+                                                        <button
+                                                            className="cancel-btn"
+                                                            onClick={() => {
+                                                                setEditingId(null);
+                                                                setNewName("");
+                                                            }}
+                                                        >
+                                                            <span className="material-symbols-outlined">close</span>
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {/* Play Button */}
+                                                        <button
+                                                            className="play-btn"
+                                                            onClick={() => playSavedRecording(rec.data)}
+                                                        >
+                                                            {/* <span className="material-symbols-outlined">play_arrow</span> */}
+                                                            <span>{rec.name}</span>
+                                                        </button>
+
+                                                        {/* Download */}
+                                                        <button
+                                                            className="download-btn"
+                                                            onClick={() => {
+                                                                const a = document.createElement("a");
+                                                                a.href = rec.data;
+                                                                a.download = `${rec.name}.webm`;
+                                                                document.body.appendChild(a);
+                                                                a.click();
+                                                                document.body.removeChild(a);
+                                                            }}
+                                                        >
+                                                            <span className="material-symbols-outlined">download</span>
+                                                        </button>
+
+                                                        {/* Edit */}
+                                                        <button
+                                                            className="edit-btn"
+                                                            onClick={() => {
+                                                                setEditingId(rec.id);
+                                                                setNewName(rec.name);
+                                                            }}
+                                                        >
+                                                            <span className="material-symbols-outlined">edit</span>
+                                                        </button>
+
+                                                        {/* Delete */}
+                                                        <button
+                                                            className="delete-btn"
+                                                            onClick={() => {
+                                                                if (window.confirm(`Delete "${rec.name}"?`)) {
+                                                                    const updated = recordingsList.filter(
+                                                                        (r) => r.id !== rec.id
+                                                                    );
+                                                                    setRecordingsList(updated);
+                                                                    localStorage.setItem(
+                                                                        "savedRecordings",
+                                                                        JSON.stringify(updated)
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
+                                                            <span className="material-symbols-outlined">delete</span>
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
                                 </details>
                             )}
+
                         </div>
                     </div>
                 </div>
