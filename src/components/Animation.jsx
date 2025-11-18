@@ -406,7 +406,7 @@ const Animation = () => {
         if (!canvas) return;
 
         // Browser compatibility check
-        if (!window.MediaRecorder || isSafari) {
+        if (!window.MediaRecorder || isSafari || isSamsung || isChrome) {
             alert("🎥 Recording not supported on this browser (Safari / Vivo).");
             return;
         }
@@ -552,6 +552,22 @@ const Animation = () => {
         localStorage.setItem("savedAnimations", JSON.stringify(updated));
         setEditingId(null);
     };
+
+    const uploadAndShare = async (rec) => {
+    const blob = await (await fetch(rec.data)).blob();
+
+    const formData = new FormData();
+    formData.append("file", blob, `${rec.name}.webm`);
+
+    const res = await fetch("https://file.io", {
+        method: "POST",
+        body: formData,
+    });
+
+    const json = await res.json();
+    navigator.clipboard.writeText(json.link);
+    showToast("Share link copied!");
+};
 
     return (
         <div className="main-container">
@@ -704,6 +720,11 @@ const Animation = () => {
                                     {hueShift}°
                                 </div>
                             </div>
+                            <button className="share-btn" onClick={() => uploadAndShare(rec)}>
+    <span className="material-symbols-outlined">share</span>
+</button>
+
+
                         </div>
 
                         <div className="record-saved">
