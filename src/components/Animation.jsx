@@ -364,7 +364,10 @@
 import { animationData } from "../data/animationConfig";
 import { useState, useEffect, useRef } from "react";
 import { ref, uploadString, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase"; // adjust path if needed
+// import { storage } from "../firebase"; // adjust path if needed
+
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 
 import "./Animation.css";
 
@@ -387,21 +390,68 @@ const Animation = () => {
     const [editingId, setEditingId] = useState(null);
     const [newName, setNewName] = useState("");
 
+    // --- NEW: states for download format menu ---
+    const [showFormatMenuId, setShowFormatMenuId] = useState(null); // id of recording showing menu
+    const [selectedRec, setSelectedRec] = useState(null);
+    const [isConverting, setIsConverting] = useState(false);
+
     const canvasRef = useRef(null);
     const recorderRef = useRef(null);
     const chunksRef = useRef([]);
     const animationRef = useRef(null);
     const audioRef = useRef(null);
 
+    // --- ffmpeg instance ref ---
+    const ffmpegRef = useRef(null);
+    const ffmpegLoadingRef = useRef(false);
+
+    const ensureFFmpeg = async () => {
+    if (!ffmpegRef.current) {
+        ffmpegRef.current = new FFmpeg();
+    }
+    if (!ffmpegRef.current.loaded) {
+        await ffmpegRef.current.load();
+    }
+};
+
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     const isSamsung = /SamsungBrowser/i.test(navigator.userAgent);
     const isChrome = /Chrome/i.test(navigator.userAgent);
+
+    // Simple toast fallback (replace with your toast if you have one)
+    const showToast = (msg) => {
+        try {
+            // prefer non-blocking notification if available
+            // Replace this with your toast component call if you have one
+            alert(msg);
+        } catch {
+            console.log(msg);
+        }
+    };
 
     // 🌀 Load recordings on mount
     useEffect(() => {
         const saved = JSON.parse(localStorage.getItem("savedRecordings")) || [];
         setRecordingsList(saved);
     }, []);
+
+    // Initialize ffmpeg (lazy load)
+    const ensureFfmpeg = async () => {
+        if (!ffmpegRef.current) {
+            ffmpegRef.current = createFFmpeg({ log: true });
+        }
+        if (!ffmpegRef.current.isLoaded() && !ffmpegLoadingRef.current) {
+            ffmpegLoadingRef.current = true;
+            try {
+                await ffmpegRef.current.load();
+            } catch (err) {
+                console.error("ffmpeg load failed", err);
+                showToast("ffmpeg failed to load (conversion unavailable)");
+            } finally {
+                ffmpegLoadingRef.current = false;
+            }
+        }
+    };
 
     // 🎬 Start recording
     const startRecording = async () => {
@@ -547,12 +597,12 @@ const Animation = () => {
     };
 
     const saveNewName = (id) => {
-        const updated = savedList.map(item =>
+        const updated = recordingsList.map(item =>
             item.id === id ? { ...item, name: newName } : item
         );
 
-        setSavedList(updated);
-        localStorage.setItem("savedAnimations", JSON.stringify(updated));
+        setRecordingsList(updated);
+        localStorage.setItem("savedRecordings", JSON.stringify(updated));
         setEditingId(null);
     };
 
@@ -580,7 +630,6 @@ const Animation = () => {
         }
     };
 
-
     const uploadAndShareById = async (id) => {
         try {
             const rec = recordingsList.find(r => r.id === id);
@@ -607,6 +656,142 @@ const Animation = () => {
         }
     };
 
+    // ----------------- Download helpers -----------------
+
+    const downloadWebM = (rec) => {
+    if (!rec) return;
+    const a = document.createElement("a");
+    a.href = rec.data;
+    a.download = `${rec.name}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setShowFormatMenuId(null);
+};
+
+
+    const downloadJSON = (rec) => {
+        if (!rec) return;
+        // If your recordings include config, put it here; otherwise save metadata only
+        const json = {
+            id: rec.id,
+            name: rec.name,
+            // If you store animation config per recording, include it as rec.config
+            // animationConfig: rec.config || {}
+        };
+        const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${rec.name}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setShowFormatMenuId(null);
+    };
+
+    const downloadAsMP4 = async (rec) => {
+    if (!rec) return;
+    setIsConverting(true);
+    showToast("Converting to MP4...");
+
+    try {
+        await ensureFfmpeg();
+        const ffmpeg = ffmpegRef.current;
+
+        // write webm input
+        await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+
+        // execute ffmpeg
+        await ffmpeg.exec([
+            "-i", "input.webm",
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-crf", "23",
+            "output.mp4",
+        ]);
+
+        // read mp4 output
+        const data = await ffmpeg.readFile("output.mp4");
+        const blob = new Blob([data], { type: "video/mp4" });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${rec.name}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+    } catch (err) {
+        console.error("MP4 conversion error", err);
+        showToast("MP4 conversion failed");
+    } finally {
+        setIsConverting(false);
+        setShowFormatMenuId(null);
+
+        // cleanup
+        try { await ffmpegRef.current.deleteFile("input.webm"); } catch {}
+        try { await ffmpegRef.current.deleteFile("output.mp4"); } catch {}
+    }
+    console.log("FFmpeg loaded?", ffmpeg.isLoaded());
+
+};
+
+
+    const downloadAsGIF = async (rec) => {
+    if (!rec) return;
+    setIsConverting(true);
+    showToast("Converting to GIF...");
+
+    try {
+        await ensureFfmpeg();
+        const ffmpeg = ffmpegRef.current;
+
+        await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+
+        // palette generation
+        await ffmpeg.exec([
+            "-i", "input.webm",
+            "-vf", "fps=12,scale=480:-1:flags=lanczos,palettegen",
+            "palette.png",
+        ]);
+
+        // gif generation
+        await ffmpeg.exec([
+            "-i", "input.webm",
+            "-i", "palette.png",
+            "-filter_complex",
+            "fps=12,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse",
+            "output.gif",
+        ]);
+
+        const data = await ffmpeg.readFile("output.gif");
+        const blob = new Blob([data], { type: "image/gif" });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${rec.name}.gif`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+    } catch (err) {
+        console.error("GIF conversion error", err);
+        showToast("GIF conversion failed");
+    } finally {
+        setIsConverting(false);
+        setShowFormatMenuId(null);
+
+        try { await ffmpegRef.current.deleteFile("input.webm"); } catch {}
+        try { await ffmpegRef.current.deleteFile("palette.png"); } catch {}
+        try { await ffmpegRef.current.deleteFile("output.gif"); } catch {}
+    }
+};
+
+
+    // ----------------- end helpers -----------------
 
     return (
         <div className="main-container">
@@ -795,20 +980,53 @@ const Animation = () => {
                                                     <span>{rec.name}</span>
                                                 </button>
 
-                                                {/* DOWNLOAD */}
+                                                {/* DOWNLOAD (opens format menu) */}
                                                 <button
                                                     className="download-btn"
                                                     onClick={() => {
-                                                        const a = document.createElement("a");
-                                                        a.href = rec.data;
-                                                        a.download = `${rec.name}.webm`;
-                                                        document.body.appendChild(a);
-                                                        a.click();
-                                                        document.body.removeChild(a);
+                                                        setSelectedRec(rec);
+                                                        // toggle inline menu for this record
+                                                        setShowFormatMenuId(prev => (prev === rec.id ? null : rec.id));
                                                     }}
                                                 >
                                                     <span className="material-symbols-outlined">download</span>
                                                 </button>
+
+                                                {/* Inline format menu (minimal, placed next to buttons) */}
+                                                {showFormatMenuId === rec.id && (
+                                                    <div className="format-menu-inline">
+                                                        <button
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadWebM(rec)}
+                                                        >
+                                                            .webm
+                                                        </button>
+                                                        <button
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadAsMP4(rec)}
+                                                        >
+                                                            .mp4
+                                                        </button>
+                                                        <button
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadAsGIF(rec)}
+                                                        >
+                                                            .gif
+                                                        </button>
+                                                        <button
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadJSON(rec)}
+                                                        >
+                                                            .json
+                                                        </button>
+                                                        <button
+                                                            className="format-close"
+                                                            onClick={() => setShowFormatMenuId(null)}
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                )}
 
                                                 <button className="share-btn" onClick={() => uploadAndShareById(rec.id)}>
                                                     <span className="material-symbols-outlined">share</span>
@@ -864,3 +1082,4 @@ const Animation = () => {
 };
 
 export default Animation;
+
