@@ -363,6 +363,9 @@
 
 import { animationData } from "../data/animationConfig";
 import { useState, useEffect, useRef } from "react";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase"; // adjust path if needed
+
 import "./Animation.css";
 
 const Animation = () => {
@@ -406,7 +409,7 @@ const Animation = () => {
         if (!canvas) return;
 
         // Browser compatibility check
-        if (!window.MediaRecorder || isSafari || isSamsung || isChrome) {
+        if (!window.MediaRecorder || isSafari) {
             alert("🎥 Recording not supported on this browser (Safari / Vivo).");
             return;
         }
@@ -553,21 +556,57 @@ const Animation = () => {
         setEditingId(null);
     };
 
-    const uploadAndShare = async (rec) => {
-    const blob = await (await fetch(rec.data)).blob();
+    const copyToClipboard = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999px";
+            textArea.style.top = "-999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
 
-    const formData = new FormData();
-    formData.append("file", blob, `${rec.name}.webm`);
+            return new Promise((resolve, reject) => {
+                if (document.execCommand("copy")) {
+                    resolve();
+                } else {
+                    reject();
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+    };
 
-    const res = await fetch("https://file.io", {
-        method: "POST",
-        body: formData,
-    });
 
-    const json = await res.json();
-    navigator.clipboard.writeText(json.link);
-    showToast("Share link copied!");
-};
+    const uploadAndShareById = async (id) => {
+        try {
+            const rec = recordingsList.find(r => r.id === id);
+            if (!rec) {
+                console.error('uploadAndShareById: record not found for id', id);
+                showToast('Upload failed: record not found');
+                return;
+            }
+
+            console.log('Uploading record:', rec);
+            showToast('Uploading...');
+
+            const uid = crypto.randomUUID();
+            const fileRef = ref(storage, `recordings/${uid}.webm`);
+            await uploadString(fileRef, rec.data, 'data_url');
+            const url = await getDownloadURL(fileRef);
+
+            await copyToClipboard(url);
+            showToast('Share link copied!');
+            console.log('Share URL:', url);
+        } catch (err) {
+            console.error('uploadAndShareById error', err);
+            showToast('Upload failed!');
+        }
+    };
+
 
     return (
         <div className="main-container">
@@ -720,11 +759,10 @@ const Animation = () => {
                                     {hueShift}°
                                 </div>
                             </div>
-                            <button className="share-btn" onClick={() => uploadAndShare(rec)}>
-    <span className="material-symbols-outlined">share</span>
-</button>
-
-
+                            {/* SHARE */}
+                            {/* <button className="share-btn" onClick={() => uploadAndShare(rec)}>
+                                <span className="material-symbols-outlined">share</span>
+                            </button> */}
                         </div>
 
                         <div className="record-saved">
@@ -751,108 +789,70 @@ const Animation = () => {
                                         {recordingsList.map((rec) => (
                                             <div key={rec.id} className="recording-item">
 
-                                                {/* If editing this item */}
-                                                {editingId === rec.id ? (
-                                                    <>
-                                                        <input
-                                                            type="text"
-                                                            className="rename-input"
-                                                            value={newName}
-                                                            onChange={(e) => setNewName(e.target.value)}
-                                                        />
+                                                {/* PLAY */}
+                                                <button className="play-btn" onClick={() => playSavedRecording(rec.data)}>
+                                                    <span className="material-symbols-outlined">play_arrow</span>
+                                                    <span>{rec.name}</span>
+                                                </button>
 
-                                                        <button
-                                                            className="save-btn"
-                                                            onClick={() => {
-                                                                const updated = recordingsList.map((r) =>
-                                                                    r.id === rec.id ? { ...r, name: newName } : r
-                                                                );
+                                                {/* DOWNLOAD */}
+                                                <button
+                                                    className="download-btn"
+                                                    onClick={() => {
+                                                        const a = document.createElement("a");
+                                                        a.href = rec.data;
+                                                        a.download = `${rec.name}.webm`;
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        document.body.removeChild(a);
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined">download</span>
+                                                </button>
 
-                                                                setRecordingsList(updated);
-                                                                localStorage.setItem(
-                                                                    "savedRecordings",
-                                                                    JSON.stringify(updated)
-                                                                );
+                                                <button className="share-btn" onClick={() => uploadAndShareById(rec.id)}>
+                                                    <span className="material-symbols-outlined">share</span>
+                                                </button>
 
-                                                                setEditingId(null);
-                                                                setNewName("");
-                                                            }}
-                                                        >
-                                                            <span className="material-symbols-outlined">check</span>
-                                                        </button>
+                                                {/* EDIT NAME */}
+                                                <button
+                                                    className="edit-btn"
+                                                    onClick={() => {
+                                                        const newName = prompt("Rename recording:", rec.name);
+                                                        if (!newName) return;
 
-                                                        <button
-                                                            className="cancel-btn"
-                                                            onClick={() => {
-                                                                setEditingId(null);
-                                                                setNewName("");
-                                                            }}
-                                                        >
-                                                            <span className="material-symbols-outlined">close</span>
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        {/* Play Button */}
-                                                        <button
-                                                            className="play-btn"
-                                                            onClick={() => playSavedRecording(rec.data)}
-                                                        >
-                                                            {/* <span className="material-symbols-outlined">play_arrow</span> */}
-                                                            <span>{rec.name}</span>
-                                                        </button>
+                                                        const updated = recordingsList.map((r) =>
+                                                            r.id === rec.id ? { ...r, name: newName } : r
+                                                        );
 
-                                                        {/* Download */}
-                                                        <button
-                                                            className="download-btn"
-                                                            onClick={() => {
-                                                                const a = document.createElement("a");
-                                                                a.href = rec.data;
-                                                                a.download = `${rec.name}.webm`;
-                                                                document.body.appendChild(a);
-                                                                a.click();
-                                                                document.body.removeChild(a);
-                                                            }}
-                                                        >
-                                                            <span className="material-symbols-outlined">download</span>
-                                                        </button>
+                                                        setRecordingsList(updated);
+                                                        localStorage.setItem("savedRecordings", JSON.stringify(updated));
+                                                        showToast("Name updated");
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined">edit</span>
+                                                </button>
 
-                                                        {/* Edit */}
-                                                        <button
-                                                            className="edit-btn"
-                                                            onClick={() => {
-                                                                setEditingId(rec.id);
-                                                                setNewName(rec.name);
-                                                            }}
-                                                        >
-                                                            <span className="material-symbols-outlined">edit</span>
-                                                        </button>
-
-                                                        {/* Delete */}
-                                                        <button
-                                                            className="delete-btn"
-                                                            onClick={() => {
-                                                                if (window.confirm(`Delete "${rec.name}"?`)) {
-                                                                    const updated = recordingsList.filter(
-                                                                        (r) => r.id !== rec.id
-                                                                    );
-                                                                    setRecordingsList(updated);
-                                                                    localStorage.setItem(
-                                                                        "savedRecordings",
-                                                                        JSON.stringify(updated)
-                                                                    );
-                                                                }
-                                                            }}
-                                                        >
-                                                            <span className="material-symbols-outlined">delete</span>
-                                                        </button>
-                                                    </>
-                                                )}
+                                                {/* DELETE */}
+                                                <button
+                                                    className="delete-btn"
+                                                    onClick={() => {
+                                                        if (window.confirm(`Delete "${rec.name}"?`)) {
+                                                            const updated = recordingsList.filter((r) => r.id !== rec.id);
+                                                            setRecordingsList(updated);
+                                                            localStorage.setItem("savedRecordings", JSON.stringify(updated));
+                                                            showToast("Recording deleted");
+                                                        }
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined">delete</span>
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 </details>
                             )}
+
 
                         </div>
                     </div>
