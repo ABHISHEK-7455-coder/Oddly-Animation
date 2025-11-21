@@ -366,6 +366,7 @@ import { useState, useEffect, useRef } from "react";
 import { ref, uploadString, getDownloadURL } from "firebase/storage";
 // import { storage } from "../firebase"; // adjust path if needed
 
+// --- FFmpeg (new SDK)
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 
@@ -405,15 +406,7 @@ const Animation = () => {
     const ffmpegRef = useRef(null);
     const ffmpegLoadingRef = useRef(false);
 
-    const ensureFFmpeg = async () => {
-    if (!ffmpegRef.current) {
-        ffmpegRef.current = new FFmpeg();
-    }
-    if (!ffmpegRef.current.loaded) {
-        await ffmpegRef.current.load();
-    }
-};
-
+    // Browser flags
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     const isSamsung = /SamsungBrowser/i.test(navigator.userAgent);
     const isChrome = /Chrome/i.test(navigator.userAgent);
@@ -435,21 +428,33 @@ const Animation = () => {
         setRecordingsList(saved);
     }, []);
 
-    // Initialize ffmpeg (lazy load)
+    // ---------- FFmpeg loader (NEW SDK) ----------
+    // NOTE: For Vite you must copy ffmpeg core files to /assets/ffmpeg via vite-plugin-static-copy.
+    // Example coreURL: "/assets/ffmpeg/ffmpeg-core.js"
     const ensureFfmpeg = async () => {
-        if (!ffmpegRef.current) {
-            ffmpegRef.current = createFFmpeg({ log: true });
-        }
-        if (!ffmpegRef.current.isLoaded() && !ffmpegLoadingRef.current) {
-            ffmpegLoadingRef.current = true;
-            try {
-                await ffmpegRef.current.load();
-            } catch (err) {
-                console.error("ffmpeg load failed", err);
-                showToast("ffmpeg failed to load (conversion unavailable)");
-            } finally {
-                ffmpegLoadingRef.current = false;
+        try {
+            if (!ffmpegRef.current) {
+                ffmpegRef.current = new FFmpeg();
             }
+            // load only once
+            if (!ffmpegRef.current.loaded && !ffmpegLoadingRef.current) {
+                ffmpegLoadingRef.current = true;
+                try {
+                    await ffmpegRef.current.load({
+                        // These paths assume you copied core files to /assets/ffmpeg
+                        coreURL: "/assets/ffmpeg/ffmpeg-core.js",
+                        wasmURL: "/assets/ffmpeg/ffmpeg-core.wasm",
+                        workerURL: "/assets/ffmpeg/ffmpeg-core.worker.js",
+                    });
+                } catch (err) {
+                    console.error("ffmpeg load failed", err);
+                    showToast("ffmpeg failed to load (conversion unavailable)");
+                } finally {
+                    ffmpegLoadingRef.current = false;
+                }
+            }
+        } catch (e) {
+            console.error("ensureFfmpeg error", e);
         }
     };
 
@@ -656,19 +661,18 @@ const Animation = () => {
         }
     };
 
-    // ----------------- Download helpers -----------------
+    // ----------------- Download helpers (MP4/GIF fixes) -----------------
 
     const downloadWebM = (rec) => {
-    if (!rec) return;
-    const a = document.createElement("a");
-    a.href = rec.data;
-    a.download = `${rec.name}.webm`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setShowFormatMenuId(null);
-};
-
+        if (!rec) return;
+        const a = document.createElement("a");
+        a.href = rec.data;
+        a.download = `${rec.name}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setShowFormatMenuId(null);
+    };
 
     const downloadJSON = (rec) => {
         if (!rec) return;
@@ -676,7 +680,6 @@ const Animation = () => {
         const json = {
             id: rec.id,
             name: rec.name,
-            // If you store animation config per recording, include it as rec.config
             // animationConfig: rec.config || {}
         };
         const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
@@ -691,105 +694,101 @@ const Animation = () => {
     };
 
     const downloadAsMP4 = async (rec) => {
-    if (!rec) return;
-    setIsConverting(true);
-    showToast("Converting to MP4...");
+        if (!rec) return;
+        setIsConverting(true);
+        showToast("Converting to MP4...");
 
-    try {
-        await ensureFfmpeg();
-        const ffmpeg = ffmpegRef.current;
+        try {
+            await ensureFfmpeg();
+            const ffmpeg = ffmpegRef.current;
 
-        // write webm input
-        await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+            // write webm input (rec.data is a dataURL)
+            await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
 
-        // execute ffmpeg
-        await ffmpeg.exec([
-            "-i", "input.webm",
-            "-c:v", "libx264",
-            "-preset", "veryfast",
-            "-crf", "23",
-            "output.mp4",
-        ]);
+            // execute conversion using new API (run)
+            await ffmpeg.run(
+                "-i", "input.webm",
+                "-c:v", "libx264",
+                "-preset", "veryfast",
+                "-crf", "23",
+                "output.mp4"
+            );
 
-        // read mp4 output
-        const data = await ffmpeg.readFile("output.mp4");
-        const blob = new Blob([data], { type: "video/mp4" });
+            // read output
+            const data = await ffmpeg.readFile("output.mp4");
+            const blob = new Blob([data], { type: "video/mp4" });
 
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${rec.name}.mp4`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${rec.name}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
 
-    } catch (err) {
-        console.error("MP4 conversion error", err);
-        showToast("MP4 conversion failed");
-    } finally {
-        setIsConverting(false);
-        setShowFormatMenuId(null);
+        } catch (err) {
+            console.error("MP4 conversion error", err);
+            showToast("MP4 conversion failed");
+        } finally {
+            setIsConverting(false);
+            setShowFormatMenuId(null);
 
-        // cleanup
-        try { await ffmpegRef.current.deleteFile("input.webm"); } catch {}
-        try { await ffmpegRef.current.deleteFile("output.mp4"); } catch {}
-    }
-    console.log("FFmpeg loaded?", ffmpeg.isLoaded());
-
-};
-
+            // cleanup if available
+            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("output.mp4"); } catch (e) {}
+        }
+    };
 
     const downloadAsGIF = async (rec) => {
-    if (!rec) return;
-    setIsConverting(true);
-    showToast("Converting to GIF...");
+        if (!rec) return;
+        setIsConverting(true);
+        showToast("Converting to GIF...");
 
-    try {
-        await ensureFfmpeg();
-        const ffmpeg = ffmpegRef.current;
+        try {
+            await ensureFfmpeg();
+            const ffmpeg = ffmpegRef.current;
 
-        await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+            await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
 
-        // palette generation
-        await ffmpeg.exec([
-            "-i", "input.webm",
-            "-vf", "fps=12,scale=480:-1:flags=lanczos,palettegen",
-            "palette.png",
-        ]);
+            // palette generation
+            await ffmpeg.run(
+                "-i", "input.webm",
+                "-vf", "fps=12,scale=480:-1:flags=lanczos,palettegen",
+                "palette.png"
+            );
 
-        // gif generation
-        await ffmpeg.exec([
-            "-i", "input.webm",
-            "-i", "palette.png",
-            "-filter_complex",
-            "fps=12,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse",
-            "output.gif",
-        ]);
+            // gif generation using palette
+            await ffmpeg.run(
+                "-i", "input.webm",
+                "-i", "palette.png",
+                "-filter_complex",
+                "fps=12,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse",
+                "output.gif"
+            );
 
-        const data = await ffmpeg.readFile("output.gif");
-        const blob = new Blob([data], { type: "image/gif" });
+            const data = await ffmpeg.readFile("output.gif");
+            const blob = new Blob([data], { type: "image/gif" });
 
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${rec.name}.gif`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${rec.name}.gif`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
 
-    } catch (err) {
-        console.error("GIF conversion error", err);
-        showToast("GIF conversion failed");
-    } finally {
-        setIsConverting(false);
-        setShowFormatMenuId(null);
+        } catch (err) {
+            console.error("GIF conversion error", err);
+            showToast("GIF conversion failed");
+        } finally {
+            setIsConverting(false);
+            setShowFormatMenuId(null);
 
-        try { await ffmpegRef.current.deleteFile("input.webm"); } catch {}
-        try { await ffmpegRef.current.deleteFile("palette.png"); } catch {}
-        try { await ffmpegRef.current.deleteFile("output.gif"); } catch {}
-    }
-};
-
+            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("palette.png"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("output.gif"); } catch (e) {}
+        }
+    };
 
     // ----------------- end helpers -----------------
 
@@ -1082,4 +1081,3 @@ const Animation = () => {
 };
 
 export default Animation;
-
