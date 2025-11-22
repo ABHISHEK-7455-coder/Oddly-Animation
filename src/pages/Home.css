@@ -29,12 +29,12 @@
 }
 
 .anim-cards {
-  width: 80%;
+  width: 87%;
   margin: auto;
   display: flex;
   overflow: scroll;
   scrollbar-width: none;
-  gap: 50px;
+  gap: 40px;
   padding: 4px;
 }
 
