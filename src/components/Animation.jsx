@@ -673,6 +673,22 @@ const Animation = () => {
 
                     <div className="dropdown-content dropdown-controls">
                         <div className="size-color">
+                            <div className="speed">
+                                <label>Speed : </label>
+                                <div className="input">
+                                    <input
+                                        className="range"
+                                        type="range"
+                                        min="0.1"
+                                        max="3"
+                                        step="0.1"
+                                        value={speed}
+                                        onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                                    />
+                                    {speed.toFixed(1)}x
+                                </div>
+                            </div>
+
                             <div className="size">
                                 <label>Size : </label>
                                 <div className="input">
