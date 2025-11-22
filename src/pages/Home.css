@@ -28,6 +28,16 @@
   color: white;
 }
 
+.anim-cards {
+  width: 87%;
+  margin: 50px auto 10px auto;
+  display: flex;
+  overflow: scroll;
+  scrollbar-width: none;
+  padding: 4px;
+  gap: 40px;
+}
+
 .bubbles img {
   width: 50px;
   /* height: 50px; */
