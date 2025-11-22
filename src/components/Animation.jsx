@@ -363,6 +363,13 @@
 
 import { animationData } from "../data/animationConfig";
 import { useState, useEffect, useRef } from "react";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
+// import { storage } from "../firebase"; // adjust path if needed
+
+// --- FFmpeg (new SDK)
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
+
 import "./Animation.css";
 
 const Animation = () => {
@@ -384,21 +391,72 @@ const Animation = () => {
     const [editingId, setEditingId] = useState(null);
     const [newName, setNewName] = useState("");
 
+    // --- NEW: states for download format menu ---
+    const [showFormatMenuId, setShowFormatMenuId] = useState(null); // id of recording showing menu
+    const [selectedRec, setSelectedRec] = useState(null);
+    const [isConverting, setIsConverting] = useState(false);
+
     const canvasRef = useRef(null);
     const recorderRef = useRef(null);
     const chunksRef = useRef([]);
     const animationRef = useRef(null);
     const audioRef = useRef(null);
 
+    // --- ffmpeg instance ref ---
+    const ffmpegRef = useRef(null);
+    const ffmpegLoadingRef = useRef(false);
+
+    // Browser flags
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     const isSamsung = /SamsungBrowser/i.test(navigator.userAgent);
     const isChrome = /Chrome/i.test(navigator.userAgent);
+
+    // Simple toast fallback (replace with your toast if you have one)
+    const showToast = (msg) => {
+        try {
+            // prefer non-blocking notification if available
+            // Replace this with your toast component call if you have one
+            alert(msg);
+        } catch {
+            console.log(msg);
+        }
+    };
 
     // 🌀 Load recordings on mount
     useEffect(() => {
         const saved = JSON.parse(localStorage.getItem("savedRecordings")) || [];
         setRecordingsList(saved);
     }, []);
+
+    // ---------- FFmpeg loader (NEW SDK) ----------
+    // NOTE: For Vite you must copy ffmpeg core files to /assets/ffmpeg via vite-plugin-static-copy.
+    // Example coreURL: "/assets/ffmpeg/ffmpeg-core.js"
+    const ensureFfmpeg = async () => {
+        try {
+            if (!ffmpegRef.current) {
+                ffmpegRef.current = new FFmpeg();
+            }
+            // load only once
+            if (!ffmpegRef.current.loaded && !ffmpegLoadingRef.current) {
+                ffmpegLoadingRef.current = true;
+                try {
+                    await ffmpegRef.current.load({
+                        // These paths assume you copied core files to /assets/ffmpeg
+                        coreURL: "/assets/ffmpeg/ffmpeg-core.js",
+                        wasmURL: "/assets/ffmpeg/ffmpeg-core.wasm",
+                        workerURL: "/assets/ffmpeg/ffmpeg-core.worker.js",
+                    });
+                } catch (err) {
+                    console.error("ffmpeg load failed", err);
+                    showToast("ffmpeg failed to load (conversion unavailable)");
+                } finally {
+                    ffmpegLoadingRef.current = false;
+                }
+            }
+        } catch (e) {
+            console.error("ensureFfmpeg error", e);
+        }
+    };
 
     // 🎬 Start recording
     const startRecording = async () => {
@@ -544,14 +602,195 @@ const Animation = () => {
     };
 
     const saveNewName = (id) => {
-        const updated = savedList.map(item =>
+        const updated = recordingsList.map(item =>
             item.id === id ? { ...item, name: newName } : item
         );
 
-        setSavedList(updated);
-        localStorage.setItem("savedAnimations", JSON.stringify(updated));
+        setRecordingsList(updated);
+        localStorage.setItem("savedRecordings", JSON.stringify(updated));
         setEditingId(null);
     };
+
+    const copyToClipboard = async (text) => {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text);
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999px";
+            textArea.style.top = "-999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            return new Promise((resolve, reject) => {
+                if (document.execCommand("copy")) {
+                    resolve();
+                } else {
+                    reject();
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+    };
+
+    const uploadAndShareById = async (id) => {
+        try {
+            const rec = recordingsList.find(r => r.id === id);
+            if (!rec) {
+                console.error('uploadAndShareById: record not found for id', id);
+                showToast('Upload failed: record not found');
+                return;
+            }
+
+            console.log('Uploading record:', rec);
+            showToast('Uploading...');
+
+            const uid = crypto.randomUUID();
+            const fileRef = ref(storage, `recordings/${uid}.webm`);
+            await uploadString(fileRef, rec.data, 'data_url');
+            const url = await getDownloadURL(fileRef);
+
+            await copyToClipboard(url);
+            showToast('Share link copied!');
+            console.log('Share URL:', url);
+        } catch (err) {
+            console.error('uploadAndShareById error', err);
+            showToast('Upload failed!');
+        }
+    };
+
+    // ----------------- Download helpers (MP4/GIF fixes) -----------------
+
+    const downloadWebM = (rec) => {
+        if (!rec) return;
+        const a = document.createElement("a");
+        a.href = rec.data;
+        a.download = `${rec.name}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setShowFormatMenuId(null);
+    };
+
+    const downloadJSON = (rec) => {
+        if (!rec) return;
+        // If your recordings include config, put it here; otherwise save metadata only
+        const json = {
+            id: rec.id,
+            name: rec.name,
+            // animationConfig: rec.config || {}
+        };
+        const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${rec.name}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setShowFormatMenuId(null);
+    };
+
+    const downloadAsMP4 = async (rec) => {
+        if (!rec) return;
+        setIsConverting(true);
+        showToast("Converting to MP4...");
+
+        try {
+            await ensureFfmpeg();
+            const ffmpeg = ffmpegRef.current;
+
+            // write webm input (rec.data is a dataURL)
+            await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+
+            // execute conversion using new API (run)
+            await ffmpeg.run(
+                "-i", "input.webm",
+                "-c:v", "libx264",
+                "-preset", "veryfast",
+                "-crf", "23",
+                "output.mp4"
+            );
+
+            // read output
+            const data = await ffmpeg.readFile("output.mp4");
+            const blob = new Blob([data], { type: "video/mp4" });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${rec.name}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+        } catch (err) {
+            console.error("MP4 conversion error", err);
+            showToast("MP4 conversion failed");
+        } finally {
+            setIsConverting(false);
+            setShowFormatMenuId(null);
+
+            // cleanup if available
+            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("output.mp4"); } catch (e) {}
+        }
+    };
+
+    const downloadAsGIF = async (rec) => {
+        if (!rec) return;
+        setIsConverting(true);
+        showToast("Converting to GIF...");
+
+        try {
+            await ensureFfmpeg();
+            const ffmpeg = ffmpegRef.current;
+
+            await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+
+            // palette generation
+            await ffmpeg.run(
+                "-i", "input.webm",
+                "-vf", "fps=12,scale=480:-1:flags=lanczos,palettegen",
+                "palette.png"
+            );
+
+            // gif generation using palette
+            await ffmpeg.run(
+                "-i", "input.webm",
+                "-i", "palette.png",
+                "-filter_complex",
+                "fps=12,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse",
+                "output.gif"
+            );
+
+            const data = await ffmpeg.readFile("output.gif");
+            const blob = new Blob([data], { type: "image/gif" });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${rec.name}.gif`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+        } catch (err) {
+            console.error("GIF conversion error", err);
+            showToast("GIF conversion failed");
+        } finally {
+            setIsConverting(false);
+            setShowFormatMenuId(null);
+
+            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("palette.png"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("output.gif"); } catch (e) {}
+        }
+    };
+
+    // ----------------- end helpers -----------------
 
     return (
         <div className="main-container">
@@ -704,6 +943,10 @@ const Animation = () => {
                                     {hueShift}°
                                 </div>
                             </div>
+                            {/* SHARE */}
+                            {/* <button className="share-btn" onClick={() => uploadAndShare(rec)}>
+                                <span className="material-symbols-outlined">share</span>
+                            </button> */}
                         </div>
 
                         <div className="record-saved">
@@ -730,108 +973,103 @@ const Animation = () => {
                                         {recordingsList.map((rec) => (
                                             <div key={rec.id} className="recording-item">
 
-                                                {/* If editing this item */}
-                                                {editingId === rec.id ? (
-                                                    <>
-                                                        <input
-                                                            type="text"
-                                                            className="rename-input"
-                                                            value={newName}
-                                                            onChange={(e) => setNewName(e.target.value)}
-                                                        />
+                                                {/* PLAY */}
+                                                <button className="play-btn" onClick={() => playSavedRecording(rec.data)}>
+                                                    <span className="material-symbols-outlined">play_arrow</span>
+                                                    <span>{rec.name}</span>
+                                                </button>
 
+                                                {/* DOWNLOAD (opens format menu) */}
+                                                <button
+                                                    className="download-btn"
+                                                    onClick={() => {
+                                                        setSelectedRec(rec);
+                                                        // toggle inline menu for this record
+                                                        setShowFormatMenuId(prev => (prev === rec.id ? null : rec.id));
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined">download</span>
+                                                </button>
+
+                                                {/* Inline format menu (minimal, placed next to buttons) */}
+                                                {showFormatMenuId === rec.id && (
+                                                    <div className="format-menu-inline">
                                                         <button
-                                                            className="save-btn"
-                                                            onClick={() => {
-                                                                const updated = recordingsList.map((r) =>
-                                                                    r.id === rec.id ? { ...r, name: newName } : r
-                                                                );
-
-                                                                setRecordingsList(updated);
-                                                                localStorage.setItem(
-                                                                    "savedRecordings",
-                                                                    JSON.stringify(updated)
-                                                                );
-
-                                                                setEditingId(null);
-                                                                setNewName("");
-                                                            }}
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadWebM(rec)}
                                                         >
-                                                            <span className="material-symbols-outlined">check</span>
+                                                            .webm
                                                         </button>
-
                                                         <button
-                                                            className="cancel-btn"
-                                                            onClick={() => {
-                                                                setEditingId(null);
-                                                                setNewName("");
-                                                            }}
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadAsMP4(rec)}
                                                         >
-                                                            <span className="material-symbols-outlined">close</span>
+                                                            .mp4
                                                         </button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        {/* Play Button */}
                                                         <button
-                                                            className="play-btn"
-                                                            onClick={() => playSavedRecording(rec.data)}
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadAsGIF(rec)}
                                                         >
-                                                            {/* <span className="material-symbols-outlined">play_arrow</span> */}
-                                                            <span>{rec.name}</span>
+                                                            .gif
                                                         </button>
-
-                                                        {/* Download */}
                                                         <button
-                                                            className="download-btn"
-                                                            onClick={() => {
-                                                                const a = document.createElement("a");
-                                                                a.href = rec.data;
-                                                                a.download = `${rec.name}.webm`;
-                                                                document.body.appendChild(a);
-                                                                a.click();
-                                                                document.body.removeChild(a);
-                                                            }}
+                                                            disabled={isConverting}
+                                                            onClick={() => downloadJSON(rec)}
                                                         >
-                                                            <span className="material-symbols-outlined">download</span>
+                                                            .json
                                                         </button>
-
-                                                        {/* Edit */}
                                                         <button
-                                                            className="edit-btn"
-                                                            onClick={() => {
-                                                                setEditingId(rec.id);
-                                                                setNewName(rec.name);
-                                                            }}
+                                                            className="format-close"
+                                                            onClick={() => setShowFormatMenuId(null)}
                                                         >
-                                                            <span className="material-symbols-outlined">edit</span>
+                                                            ✕
                                                         </button>
-
-                                                        {/* Delete */}
-                                                        <button
-                                                            className="delete-btn"
-                                                            onClick={() => {
-                                                                if (window.confirm(`Delete "${rec.name}"?`)) {
-                                                                    const updated = recordingsList.filter(
-                                                                        (r) => r.id !== rec.id
-                                                                    );
-                                                                    setRecordingsList(updated);
-                                                                    localStorage.setItem(
-                                                                        "savedRecordings",
-                                                                        JSON.stringify(updated)
-                                                                    );
-                                                                }
-                                                            }}
-                                                        >
-                                                            <span className="material-symbols-outlined">delete</span>
-                                                        </button>
-                                                    </>
+                                                    </div>
                                                 )}
+
+                                                <button className="share-btn" onClick={() => uploadAndShareById(rec.id)}>
+                                                    <span className="material-symbols-outlined">share</span>
+                                                </button>
+
+                                                {/* EDIT NAME */}
+                                                <button
+                                                    className="edit-btn"
+                                                    onClick={() => {
+                                                        const newName = prompt("Rename recording:", rec.name);
+                                                        if (!newName) return;
+
+                                                        const updated = recordingsList.map((r) =>
+                                                            r.id === rec.id ? { ...r, name: newName } : r
+                                                        );
+
+                                                        setRecordingsList(updated);
+                                                        localStorage.setItem("savedRecordings", JSON.stringify(updated));
+                                                        showToast("Name updated");
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined">edit</span>
+                                                </button>
+
+                                                {/* DELETE */}
+                                                <button
+                                                    className="delete-btn"
+                                                    onClick={() => {
+                                                        if (window.confirm(`Delete "${rec.name}"?`)) {
+                                                            const updated = recordingsList.filter((r) => r.id !== rec.id);
+                                                            setRecordingsList(updated);
+                                                            localStorage.setItem("savedRecordings", JSON.stringify(updated));
+                                                            showToast("Recording deleted");
+                                                        }
+                                                    }}
+                                                >
+                                                    <span className="material-symbols-outlined">delete</span>
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 </details>
                             )}
+
 
                         </div>
                     </div>
