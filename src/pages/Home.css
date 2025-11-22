@@ -30,7 +30,7 @@
 
 .anim-cards {
   width: 87%;
-  margin: auto;
+  margin: 50px auto 10px auto;
   display: flex;
   overflow: scroll;
   scrollbar-width: none;
