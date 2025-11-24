@@ -1,16 +1,27 @@
-import React, { useState, } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Animation from "../components/Animation";
 import { animationData } from "../data/animationConfig.js"; // 50 animations ka data
+import { useLocation } from "react-router-dom";
 import "./Gallery.css";
 
 const Gallery = () => {
-    const [selectedAnimation, setSelectedAnimation] = useState("fractalLaserGrid");
+    const [selectedAnimation, setSelectedAnimation] = useState(0);
     const [color, setColor] = useState("#ef8bf4");
     const [size, setSize] = useState(50);
     const [speed, setSpeed] = useState(0.01);
 
     const navigate = useNavigate();
+
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const animIdFromURL = queryParams.get("anim");
+
+    useEffect(() => {
+    if (animIdFromURL) {
+        setSelectedAnimation(parseInt(animIdFromURL));
+    }
+}, [animIdFromURL]);
 
     return (
         <div className="gallery-container">

@@ -364,7 +364,7 @@
 import { animationData } from "../data/animationConfig";
 import { useState, useEffect, useRef } from "react";
 import { ref, uploadString, getDownloadURL } from "firebase/storage";
-// import { storage } from "../firebase"; // adjust path if needed
+import { storage } from "../firebase"; // adjust path if needed
 
 // --- FFmpeg (new SDK)
 import { FFmpeg } from "@ffmpeg/ffmpeg";
@@ -392,9 +392,12 @@ const Animation = () => {
     const [newName, setNewName] = useState("");
 
     // --- NEW: states for download format menu ---
-    const [showFormatMenuId, setShowFormatMenuId] = useState(null); // id of recording showing menu
+    const [showFormatMenuId, setShowFormatMenuId] = useState(null); // id of recording showing format menu
     const [selectedRec, setSelectedRec] = useState(null);
     const [isConverting, setIsConverting] = useState(false);
+
+    // --- NEW: share menu state (inline) ---
+    const [showShareMenuId, setShowShareMenuId] = useState(null);
 
     const canvasRef = useRef(null);
     const recorderRef = useRef(null);
@@ -530,6 +533,20 @@ const Animation = () => {
             reader.readAsDataURL(blob);
         });
 
+    // 🧩 Convert DataURL (base64) to Blob
+    const dataURLToBlob = (dataURL) => {
+        // dataURL example: "data:video/webm;base64,AAAA..."
+        const arr = dataURL.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
+    };
+
     // ▶️ Play Saved Recording
     const playSavedRecording = (videoSrc) => {
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
@@ -635,6 +652,41 @@ const Animation = () => {
         }
     };
 
+    // ----------------- Upload & Share (Firebase + Direct share) -----------------
+
+    async function getActualBlob(localUrl) {
+        try {
+            const res = await fetch(localUrl);
+            const blob = await res.blob();
+            return blob;
+        } catch (e) {
+            console.error("Blob fetch error:", e);
+            return null;
+        }
+    }
+
+
+    // Upload base64 dataURL to Firebase Storage and return URL
+    const uploadRecordingDataURL = async (rec) => {
+        try {
+            if (!rec) throw new Error("record not found");
+            // ensure `storage` import exists (uncomment at top if needed)
+            if (typeof storage === "undefined") {
+                console.warn("Firebase 'storage' is not defined. Make sure to import it from your firebase config.");
+                throw new Error("Firebase storage not available");
+            }
+            const uid = crypto.randomUUID();
+            const fileRef = ref(storage, `recordings/${uid}.webm`);
+            await uploadString(fileRef, rec.data, 'data_url');
+            const url = await getDownloadURL(fileRef);
+            return url;
+        } catch (err) {
+            console.error("uploadRecordingDataURL error", err);
+            throw err;
+        }
+    };
+
+    // Existing function (kept) but improved error handling & toast
     const uploadAndShareById = async (id) => {
         try {
             const rec = recordingsList.find(r => r.id === id);
@@ -647,10 +699,7 @@ const Animation = () => {
             console.log('Uploading record:', rec);
             showToast('Uploading...');
 
-            const uid = crypto.randomUUID();
-            const fileRef = ref(storage, `recordings/${uid}.webm`);
-            await uploadString(fileRef, rec.data, 'data_url');
-            const url = await getDownloadURL(fileRef);
+            const url = await uploadRecordingDataURL(rec);
 
             await copyToClipboard(url);
             showToast('Share link copied!');
@@ -658,6 +707,58 @@ const Animation = () => {
         } catch (err) {
             console.error('uploadAndShareById error', err);
             showToast('Upload failed!');
+        } finally {
+            setShowShareMenuId(null);
+            setShowFormatMenuId(null);
+        }
+    };
+
+    // Direct share (Web Share API) — share video file directly
+    const shareWebmDirectById = async (id) => {
+        try {
+            const rec = recordingsList.find(r => r.id === id);
+            if (!rec) {
+                showToast("Record not found");
+                return;
+            }
+
+            const blob = dataURLToBlob(rec.data);
+            const file = new File([blob], `${rec.name}.webm`, { type: blob.type });
+
+            // Feature-detect sharing files
+            const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+
+            if (canShareFiles) {
+                try {
+                    await navigator.share({
+                        title: rec.name,
+                        text: "Check out this animation",
+                        files: [file],
+                    });
+                    showToast("Shared successfully!");
+                } catch (err) {
+                    console.log("share cancelled or failed", err);
+                    showToast("Sharing cancelled or failed");
+                }
+            } else {
+                // Fallback: offer download + optional copy link (upload to firebase if user wants link)
+                // We'll trigger a download so user can manually share the file from their device
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${rec.name}.webm`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast("Download started (sharing not supported on this device).");
+            }
+        } catch (err) {
+            console.error("shareWebmDirectById error", err);
+            showToast("Direct share failed");
+        } finally {
+            setShowShareMenuId(null);
         }
     };
 
@@ -734,8 +835,8 @@ const Animation = () => {
             setShowFormatMenuId(null);
 
             // cleanup if available
-            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) {}
-            try { await ffmpegRef.current.deleteFile("output.mp4"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) { }
+            try { await ffmpegRef.current.deleteFile("output.mp4"); } catch (e) { }
         }
     };
 
@@ -784,9 +885,9 @@ const Animation = () => {
             setIsConverting(false);
             setShowFormatMenuId(null);
 
-            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) {}
-            try { await ffmpegRef.current.deleteFile("palette.png"); } catch (e) {}
-            try { await ffmpegRef.current.deleteFile("output.gif"); } catch (e) {}
+            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) { }
+            try { await ffmpegRef.current.deleteFile("palette.png"); } catch (e) { }
+            try { await ffmpegRef.current.deleteFile("output.gif"); } catch (e) { }
         }
     };
 
@@ -943,7 +1044,7 @@ const Animation = () => {
                                     {hueShift}°
                                 </div>
                             </div>
-                            {/* SHARE */}
+                            {/* SHARE - kept visually same, now toggles inline share menu */}
                             {/* <button className="share-btn" onClick={() => uploadAndShare(rec)}>
                                 <span className="material-symbols-outlined">share</span>
                             </button> */}
@@ -1027,9 +1128,39 @@ const Animation = () => {
                                                     </div>
                                                 )}
 
-                                                <button className="share-btn" onClick={() => uploadAndShareById(rec.id)}>
-                                                    <span className="material-symbols-outlined">share</span>
-                                                </button>
+                                                {/* SHARE (now toggles an inline share menu with two options) */}
+                                                <div style={{ display: "inline-block", position: "relative" }}>
+                                                    <button
+                                                        className="share-btn"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedRec(rec);
+                                                            setShowShareMenuId(prev => (prev === rec.id ? null : rec.id));
+                                                            // close other menus
+                                                            setShowFormatMenuId(null);
+                                                        }}
+                                                    >
+                                                        <span className="material-symbols-outlined">share</span>
+                                                    </button>
+
+                                                    {showShareMenuId === rec.id && (
+                                                        <div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
+                                                            <button
+                                                                onClick={() => shareWebmDirectById(rec.id)}
+                                                                disabled={isConverting}
+                                                            >
+                                                                Share Video
+                                                            </button>
+                                                            <button
+                                                                onClick={() => uploadAndShareById(rec.id)}
+                                                                disabled={isConverting}
+                                                            >
+                                                                Share Link (Upload)
+                                                            </button>
+                                                            <button className="format-close" onClick={() => setShowShareMenuId(null)}>✕</button>
+                                                        </div>
+                                                    )}
+                                                </div>
 
                                                 {/* EDIT NAME */}
                                                 <button
