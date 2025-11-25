@@ -283,6 +283,21 @@
     border: none;
 }
 
+.share-menu-inline {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+}
+
+.share-btn {
+    background: none;
+    border: none;
+}
+
+.format-close {
+    border: none;
+}
+
 /* Animation Buttons */
 .animation-btn {
     width: 95%;

@@ -1145,13 +1145,13 @@ const Animation = () => {
 
                                                     {showShareMenuId === rec.id && (
                                                         <div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
-                                                            <button
+                                                            <button className="share-btn" 
                                                                 onClick={() => shareWebmDirectById(rec.id)}
                                                                 disabled={isConverting}
                                                             >
                                                                 Share Video
                                                             </button>
-                                                            <button
+                                                            <button className="share-btn"
                                                                 onClick={() => uploadAndShareById(rec.id)}
                                                                 disabled={isConverting}
                                                             >
