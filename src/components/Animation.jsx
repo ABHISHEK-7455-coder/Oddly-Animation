@@ -1151,12 +1151,12 @@ const Animation = () => {
                                                             >
                                                                 Share Video
                                                             </button>
-                                                            <button className="share-btn"
+                                                            {/* <button className="share-btn"
                                                                 onClick={() => uploadAndShareById(rec.id)}
                                                                 disabled={isConverting}
                                                             >
                                                                 Share Link (Upload)
-                                                            </button>
+                                                            </button> */}
                                                             <button className="format-close" onClick={() => setShowShareMenuId(null)}>✕</button>
                                                         </div>
                                                     )}
