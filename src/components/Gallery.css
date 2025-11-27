@@ -3,13 +3,13 @@
     text-align: center;
     padding: 4px;
     width: 100%;
-    margin-top: 0px;
-    display: flex;
+    margin: auto;
+    /* display: flex; */
     justify-content: space-around;
     background-color: #1A1A1A;
     height: auto;
     color: white;
-   
+   /* flex-direction: column; */
 }
 
 .gallery {
