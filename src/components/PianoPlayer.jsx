@@ -1,16 +1,33 @@
 import React, { useState, useRef, useEffect } from "react";
 
 const NOTES = [
-    { key: "C", freq: 901.63 },
-    { key: "D", freq: 293.66 },
-    { key: "E", freq: 329.63 },
-    { key: "F", freq: 349.23 },
-    { key: "G", freq: 392.00 },
-    { key: "A", freq: 440.00 },
-    { key: "B", freq: 493.88 },
-    { key: "A2", freq: 223.25 },
-    { key: "B2", freq: 723.25 },
-    { key: "G2", freq: 823.25 },
+    { key: "C3", freq: 130.81 },
+  { key: "C#3", freq: 138.59 },
+  { key: "D3", freq: 146.83 },
+  { key: "D#3", freq: 155.56 },
+  { key: "E3", freq: 164.81 },
+  { key: "F3", freq: 174.61 },
+  { key: "F#3", freq: 185.00 },
+  { key: "G3", freq: 196.00 },
+  { key: "G#3", freq: 207.65 },
+  { key: "A3", freq: 220.00 },
+  { key: "A#3", freq: 233.08 },
+  { key: "B3", freq: 246.94 },
+
+  { key: "C4", freq: 261.63 },
+  { key: "C#4", freq: 277.18 },
+  { key: "D4", freq: 293.66 },
+  { key: "D#4", freq: 311.13 },
+  { key: "E4", freq: 328.63 },
+  { key: "F4", freq: 349.23 },
+  { key: "F#4", freq: 369.99 },
+  { key: "G4", freq: 392.00 },
+  { key: "G#4", freq: 415.30 },
+  { key: "A4", freq: 440.00 },
+  { key: "A#4", freq: 466.16 },
+  { key: "B4", freq: 493.88 },
+
+  { key: "C5", freq: 523.25 },
 ];
 
 export default function PianoPlayer() {
