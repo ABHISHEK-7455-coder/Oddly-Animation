@@ -21,7 +21,7 @@ const NOTES = [
   { key: "E4", freq: 328.63 },
   { key: "F4", freq: 349.23 },
   { key: "F#4", freq: 369.99 },
-  { key: "G4", freq: 392.00 },
+  { key: "G4", freq: 372.00 },
   { key: "G#4", freq: 415.30 },
   { key: "A4", freq: 440.00 },
   { key: "A#4", freq: 466.16 },
