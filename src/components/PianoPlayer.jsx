@@ -282,29 +282,46 @@ const NOTES = [
     { key: "E3", file: "/piano/44.1khz16bit/A5v16.wav" },
     { key: "F3", file: "/piano/44.1khz16bit/A6v16.wav" },
 
-    { key: "F#3", file: "/piano/44.1khz16bit/B1v16.wav" },
-    { key: "G3", file: "/piano/44.1khz16bit/B1v16.wav" },
-    { key: "G#3", file: "/piano/44.1khz16bit/B1v16.wav" },
-    { key: "A3", file: "/piano/44.1khz16bit/B1v16.wav" },
-    { key: "A#3", file: "/piano/44.1khz16bit/B1v16.wav" },
-    { key: "B3", file: "/piano/44.1khz16bit/B1v16.wav" },
+    { key: "C4", file: "/piano/44.1khz16bit/C1v16.wav" },
+    { key: "C#4", file: "/piano/44.1khz16bit/C2v16.wav" },
+    { key: "D4", file: "/piano/44.1khz16bit/C3v16.wav" },
+    { key: "D#4", file: "/piano/44.1khz16bit/C4v16.wav" },
+    { key: "E4", file: "/piano/44.1khz16bit/C5v16.wav" },
+    { key: "F4", file: "/piano/44.1khz16bit/C6v16.wav" },
 
-    { key: "C4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "C#4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "D4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "D#4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "E4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "F4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    
-    { key: "F#4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "G4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "G#4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "A4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "A#4", file: "/piano/44.1khz16bit/A1v16.wav" },
-    { key: "B4", file: "/piano/44.1khz16bit/A1v16.wav" },
+    { key: "F#4", file: "/piano/44.1khz16bit/A1v9.wav" },
+    { key: "G4", file: "/piano/44.1khz16bit/D#2v1.wav" },
+    { key: "G#4", file: "/piano/44.1khz16bit/D#3v16.wav" },
+    { key: "A4", file: "/piano/44.1khz16bit/D#4v16.wav" },
+    { key: "A#4", file: "/piano/44.1khz16bit/D#5v16.wav" },
+    { key: "B4", file: "/piano/44.1khz16bit/D#6v16.wav" },
 
-    { key: "C5", file: "/piano/44.1khz16bit/A1v16.wav" },
+    { key: "F#3", file: "/piano/44.1khz16bit/F#1v16.wav" },
+    { key: "G3", file: "/piano/44.1khz16bit/F#2v16.wav" },
+    { key: "G#3", file: "/piano/44.1khz16bit/F#3v16.wav" },
+    { key: "A3", file: "/piano/44.1khz16bit/F#4v16.wav" },
+    { key: "A#3", file: "/piano/44.1khz16bit/F#5v16.wav" },
+    { key: "B3", file: "/piano/44.1khz16bit/F#6v16.wav" },
+
+    { key: "C5", file: "/piano/44.1khz16bit/harmLAO.wav" },
 ];
+
+// KEYBOARD → NOTE MAP
+const KEY_MAP = {
+    a: "C3",
+    w: "C#4",
+    s: "D4",
+    e: "D#4",
+    d: "E4",
+    f: "F4",
+    t: "F#4",
+    g: "G4",
+    y: "G#4",
+    h: "A4",
+    u: "A#4",
+    j: "B4",
+    k: "C5",
+};
 
 export default function PianoPlayer() {
     const audioCtx = useRef(null);
@@ -313,23 +330,22 @@ export default function PianoPlayer() {
     const chunks = useRef([]);
 
     const [isRecording, setIsRecording] = useState(false);
-    const [savedAudio, setSavedAudio] = useState(null);
     const [audioList, setAudioList] = useState([]);
 
-    // LOAD FROM LOCAL STORAGE
+    // LOAD SAVED AUDIO
     useEffect(() => {
         const stored = JSON.parse(localStorage.getItem("piano_audios")) || [];
         setAudioList(stored);
     }, []);
 
-    // SAVE TO LOCAL STORAGE
+    // SAVE AUDIO
     const saveToLocalStorage = (audioObj) => {
         const updated = [...audioList, audioObj];
         setAudioList(updated);
         localStorage.setItem("piano_audios", JSON.stringify(updated));
     };
 
-    // PLAY REAL AUDIO SAMPLE
+    // REAL PIANO NOTE PLAYER
     const playNote = (file) => {
         if (!audioCtx.current) {
             audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -354,10 +370,22 @@ export default function PianoPlayer() {
             });
     };
 
+    // 🎹 KEYBOARD EVENT SUPPORT
+    useEffect(() => {
+        const handleKey = (e) => {
+            const noteName = KEY_MAP[e.key.toLowerCase()];
+            if (!noteName) return;
+
+            const noteObj = NOTES.find((n) => n.key === noteName);
+            if (noteObj) playNote(noteObj.file);
+        };
+
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, []);
+
     // START RECORDING
     const startRecording = () => {
-        if (!dest.current) return;
-
         recorder.current = new MediaRecorder(dest.current.stream);
         chunks.current = [];
 
@@ -373,7 +401,6 @@ export default function PianoPlayer() {
                 name: "Piano_" + Date.now(),
             };
 
-            setSavedAudio(audioObj);
             saveToLocalStorage(audioObj);
         };
 
@@ -383,9 +410,7 @@ export default function PianoPlayer() {
 
     // STOP RECORDING
     const stopRecording = () => {
-        if (recorder.current && recorder.current.state !== "inactive") {
-            recorder.current.stop();
-        }
+        if (recorder.current.state !== "inactive") recorder.current.stop();
         setIsRecording(false);
     };
 
@@ -406,25 +431,23 @@ export default function PianoPlayer() {
 
     return (
         <div style={{ textAlign: "center", padding: "20px" }}>
-            <h2 style={{ color: "#fff", marginBottom: "15px" }}>Real Piano</h2>
+            <h2 style={{ color: "#fff" }}>Real Piano + Keyboard Control</h2>
 
-            {/* KEYS */}
+            {/* PIANO KEYS */}
             <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                 {NOTES.map((n) => (
                     <button
                         key={n.key}
                         onClick={() => playNote(n.file)}
                         style={{
-                            width: "60px",
-                            height: "160px",
+                            width: "55px",
+                            height: "150px",
                             background: "linear-gradient(180deg, #0ff, #0099ff)",
                             border: "none",
-                            borderRadius: "12px",
-                            transition: "0.1s",
+                            borderRadius: "10px",
                             cursor: "pointer",
+                            transition: "0.1s",
                         }}
-                        onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-                        onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
                     >
                         {n.key}
                     </button>
@@ -439,8 +462,8 @@ export default function PianoPlayer() {
                         style={{
                             padding: "10px 20px",
                             background: "#00ffcc",
-                            borderRadius: "10px",
                             border: "none",
+                            borderRadius: "10px",
                             cursor: "pointer",
                             fontWeight: "bold",
                         }}
@@ -453,11 +476,10 @@ export default function PianoPlayer() {
                         style={{
                             padding: "10px 20px",
                             background: "red",
-                            borderRadius: "10px",
-                            border: "none",
-                            cursor: "pointer",
                             color: "#fff",
-                            fontWeight: "bold",
+                            border: "none",
+                            borderRadius: "10px",
+                            cursor: "pointer",
                         }}
                     >
                         Stop Recording
@@ -468,20 +490,19 @@ export default function PianoPlayer() {
             {/* SAVED LIST */}
             <h3 style={{ marginTop: "30px", color: "#fff" }}>Saved Recordings</h3>
 
-            {audioList.length === 0 && <p style={{ color: "#aaa" }}>No audio saved yet.</p>}
+            {audioList.length === 0 && <p style={{ color: "#aaa" }}>No audio saved.</p>}
 
             <ul style={{ listStyle: "none", padding: 0 }}>
                 {audioList.map((audio) => (
                     <li
                         key={audio.id}
                         style={{
+                            background: "#111",
+                            padding: "15px",
                             margin: "10px 0",
-                            background: "#1b1b1b",
-                            padding: "12px",
-                            borderRadius: "8px",
+                            borderRadius: "10px",
                             display: "flex",
                             justifyContent: "space-between",
-                            alignItems: "center",
                         }}
                     >
                         <span style={{ color: "#0ff" }}>{audio.name}</span>
@@ -490,12 +511,10 @@ export default function PianoPlayer() {
                             <button
                                 onClick={() => new Audio(audio.url).play()}
                                 style={{
+                                    marginRight: "10px",
                                     padding: "6px 12px",
-                                    marginRight: "8px",
-                                    background: "#0ff",
-                                    border: "none",
                                     borderRadius: "6px",
-                                    cursor: "pointer",
+                                    background: "#0ff",
                                 }}
                             >
                                 Play
@@ -504,12 +523,10 @@ export default function PianoPlayer() {
                             <button
                                 onClick={() => downloadAudio(audio.url, audio.name)}
                                 style={{
+                                    marginRight: "10px",
                                     padding: "6px 12px",
-                                    marginRight: "8px",
-                                    background: "#00c3ff",
-                                    border: "none",
                                     borderRadius: "6px",
-                                    cursor: "pointer",
+                                    background: "#00c3ff",
                                 }}
                             >
                                 Download
@@ -519,11 +536,9 @@ export default function PianoPlayer() {
                                 onClick={() => deleteAudio(audio.id)}
                                 style={{
                                     padding: "6px 12px",
+                                    borderRadius: "6px",
                                     background: "red",
                                     color: "#fff",
-                                    border: "none",
-                                    borderRadius: "6px",
-                                    cursor: "pointer",
                                 }}
                             >
                                 Delete
