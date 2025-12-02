@@ -1,0 +1,100 @@
+.piano-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.piano-title {
+    color: #fff;
+}
+
+/* Piano Keys */
+.piano-keys {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.piano-key {
+    width: 55px;
+    height: 150px;
+    background: linear-gradient(180deg, #0ff, #0099ff);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.1s;
+}
+
+/* Recording Buttons */
+.record-btn,
+.stop-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 25px;
+}
+
+.record-btn {
+    background: #00ffcc;
+}
+
+.stop-btn {
+    background: red;
+    color: #fff;
+}
+
+/* Saved Recordings */
+.saved-title {
+    margin-top: 30px;
+    color: #fff;
+}
+
+.no-audio {
+    color: #aaa;
+}
+
+.saved-list {
+    list-style: none;
+    padding: 0;
+}
+
+.saved-item {
+    background: #111;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.saved-name {
+    color: #0ff;
+}
+
+/* Buttons inside saved list */
+.saved-items-btn {
+    display: flex;
+}
+
+.list-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.play-btn {
+    background: #0ff;
+}
+
+.download-btn {
+    background: #00c3ff;
+    color: white;
+}
+
+.delete-btn {
+    background: red;
+    color: #fff;
+}

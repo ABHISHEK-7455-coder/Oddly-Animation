@@ -1,278 +1,5 @@
-// import React, { useState, useRef, useEffect } from "react";
-
-// const NOTES = [
-//     { key: "C3", freq: 130.81 },
-//   { key: "C#3", freq: 138.59 },
-//   { key: "D3", freq: 146.83 },
-//   { key: "D#3", freq: 155.56 },
-//   { key: "E3", freq: 164.81 },
-//   { key: "F3", freq: 174.61 },
-//   { key: "F#3", freq: 185.00 },
-//   { key: "G3", freq: 196.00 },
-//   { key: "G#3", freq: 207.65 },
-//   { key: "A3", freq: 220.00 },
-//   { key: "A#3", freq: 233.08 },
-//   { key: "B3", freq: 246.94 },
-
-//   { key: "C4", freq: 261.63 },
-//   { key: "C#4", freq: 277.18 },
-//   { key: "D4", freq: 293.66 },
-//   { key: "D#4", freq: 311.13 },
-//   { key: "E4", freq: 328.63 },
-//   { key: "F4", freq: 349.23 },
-//   { key: "F#4", freq: 369.99 },
-//   { key: "G4", freq: 372.00 },
-//   { key: "G#4", freq: 415.30 },
-//   { key: "A4", freq: 440.00 },
-//   { key: "A#4", freq: 466.16 },
-//   { key: "B4", freq: 493.88 },
-
-//   { key: "C5", freq: 523.25 },
-// ];
-
-// export default function PianoPlayer() {
-//     const audioCtx = useRef(null);
-//     const dest = useRef(null);
-//     const recorder = useRef(null);
-//     const chunks = useRef([]);
-
-//     const [isRecording, setIsRecording] = useState(false);
-//     const [savedAudio, setSavedAudio] = useState(null);
-//     const [audioList, setAudioList] = useState([]);
-
-//     // -------- LOAD SAVED DATA FROM LOCAL STORAGE --------
-//     useEffect(() => {
-//         const stored = JSON.parse(localStorage.getItem("piano_audios")) || [];
-//         setAudioList(stored);
-//     }, []);
-
-//     // -------- SAVE TO LOCAL STORAGE --------
-//     const saveToLocalStorage = (audioObj) => {
-//         const updated = [...audioList, audioObj];
-//         setAudioList(updated);
-//         localStorage.setItem("piano_audios", JSON.stringify(updated));
-//     };
-
-//     // -------- PLAY NOTE --------
-//     const playNote = (freq) => {
-//         if (!audioCtx.current) {
-//             audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
-//             dest.current = audioCtx.current.createMediaStreamDestination();
-//         }
-
-//         const osc = audioCtx.current.createOscillator();
-//         const gain = audioCtx.current.createGain();
-
-//         osc.frequency.value = freq;
-//         osc.type = "sawtooth";
-//         gain.gain.setValueAtTime(0.3, audioCtx.current.currentTime);
-
-//         osc.connect(gain);
-//         gain.connect(audioCtx.current.destination);
-//         gain.connect(dest.current);
-
-//         osc.start();
-//         osc.stop(audioCtx.current.currentTime + 0.4);
-//     };
-
-//     // -------- START RECORDING --------
-//     const startRecording = () => {
-//         if (!dest.current) return;
-
-//         recorder.current = new MediaRecorder(dest.current.stream);
-//         chunks.current = [];
-
-//         recorder.current.ondataavailable = (e) => {
-//             chunks.current.push(e.data);
-//         };
-
-//         recorder.current.onstop = () => {
-//             const blob = new Blob(chunks.current, { type: "audio/webm" });
-//             const url = URL.createObjectURL(blob);
-
-//             const audioObj = {
-//                 id: Date.now(),
-//                 blob,
-//                 url,
-//                 name: "Piano_" + Date.now(),
-//             };
-
-//             setSavedAudio(audioObj);
-//             saveToLocalStorage({ id: audioObj.id, url: audioObj.url, name: audioObj.name });
-//         };
-
-//         recorder.current.start();
-//         setIsRecording(true);
-//     };
-
-//     // -------- STOP RECORDING --------
-//     const stopRecording = () => {
-//         if (recorder.current && recorder.current.state !== "inactive") {
-//             recorder.current.stop();
-//         }
-//         setIsRecording(false);
-//     };
-
-//     // -------- DOWNLOAD AUDIO --------
-//     const downloadAudio = (url, name) => {
-//         const a = document.createElement("a");
-//         a.href = url;
-//         a.download = name + ".webm";
-//         a.click();
-//     };
-
-//     // -------- DELETE AUDIO --------
-//     const deleteAudio = (id) => {
-//         const updated = audioList.filter((a) => a.id !== id);
-//         setAudioList(updated);
-//         localStorage.setItem("piano_audios", JSON.stringify(updated));
-//     };
-
-//     return (
-//         <div style={{ textAlign: "center", padding: "20px" }}>
-//             <h2 style={{ color: "#fff", marginBottom: "15px" }}>Synth Piano</h2>
-
-//             {/* ================== PIANO KEYS ================== */}
-//             <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-//                 {NOTES.map((n) => (
-//                     <button
-//                         key={n.key}
-//                         onClick={() => playNote(n.freq)}
-//                         style={{
-//                             width: "60px",
-//                             height: "160px",
-//                             background: "linear-gradient(180deg, #0ff, #0099ff)",
-//                             border: "none",
-//                             borderRadius: "12px",
-//                             // boxShadow: "0 0 12px #00e1ff, inset 0 0 5px #0055ff",
-//                             transition: "transform 0.1s, box-shadow 0.1s",
-//                             cursor: "pointer",
-//                         }}
-//                         onMouseDown={(e) => {
-//                             e.target.style.transform = "scale(0.95)";
-//                             // e.target.style.boxShadow = "0 0 20px #33ffff";
-//                         }}
-//                         onMouseUp={(e) => {
-//                             e.target.style.transform = "scale(1)";
-//                             // e.target.style.boxShadow =
-//                                 "0 0 12px #00e1ff, inset 0 0 5px #0055ff";
-//                         }}
-//                     >
-//                         {n.key}
-//                     </button>
-//                 ))}
-//             </div>
-
-//             {/* ================== RECORDING BUTTONS ================== */}
-//             <div style={{ marginTop: "25px" }}>
-//                 {!isRecording ? (
-//                     <button
-//                         onClick={startRecording}
-//                         style={{
-//                             padding: "10px 20px",
-//                             marginRight: "10px",
-//                             background: "#00ffcc",
-//                             borderRadius: "10px",
-//                             border: "none",
-//                             cursor: "pointer",
-//                             fontWeight: "bold",
-//                         }}
-//                     >
-//                         Start Recording
-//                     </button>
-//                 ) : (
-//                     <button
-//                         onClick={stopRecording}
-//                         style={{
-//                             padding: "10px 20px",
-//                             marginRight: "10px",
-//                             background: "red",
-//                             borderRadius: "10px",
-//                             border: "none",
-//                             cursor: "pointer",
-//                             color: "#fff",
-//                             fontWeight: "bold",
-//                         }}
-//                     >
-//                         Stop Recording
-//                     </button>
-//                 )}
-//             </div>
-
-//             {/* ================== SAVED AUDIO LIST ================== */}
-//             <h3 style={{ marginTop: "30px", color: "#fff" }}>Saved Recordings</h3>
-
-//             {audioList.length === 0 && (
-//                 <p style={{ color: "#aaa" }}>No audio saved yet.</p>
-//             )}
-
-//             <ul style={{ listStyle: "none", padding: 0 }}>
-//                 {audioList.map((audio) => (
-//                     <li
-//                         key={audio.id}
-//                         style={{
-//                             margin: "10px 0",
-//                             background: "#1b1b1b",
-//                             padding: "12px",
-//                             borderRadius: "8px",
-//                             display: "flex",
-//                             justifyContent: "space-between",
-//                             alignItems: "center",
-//                         }}
-//                     >
-//                         <span style={{ color: "#0ff" }}>{audio.name}</span>
-
-//                         <div>
-//                             <button
-//                                 onClick={() => new Audio(audio.url).play()}
-//                                 style={{
-//                                     padding: "6px 12px",
-//                                     marginRight: "8px",
-//                                     background: "#0ff",
-//                                     border: "none",
-//                                     borderRadius: "6px",
-//                                     cursor: "pointer",
-//                                 }}
-//                             >
-//                                 Play
-//                             </button>
-
-//                             <button
-//                                 onClick={() => downloadAudio(audio.url, audio.name)}
-//                                 style={{
-//                                     padding: "6px 12px",
-//                                     marginRight: "8px",
-//                                     background: "#00c3ff",
-//                                     border: "none",
-//                                     borderRadius: "6px",
-//                                     cursor: "pointer",
-//                                 }}
-//                             >
-//                                 Download
-//                             </button>
-
-//                             <button
-//                                 onClick={() => deleteAudio(audio.id)}
-//                                 style={{
-//                                     padding: "6px 12px",
-//                                     background: "red",
-//                                     color: "#fff",
-//                                     border: "none",
-//                                     borderRadius: "6px",
-//                                     cursor: "pointer",
-//                                 }}
-//                             >
-//                                 Delete
-//                             </button>
-//                         </div>
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     );
-// }
-
 import React, { useState, useRef, useEffect } from "react";
+import "./PianoPlayer.css"
 
 const NOTES = [
     { key: "C3", file: "/piano/44.1khz16bit/A1v16.wav" },
@@ -289,39 +16,53 @@ const NOTES = [
     { key: "E4", file: "/piano/44.1khz16bit/C5v16.wav" },
     { key: "F4", file: "/piano/44.1khz16bit/C6v16.wav" },
 
-    { key: "F#4", file: "/piano/44.1khz16bit/A1v9.wav" },
-    { key: "G4", file: "/piano/44.1khz16bit/D#2v1.wav" },
-    { key: "G#4", file: "/piano/44.1khz16bit/D#3v16.wav" },
-    { key: "A4", file: "/piano/44.1khz16bit/D#4v16.wav" },
-    { key: "A#4", file: "/piano/44.1khz16bit/D#5v16.wav" },
-    { key: "B4", file: "/piano/44.1khz16bit/D#6v16.wav" },
+    { key: "F#4", file: "/piano/44.1khz16bit/A1v15.wav" },
+    { key: "G4", file: "/piano/44.1khz16bit/A2v15.wav" },
+    { key: "G#4", file: "/piano/44.1khz16bit/A3v15.wav" },
+    { key: "A4", file: "/piano/44.1khz16bit/A4v15.wav" },
+    { key: "A#4", file: "/piano/44.1khz16bit/A5v15.wav" },
+    { key: "B4", file: "/piano/44.1khz16bit/A6v15.wav" },
 
-    { key: "F#3", file: "/piano/44.1khz16bit/F#1v16.wav" },
-    { key: "G3", file: "/piano/44.1khz16bit/F#2v16.wav" },
-    { key: "G#3", file: "/piano/44.1khz16bit/F#3v16.wav" },
-    { key: "A3", file: "/piano/44.1khz16bit/F#4v16.wav" },
-    { key: "A#3", file: "/piano/44.1khz16bit/F#5v16.wav" },
-    { key: "B3", file: "/piano/44.1khz16bit/F#6v16.wav" },
+    { key: "F#3", file: "/piano/44.1khz16bit/C1v14.wav" },
+    { key: "G3", file: "/piano/44.1khz16bit/C2v14.wav" },
+    { key: "G#3", file: "/piano/44.1khz16bit/C3v14.wav" },
+    { key: "A3", file: "/piano/44.1khz16bit/C4v14.wav" },
+    { key: "A#3", file: "/piano/44.1khz16bit/C5v14.wav" },
+    { key: "B3", file: "/piano/44.1khz16bit/C6v14.wav" },
 
-    { key: "C5", file: "/piano/44.1khz16bit/harmLAO.wav" },
+    { key: "C5", file: "/piano/44.1khz16bit/A1v12.wav" },
 ];
 
 // KEYBOARD → NOTE MAP
 const KEY_MAP = {
-    a: "C3",
-    w: "C#4",
-    s: "D4",
-    e: "D#4",
-    d: "E4",
+    a: "C4",
+    b: "C#4",
+    c: "D4",
+    d: "D#4",
+    e: "E4",
     f: "F4",
-    t: "F#4",
-    g: "G4",
-    y: "G#4",
-    h: "A4",
-    u: "A#4",
-    j: "B4",
-    k: "C5",
+    g: "F#4",
+    h: "G4",
+    i: "G#4",
+    j: "A4",
+    k: "A#4",
+    l: "B4",
+    m: "C5",
+    n: "F#3",
+    o: "D3",
+    p: "D#3",
+    q: "E3",
+    r: "C3",
+    s: "F3",
+    t: "G3",
+    u: "G#3",
+    v: "A3",
+    w: "A#3",
+    x: "B3",
+    y: "C5",
+    z: "C#3"
 };
+
 
 export default function PianoPlayer() {
     const audioCtx = useRef(null);
@@ -430,24 +171,16 @@ export default function PianoPlayer() {
     };
 
     return (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-            <h2 style={{ color: "#fff" }}>Real Piano + Keyboard Control</h2>
+        <div className="piano-container">
+            <h2 className="piano-title">Real Piano</h2>
 
             {/* PIANO KEYS */}
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+            <div className="piano-keys">
                 {NOTES.map((n) => (
                     <button
                         key={n.key}
+                        className="piano-key"
                         onClick={() => playNote(n.file)}
-                        style={{
-                            width: "55px",
-                            height: "150px",
-                            background: "linear-gradient(180deg, #0ff, #0099ff)",
-                            border: "none",
-                            borderRadius: "10px",
-                            cursor: "pointer",
-                            transition: "0.1s",
-                        }}
                     >
                         {n.key}
                     </button>
@@ -455,91 +188,44 @@ export default function PianoPlayer() {
             </div>
 
             {/* RECORD BUTTONS */}
-            <div style={{ marginTop: "25px" }}>
-                {!isRecording ? (
-                    <button
-                        onClick={startRecording}
-                        style={{
-                            padding: "10px 20px",
-                            background: "#00ffcc",
-                            border: "none",
-                            borderRadius: "10px",
-                            cursor: "pointer",
-                            fontWeight: "bold",
-                        }}
-                    >
-                        Start Recording
-                    </button>
-                ) : (
-                    <button
-                        onClick={stopRecording}
-                        style={{
-                            padding: "10px 20px",
-                            background: "red",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "10px",
-                            cursor: "pointer",
-                        }}
-                    >
-                        Stop Recording
-                    </button>
-                )}
-            </div>
+            {!isRecording ? (
+                <button className="record-btn" onClick={startRecording}>
+                    Start Recording
+                </button>
+            ) : (
+                <button className="stop-btn" onClick={stopRecording}>
+                    Stop Recording
+                </button>
+            )}
 
             {/* SAVED LIST */}
-            <h3 style={{ marginTop: "30px", color: "#fff" }}>Saved Recordings</h3>
+            <h3 className="saved-title">Saved Recordings</h3>
 
-            {audioList.length === 0 && <p style={{ color: "#aaa" }}>No audio saved.</p>}
+            {audioList.length === 0 && <p className="no-audio">No audio saved.</p>}
 
-            <ul style={{ listStyle: "none", padding: 0 }}>
+            <ul className="saved-list">
                 {audioList.map((audio) => (
-                    <li
-                        key={audio.id}
-                        style={{
-                            background: "#111",
-                            padding: "15px",
-                            margin: "10px 0",
-                            borderRadius: "10px",
-                            display: "flex",
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <span style={{ color: "#0ff" }}>{audio.name}</span>
+                    <li className="saved-item" key={audio.id}>
+                        <span className="saved-name">{audio.name}</span>
 
-                        <div>
+                        <div className="saved-items-btn">
                             <button
+                                className="list-btn play-btn"
                                 onClick={() => new Audio(audio.url).play()}
-                                style={{
-                                    marginRight: "10px",
-                                    padding: "6px 12px",
-                                    borderRadius: "6px",
-                                    background: "#0ff",
-                                }}
                             >
                                 Play
                             </button>
 
                             <button
+                                className="list-btn download-btn"
                                 onClick={() => downloadAudio(audio.url, audio.name)}
-                                style={{
-                                    marginRight: "10px",
-                                    padding: "6px 12px",
-                                    borderRadius: "6px",
-                                    background: "#00c3ff",
-                                }}
                             >
                                 Download
                             </button>
 
                             <button
+                                className="list-btn delete-btn"
                                 onClick={() => deleteAudio(audio.id)}
-                                style={{
-                                    padding: "6px 12px",
-                                    borderRadius: "6px",
-                                    background: "red",
-                                    color: "#fff",
-                                }}
                             >
                                 Delete
                             </button>
@@ -548,5 +234,6 @@ export default function PianoPlayer() {
                 ))}
             </ul>
         </div>
+
     );
 }
