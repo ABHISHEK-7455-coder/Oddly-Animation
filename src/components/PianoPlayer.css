@@ -1,100 +1,189 @@
+/* PianoPlayer.css - Real piano board styling (white + black keys) */
+
 .piano-container {
-    text-align: center;
-    padding: 20px;
+  text-align: center;
+  padding: 20px;
+  max-width: 980px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  color: #e9fbff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
 .piano-title {
-    color: #fff;
+  color: #fff;
+  margin-bottom: 12px;
 }
 
-/* Piano Keys */
-.piano-keys {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
+/* board wrapper */
+.piano-board {
+  position: relative;
+  width: 100%;
+  /* background: linear-gradient(180deg, #0b1220, #07101a); */
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
 }
 
-.piano-key {
-    width: 55px;
-    height: 150px;
-    background: linear-gradient(180deg, #0ff, #0099ff);
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.1s;
+/* White keys container */
+.white-keys {
+  display: flex;
+  position: relative;
+  z-index: 1;
+  gap: 6px;
+  justify-content: center;
+  padding: 10px 8px 28px;
 }
 
-/* Recording Buttons */
+/* Each white key */
+.white-key {
+  position: relative;
+  flex: 0 0 48px; /* fixed width keys */
+  height: 160px;
+  background: linear-gradient(180deg, #fff, #e6e6e6);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow:
+    0 6px 10px rgba(0,0,0,0.35),
+    inset 0 -8px 18px rgba(0,0,0,0.06);
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+  user-select: none;
+  transition: transform 0.06s ease;
+}
+
+/* on-press visual */
+.white-key:active,
+.white-key.pressed {
+  transform: translateY(6px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.45);
+}
+
+/* small label on key (note name) */
+.key-label {
+  font-size: 11px;
+  color: #222;
+  opacity: 0.9;
+}
+
+/* Black keys overlay */
+.black-keys {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  height: 110px;
+  pointer-events: none; /* let keys control pointer unless overridden */
+  z-index: 2;
+}
+
+/* Each black key is absolutely positioned */
+.black-key {
+  pointer-events: auto; /* enable clicking */
+  position: absolute;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 110px;
+  background: linear-gradient(180deg, #1b1b1b, #000);
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.6), inset 0 -6px 10px rgba(255,255,255,0.02);
+  border: 1px solid rgba(0,0,0,0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  user-select: none;
+  transition: transform 0.06s ease;
+}
+
+/* pressed effect */
+.black-key:active,
+.black-key.pressed {
+  transform: translateX(-50%) translateY(6px);
+}
+
+/* black key label */
+.key-label-black {
+  font-size: 10px;
+  color: #d6f8ff;
+  opacity: 0.85;
+}
+
+/* Record controls */
+.record-row {
+  margin-top: 18px;
+}
+
 .record-btn,
 .stop-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 25px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .record-btn {
-    background: #00ffcc;
+  background: #00ffcc;
 }
 
 .stop-btn {
-    background: red;
-    color: #fff;
+  background: red;
+  color: #fff;
 }
 
-/* Saved Recordings */
+/* Saved recordings list */
 .saved-title {
-    margin-top: 30px;
-    color: #fff;
+  margin-top: 20px;
+  color: #fff;
 }
 
 .no-audio {
-    color: #aaa;
+  color: #aaa;
+  margin-top: 8px;
 }
 
 .saved-list {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
 }
 
 .saved-item {
-    background: #111;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
+  background: #111;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .saved-name {
-    color: #0ff;
+  color: #0ff;
+  font-weight: 700;
 }
 
-/* Buttons inside saved list */
-.saved-items-btn {
-    display: flex;
+/* buttons inside list */
+.saved-items-btn .list-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  margin-left: 8px;
+  cursor: pointer;
+  font-weight: 700;
 }
 
-.list-btn {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    margin-right: 10px;
-}
+.play-btn { background: #0ff; color: #002; }
+.download-btn { background: #00c3ff; color: #002; }
+.delete-btn { background: red; color: #fff; }
 
-.play-btn {
-    background: #0ff;
-}
-
-.download-btn {
-    background: #00c3ff;
-    color: white;
-}
-
-.delete-btn {
-    background: red;
-    color: #fff;
+/* responsive tweaks */
+@media (max-width: 720px) {
+  .white-key { flex: 0 0 40px; height: 120px; }
+  .black-key { width: 28px; height: 90px; }
 }

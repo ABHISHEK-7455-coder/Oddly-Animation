@@ -775,121 +775,121 @@ const Animation = () => {
         setShowFormatMenuId(null);
     };
 
-    const downloadJSON = (rec) => {
-        if (!rec) return;
-        // If your recordings include config, put it here; otherwise save metadata only
-        const json = {
-            id: rec.id,
-            name: rec.name,
-            // animationConfig: rec.config || {}
-        };
-        const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${rec.name}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setShowFormatMenuId(null);
-    };
+    // const downloadJSON = (rec) => {
+    //     if (!rec) return;
+    //     // If your recordings include config, put it here; otherwise save metadata only
+    //     const json = {
+    //         id: rec.id,
+    //         name: rec.name,
+    //         // animationConfig: rec.config || {}
+    //     };
+    //     const blob = new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+    //     const url = URL.createObjectURL(blob);
+    //     const a = document.createElement("a");
+    //     a.href = url;
+    //     a.download = `${rec.name}.json`;
+    //     document.body.appendChild(a);
+    //     a.click();
+    //     document.body.removeChild(a);
+    //     setShowFormatMenuId(null);
+    // };
 
-    const downloadAsMP4 = async (rec) => {
-        if (!rec) return;
-        setIsConverting(true);
-        showToast("Converting to MP4...");
+    // const downloadAsMP4 = async (rec) => {
+    //     if (!rec) return;
+    //     setIsConverting(true);
+    //     showToast("Converting to MP4...");
 
-        try {
-            await ensureFfmpeg();
-            const ffmpeg = ffmpegRef.current;
+    //     try {
+    //         await ensureFfmpeg();
+    //         const ffmpeg = ffmpegRef.current;
 
-            // write webm input (rec.data is a dataURL)
-            await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+    //         // write webm input (rec.data is a dataURL)
+    //         await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
 
-            // execute conversion using new API (run)
-            await ffmpeg.run(
-                "-i", "input.webm",
-                "-c:v", "libx264",
-                "-preset", "veryfast",
-                "-crf", "23",
-                "output.mp4"
-            );
+    //         // execute conversion using new API (run)
+    //         await ffmpeg.run(
+    //             "-i", "input.webm",
+    //             "-c:v", "libx264",
+    //             "-preset", "veryfast",
+    //             "-crf", "23",
+    //             "output.mp4"
+    //         );
 
-            // read output
-            const data = await ffmpeg.readFile("output.mp4");
-            const blob = new Blob([data], { type: "video/mp4" });
+    //         // read output
+    //         const data = await ffmpeg.readFile("output.mp4");
+    //         const blob = new Blob([data], { type: "video/mp4" });
 
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${rec.name}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+    //         const url = URL.createObjectURL(blob);
+    //         const a = document.createElement("a");
+    //         a.href = url;
+    //         a.download = `${rec.name}.mp4`;
+    //         document.body.appendChild(a);
+    //         a.click();
+    //         document.body.removeChild(a);
 
-        } catch (err) {
-            console.error("MP4 conversion error", err);
-            showToast("MP4 conversion failed");
-        } finally {
-            setIsConverting(false);
-            setShowFormatMenuId(null);
+    //     } catch (err) {
+    //         console.error("MP4 conversion error", err);
+    //         showToast("MP4 conversion failed");
+    //     } finally {
+    //         setIsConverting(false);
+    //         setShowFormatMenuId(null);
 
-            // cleanup if available
-            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) { }
-            try { await ffmpegRef.current.deleteFile("output.mp4"); } catch (e) { }
-        }
-    };
+    //         // cleanup if available
+    //         try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) { }
+    //         try { await ffmpegRef.current.deleteFile("output.mp4"); } catch (e) { }
+    //     }
+    // };
 
-    const downloadAsGIF = async (rec) => {
-        if (!rec) return;
-        setIsConverting(true);
-        showToast("Converting to GIF...");
+    // const downloadAsGIF = async (rec) => {
+    //     if (!rec) return;
+    //     setIsConverting(true);
+    //     showToast("Converting to GIF...");
 
-        try {
-            await ensureFfmpeg();
-            const ffmpeg = ffmpegRef.current;
+    //     try {
+    //         await ensureFfmpeg();
+    //         const ffmpeg = ffmpegRef.current;
 
-            await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
+    //         await ffmpeg.writeFile("input.webm", await fetchFile(rec.data));
 
-            // palette generation
-            await ffmpeg.run(
-                "-i", "input.webm",
-                "-vf", "fps=12,scale=480:-1:flags=lanczos,palettegen",
-                "palette.png"
-            );
+    //         // palette generation
+    //         await ffmpeg.run(
+    //             "-i", "input.webm",
+    //             "-vf", "fps=12,scale=480:-1:flags=lanczos,palettegen",
+    //             "palette.png"
+    //         );
 
-            // gif generation using palette
-            await ffmpeg.run(
-                "-i", "input.webm",
-                "-i", "palette.png",
-                "-filter_complex",
-                "fps=12,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse",
-                "output.gif"
-            );
+    //         // gif generation using palette
+    //         await ffmpeg.run(
+    //             "-i", "input.webm",
+    //             "-i", "palette.png",
+    //             "-filter_complex",
+    //             "fps=12,scale=480:-1:flags=lanczos[x];[x][1:v]paletteuse",
+    //             "output.gif"
+    //         );
 
-            const data = await ffmpeg.readFile("output.gif");
-            const blob = new Blob([data], { type: "image/gif" });
+    //         const data = await ffmpeg.readFile("output.gif");
+    //         const blob = new Blob([data], { type: "image/gif" });
 
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${rec.name}.gif`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+    //         const url = URL.createObjectURL(blob);
+    //         const a = document.createElement("a");
+    //         a.href = url;
+    //         a.download = `${rec.name}.gif`;
+    //         document.body.appendChild(a);
+    //         a.click();
+    //         document.body.removeChild(a);
 
-        } catch (err) {
-            console.error("GIF conversion error", err);
-            showToast("GIF conversion failed");
-        } finally {
-            setIsConverting(false);
-            setShowFormatMenuId(null);
+    //     } catch (err) {
+    //         console.error("GIF conversion error", err);
+    //         showToast("GIF conversion failed");
+    //     } finally {
+    //         setIsConverting(false);
+    //         setShowFormatMenuId(null);
 
-            try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) { }
-            try { await ffmpegRef.current.deleteFile("palette.png"); } catch (e) { }
-            try { await ffmpegRef.current.deleteFile("output.gif"); } catch (e) { }
-        }
-    };
+    //         try { await ffmpegRef.current.deleteFile("input.webm"); } catch (e) { }
+    //         try { await ffmpegRef.current.deleteFile("palette.png"); } catch (e) { }
+    //         try { await ffmpegRef.current.deleteFile("output.gif"); } catch (e) { }
+    //     }
+    // };
 
     // ----------------- end helpers -----------------
 
@@ -1059,7 +1059,7 @@ const Animation = () => {
                                 </button>
                             ) : (
                                 <button className="record-btn stop" onClick={stopRecording}>
-                                    <span className="material-symbols-outlined">stop_circle</span> Stop Recording
+                                    Stop Recording
                                 </button>
                             )}
 
@@ -1080,20 +1080,16 @@ const Animation = () => {
                                                     <span>{rec.name}</span>
                                                 </button>
 
-                                                {/* DOWNLOAD (opens format menu) */}
+                                                {/* DIRECT DOWNLOAD - no dropdown */}
                                                 <button
                                                     className="download-btn"
-                                                    onClick={() => {
-                                                        setSelectedRec(rec);
-                                                        // toggle inline menu for this record
-                                                        setShowFormatMenuId(prev => (prev === rec.id ? null : rec.id));
-                                                    }}
+                                                    onClick={() => downloadWebM(rec)}
                                                 >
                                                     <span className="material-symbols-outlined">download</span>
                                                 </button>
 
                                                 {/* Inline format menu (minimal, placed next to buttons) */}
-                                                {showFormatMenuId === rec.id && (
+                                                {/* {showFormatMenuId === rec.id && (
                                                     <div className="format-menu-inline">
                                                         <button
                                                             disabled={isConverting}
@@ -1126,7 +1122,7 @@ const Animation = () => {
                                                             ✕
                                                         </button>
                                                     </div>
-                                                )}
+                                                )} */}
 
                                                 {/* SHARE (now toggles an inline share menu with two options) */}
                                                 <div style={{ display: "inline-block", position: "relative" }}>
@@ -1145,7 +1141,7 @@ const Animation = () => {
 
                                                     {showShareMenuId === rec.id && (
                                                         <div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
-                                                            <button className="share-btn" 
+                                                            <button className="share-btn"
                                                                 onClick={() => shareWebmDirectById(rec.id)}
                                                                 disabled={isConverting}
                                                             >
