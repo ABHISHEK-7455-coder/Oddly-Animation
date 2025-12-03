@@ -1,0 +1,97 @@
+/* Main container */
+.physics-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0f172a; /* slate-900 */
+  color: #e2e8f0; /* slate-200 */
+}
+
+/* Controls bar */
+.physics-controls {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border: none;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: 0.15s ease-in-out;
+}
+
+.btn-indigo {
+  background: #4f46e5;
+}
+.btn-indigo:hover {
+  background: #6366f1;
+}
+
+.btn-rose {
+  background: #e11d48;
+}
+.btn-rose:hover {
+  background: #fb7185;
+}
+
+.btn-yellow {
+  background: #eab308;
+  color: #111;
+}
+.btn-yellow:hover {
+  background: #facc15;
+}
+
+/* Labels */
+.label-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+  font-size: 0.9rem;
+}
+
+.small-gap {
+  margin-left: 0.5rem;
+}
+
+/* Range slider */
+.range-input {
+  width: 10rem; /* w-40 */
+}
+
+.gravity-value {
+  width: 3rem;
+  text-align: right;
+}
+
+/* Number input */
+.number-input {
+  width: 4rem;
+  padding: 0.25rem;
+  background: #1e293b;
+  color: white;
+  border: 1px solid #334155;
+  border-radius: 0.25rem;
+}
+
+/* Canvas area */
+.physics-canvas {
+  flex: 1;
+  min-height: 520px;
+  border-top: 1px solid #1e293b;
+}
+
+/* Hint text */
+.hint-text {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}

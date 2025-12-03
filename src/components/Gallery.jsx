@@ -4,6 +4,7 @@ import Animation from "../components/Animation";
 import { animationData } from "../data/animationConfig.js"; // 50 animations ka data
 import { useLocation } from "react-router-dom";
 import PianoPlayer from "./PianoPlayer.jsx";
+import PhysicsMixedDemo from './MatterJs.jsx';
 import "./Gallery.css";
 
 const Gallery = () => {
@@ -19,10 +20,10 @@ const Gallery = () => {
     const animIdFromURL = queryParams.get("anim");
 
     useEffect(() => {
-    if (animIdFromURL) {
-        setSelectedAnimation(parseInt(animIdFromURL));
-    }
-}, [animIdFromURL]);
+        if (animIdFromURL) {
+            setSelectedAnimation(parseInt(animIdFromURL));
+        }
+    }, [animIdFromURL]);
 
     return (
         <div className="gallery-container">
@@ -36,7 +37,7 @@ const Gallery = () => {
                 speed={speed}
             />
             <PianoPlayer />
-
+            <PhysicsMixedDemo />
         </div>
     );
 };
