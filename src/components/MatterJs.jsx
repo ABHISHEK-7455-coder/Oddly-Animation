@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Matter from 'matter-js';
+import "./MatterJs.css"
 
 // Default export React component ready to drop into a CRA/Vite app
 // Tailwind classes are used for quick styling — you can remove them or replace
@@ -9,7 +10,7 @@ export default function PhysicsMixedDemo() {
     const sceneRef = useRef(null);
     const engineRef = useRef(null);
     const [running, setRunning] = useState(true);
-    const [gravityScale, setGravityScale] = useState(1);
+    const [gravityScale, setGravityScale] = useState(0.1);
     const [spawnCount, setSpawnCount] = useState(12);
 
     useEffect(() => {
@@ -39,7 +40,7 @@ export default function PhysicsMixedDemo() {
                 pixelRatio: window.devicePixelRatio || 1,
             },
         });
-
+        
         // Floor and walls
         const wallThickness = 60;
         const floor = Bodies.rectangle(width / 2, height + wallThickness / 2, width + 2 * wallThickness, wallThickness, { isStatic: true, render: { fillStyle: '#111827' } });
@@ -50,7 +51,7 @@ export default function PhysicsMixedDemo() {
         World.add(engine.world, [floor, leftWall, rightWall, ceiling]);
 
         // Utility: random color
-        function randColor() {
+        function randomColor() {
             const palette = ['#60A5FA', '#F472B6', '#34D399', '#F59E0B', '#A78BFA', '#F87171', '#FCD34D'];
             return palette[Math.floor(Math.random() * palette.length)];
         }
@@ -65,7 +66,7 @@ export default function PhysicsMixedDemo() {
                     restitution: 0.2 + Math.random() * 0.7,
                     friction: 0.01 + Math.random() * 0.2,
                     density: 0.001 + Math.random() * 0.01,
-                    render: { fillStyle: randColor() },
+                    render: { fillStyle: randomColor() },
                 };
 
                 let body;
@@ -85,7 +86,7 @@ export default function PhysicsMixedDemo() {
                         restitution: opts.restitution,
                         friction: opts.friction,
                         density: opts.density,
-                        render: { fillStyle: randColor() },
+                        render: { fillStyle: randomColor() },
                     });
                 }
 
@@ -215,30 +216,30 @@ export default function PhysicsMixedDemo() {
     }
 
     return (
-        <div className="flex flex-col h-full min-h-screen bg-slate-900 text-slate-200">
-            <div className="p-4 flex items-center gap-3">
+        <div className="matter-container">
+            <div className="matter-controls">
                 <button
                     onClick={handleSpawn}
-                    className="px-3 py-1 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow"
+                    className="btn btn-indigo"
                 >
                     Spawn {spawnCount}
                 </button>
 
                 <button
                     onClick={handleClear}
-                    className="px-3 py-1 rounded-md bg-rose-600 hover:bg-rose-500 text-white shadow"
+                    className="btn btn-rose"
                 >
                     Clear
                 </button>
 
                 <button
                     onClick={() => { setRunning(s => !s); handlePauseToggle(); }}
-                    className="px-3 py-1 rounded-md bg-yellow-500 hover:bg-yellow-400 text-slate-900 shadow"
+                    className="btn btn-yellow"
                 >
-                    {running ? 'Pause' : 'Resume'}
+                    {running ? "Pause" : "Resume"}
                 </button>
 
-                <label className="flex items-center gap-2 ml-4">
+                <label className="label-row">
                     Gravity
                     <input
                         type="range"
@@ -247,29 +248,29 @@ export default function PhysicsMixedDemo() {
                         step="0.1"
                         value={gravityScale}
                         onChange={(e) => setGravityScale(parseFloat(e.target.value))}
-                        className="w-40"
+                        className="gravity-slider"
                     />
-                    <span className="w-12 text-right">{gravityScale.toFixed(1)}</span>
+                    <span className="gravity-value">{gravityScale.toFixed(1)}</span>
                 </label>
 
-                <label className="flex items-center gap-2 ml-2">
+                <label className="label-row">
                     Spawn Count
                     <input
                         type="number"
                         min="1"
                         max="60"
                         value={spawnCount}
-                        onChange={(e) => setSpawnCount(Math.max(1, Math.min(60, parseInt(e.target.value || '12', 10))))}
-                        className="w-16 p-1 rounded bg-slate-800 text-white"
+                        onChange={(e) =>
+                            setSpawnCount(Math.max(1, Math.min(60, parseInt(e.target.value || "12", 10))))
+                        }
+                        className="spawn-input"
                     />
                 </label>
 
-                <div className="ml-auto text-sm text-slate-400">Drag with mouse to interact</div>
+                <div className="hint-text">Drag with mouse to interact</div>
             </div>
 
-            <div ref={sceneRef} className="flex-1 border-t border-slate-800" style={{ minHeight: 520}} />
-
-            {/* <footer className="p-3 text-xs text-slate-400">Matter.js + React demo — mixed shapes. Drop this component into your app and install <code>matter-js</code>.</footer> */}
+            <div ref={sceneRef} className="scene-area" />
         </div>
     );
 }

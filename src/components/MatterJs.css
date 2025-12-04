@@ -1,97 +1,93 @@
-/* Main container */
-.physics-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: #0f172a; /* slate-900 */
-  color: #e2e8f0; /* slate-200 */
+/* Container layout */
+.matter-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 85%;
+    margin: auto;
+    height: 100vh;
+    background-color: #0f172a; /* slate-900 */
+    color: #e2e8f0; /* slate-200 */
 }
 
-/* Controls bar */
-.physics-controls {
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+/* Top controls bar */
+.matter-controls {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 /* Buttons */
 .btn {
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.45rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  border: none;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  transition: 0.15s ease-in-out;
+    padding: 0.25rem 0.75rem;
+    border: none;
+    border-radius: 0.375rem;
+    color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
 }
 
 .btn-indigo {
-  background: #4f46e5;
+    background-color: #4f46e5;
 }
 .btn-indigo:hover {
-  background: #6366f1;
+    background-color: #6366f1;
 }
 
 .btn-rose {
-  background: #e11d48;
+    background-color: #e11d48;
 }
 .btn-rose:hover {
-  background: #fb7185;
+    background-color: #f43f5e;
 }
 
 .btn-yellow {
-  background: #eab308;
-  color: #111;
+    background-color: #eab308;
+    /* color: #0f172a; */
 }
 .btn-yellow:hover {
-  background: #facc15;
+    background-color: #facc15;
 }
 
-/* Labels */
-.label-inline {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 1rem;
-  font-size: 0.9rem;
+/* Labels and inputs */
+.label-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
 }
 
-.small-gap {
-  margin-left: 0.5rem;
-}
-
-/* Range slider */
-.range-input {
-  width: 10rem; /* w-40 */
+.gravity-slider {
+    width: 10rem;
 }
 
 .gravity-value {
-  width: 3rem;
-  text-align: right;
+    width: 3rem;
+    text-align: right;
 }
 
-/* Number input */
-.number-input {
-  width: 4rem;
-  padding: 0.25rem;
-  background: #1e293b;
-  color: white;
-  border: 1px solid #334155;
-  border-radius: 0.25rem;
+.spawn-input {
+    width: 4rem;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    background-color: #1e293b; /* slate-800 */
+    color: white;
+    border: none;
 }
 
-/* Canvas area */
-.physics-canvas {
-  flex: 1;
-  min-height: 520px;
-  border-top: 1px solid #1e293b;
-}
-
-/* Hint text */
+/* Hint */
 .hint-text {
-  margin-left: auto;
-  font-size: 0.8rem;
-  color: #94a3b8;
+    margin-left: auto;
+    font-size: 0.875rem;
+    color: #94a3b8; /* slate-400 */
+}
+
+/* Scene container */
+.scene-area {
+    flex: 1;
+    border-top: 1px solid #1e293b; /* slate-800 */
+    height: 590px;
+    width: 100%;
 }
