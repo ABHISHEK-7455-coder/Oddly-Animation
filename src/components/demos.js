@@ -109,50 +109,126 @@ export function AvalancheDemo({ engine, render, spawnCount = 30 }) {
 }
 
 export function ConstraintsDemo({ engine, render }) {
-  const { Bodies, Composite, Constraint, World } = Matter;
+    const { Bodies, Composite, Constraint, World } = Matter;
 
-  const width = render.options.width;
-  const height = render.options.height;
+    const width = render.options.width;
+    const height = render.options.height;
 
-  // floor & walls
-  const wallThickness = 60;
-  const floor  = Bodies.rectangle(width/2, height + wallThickness/2, width + 2*wallThickness, wallThickness, { isStatic: true, render:{ fillStyle:'#111827' }});
-  const left   = Bodies.rectangle(-wallThickness/2, height/2, wallThickness, height, { isStatic: true, render:{ fillStyle:'#111827' }});
-  const right  = Bodies.rectangle(width + wallThickness/2, height/2, wallThickness, height, { isStatic: true, render:{ fillStyle:'#111827' }});
-  const ceiling= Bodies.rectangle(width/2, -wallThickness/2, width, wallThickness, { isStatic: true, render:{ fillStyle:'#0b1220' }});
-  World.add(engine.world, [floor, left, right, ceiling]);
+    // floor & walls
+    const wallThickness = 60;
+    const floor = Bodies.rectangle(width / 2, height + wallThickness / 2, width + 2 * wallThickness, wallThickness, { isStatic: true, render: { fillStyle: '#111827' } });
+    const left = Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: '#111827' } });
+    const right = Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: '#111827' } });
+    const ceiling = Bodies.rectangle(width / 2, -wallThickness / 2, width, wallThickness, { isStatic: true, render: { fillStyle: '#0b1220' } });
+    World.add(engine.world, [floor, left, right, ceiling]);
 
-  // Create two boxes
-  const boxA = Bodies.rectangle(width/2 - 100, 200, 80, 80, { restitution:0.5, friction:0.1, render:{ fillStyle:'#60A5FA' } });
-  const boxB = Bodies.rectangle(width/2 + 100, 200, 80, 80, { restitution:0.5, friction:0.1, render:{ fillStyle:'#F472B6' } });
-  World.add(engine.world, [boxA, boxB]);
+    // Create two boxes
+    const boxA = Bodies.rectangle(width / 2 - 100, 200, 80, 80, { restitution: 0.5, friction: 0.1, render: { fillStyle: '#60A5FA' } });
+    const boxB = Bodies.rectangle(width / 2 + 100, 200, 80, 80, { restitution: 0.5, friction: 0.1, render: { fillStyle: '#F472B6' } });
+    World.add(engine.world, [boxA, boxB]);
 
-  // Connect them with a constraint (like a spring / rod)
-  const cons = Constraint.create({
-    bodyA: boxA,
-    bodyB: boxB,
-    length: 200,
-    stiffness: 0.9,
-    render: {
-      visible: true,
-      lineWidth: 4,
-      strokeStyle: '#94a3b8'
-    }
-  });
-  World.add(engine.world, cons);
+    // Connect them with a constraint (like a spring / rod)
+    const cons = Constraint.create({
+        bodyA: boxA,
+        bodyB: boxB,
+        length: 200,
+        stiffness: 0.9,
+        render: {
+            visible: true,
+            lineWidth: 4,
+            strokeStyle: '#94a3b8'
+        }
+    });
+    World.add(engine.world, cons);
 
-  // Also attach one end to a fixed point (optional)
-  const fixedPoint = { x: width/2, y: 50 };
-  const cons2 = Constraint.create({
-    pointA: fixedPoint,
-    bodyB: boxA,
-    length: 150,
-    stiffness: 0.9,
-    render: {
-      visible: true,
-      lineWidth: 4,
-      strokeStyle: '#94a3b8'
-    }
-  });
-  World.add(engine.world, cons2);
+    // Also attach one end to a fixed point (optional)
+    const fixedPoint = { x: width / 2, y: 50 };
+    const cons2 = Constraint.create({
+        pointA: fixedPoint,
+        bodyB: boxA,
+        length: 150,
+        stiffness: 0.9,
+        render: {
+            visible: true,
+            lineWidth: 4,
+            strokeStyle: '#94a3b8'
+        }
+    });
+    World.add(engine.world, cons2);
 }
+
+// ===== Double Pendulum Demo =====
+export function DoublePendulumDemo({ engine, render }) {
+    const { Bodies, Composite, Constraint, World } = Matter;
+
+    const width = render.options.width;
+    const height = render.options.height;
+
+    // Walls (same as all other demos)
+    const wallThickness = 60;
+    const floor = Bodies.rectangle(width / 2, height + wallThickness / 2, width + 2 * wallThickness, wallThickness, {
+        isStatic: true,
+        render: { fillStyle: '#111827' }
+    });
+    const left = Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height, {
+        isStatic: true,
+        render: { fillStyle: '#111827' }
+    });
+    const right = Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height, {
+        isStatic: true,
+        render: { fillStyle: '#111827' }
+    });
+    const ceiling = Bodies.rectangle(width / 2, -wallThickness / 2, width, wallThickness, {
+        isStatic: true,
+        render: { fillStyle: '#0b1220' }
+    });
+
+    World.add(engine.world, [floor, left, right, ceiling]);
+
+    // Double pendulum system
+    const pivot = { x: width / 2, y: 100 };
+
+    const bob1 = Bodies.circle(pivot.x, pivot.y + 140, 30, {
+        restitution: 1,
+        frictionAir: 0.002,
+        render: { fillStyle: '#FF6B6B' }
+    });
+
+    const bob2 = Bodies.circle(pivot.x, pivot.y + 280, 30, {
+        restitution: 1,
+        frictionAir: 0.002,
+        render: { fillStyle: '#4D9AFF' }
+    });
+
+    World.add(engine.world, [bob1, bob2]);
+
+    const rod1 = Constraint.create({
+        pointA: pivot,
+        bodyB: bob1,
+        length: 140,
+        stiffness: 0.9,
+        render: {
+            visible: true,
+            strokeStyle: '#94a3b8',
+            lineWidth: 4
+        }
+    });
+
+    const rod2 = Constraint.create({
+        bodyA: bob1,
+        bodyB: bob2,
+        length: 140,
+        stiffness: 0.9,
+        render: {
+            visible: true,
+            strokeStyle: '#94a3b8',
+            lineWidth: 4
+        }
+    });
+
+    World.add(engine.world, [rod1, rod2]);
+
+    // Kick start
+    Matter.Body.applyForce(bob1, bob1.position, { x: 0.05, y: 0 });
+}
+

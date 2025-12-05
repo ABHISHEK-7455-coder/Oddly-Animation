@@ -4,7 +4,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import Matter from 'matter-js';
-import { MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo } from './demos';
+import { MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo, DoublePendulumDemo } from './demos';
 // import { AvalancheDemo } from './AvalancheDemo';
 import './MatterJs.css';
 
@@ -13,12 +13,12 @@ export default function MegaPhysicsDemo() {
     const engineRef = useRef(null);
     const renderRef = useRef(null);
     const mouseConstraintRef = useRef(null);
-    const [activeDemo,setActiveDemo] = useState('mixed');
-    const [gravity,setGravity] = useState(0.5);
-    const [spawnCount,setSpawnCount] = useState(12);
-    const [running,setRunning] = useState(true);
+    const [activeDemo, setActiveDemo] = useState('mixed');
+    const [gravity, setGravity] = useState(0.5);
+    const [spawnCount, setSpawnCount] = useState(12);
+    const [running, setRunning] = useState(true);
 
-    useEffect(()=>{
+    useEffect(() => {
         const Engine = Matter.Engine;
         const Render = Matter.Render;
         const Mouse = Matter.Mouse;
@@ -26,27 +26,27 @@ export default function MegaPhysicsDemo() {
 
         const engine = Engine.create();
         engine.gravity.y = gravity;
-        engineRef.current=engine;
+        engineRef.current = engine;
 
         const width = sceneRef.current.clientWidth || 800;
         const height = sceneRef.current.clientHeight || 600;
 
         const render = Render.create({
-            element:sceneRef.current,
+            element: sceneRef.current,
             engine,
-            options:{
-                width,height,
-                wireframes:false,
-                background:'#0f172a'
+            options: {
+                width, height,
+                wireframes: false,
+                background: '#0f172a'
             }
         });
-        renderRef.current=render;
+        renderRef.current = render;
 
         // Add mouse constraint ONCE
         const mouse = Mouse.create(render.canvas);
-        const mouseConstraint = MouseConstraint.create(engine,{
+        const mouseConstraint = MouseConstraint.create(engine, {
             mouse,
-            constraint:{stiffness:0.2, render:{visible:true}}
+            constraint: { stiffness: 0.2, render: { visible: true } }
         });
         Matter.World.add(engine.world, mouseConstraint);
         mouseConstraintRef.current = mouseConstraint;
@@ -54,10 +54,10 @@ export default function MegaPhysicsDemo() {
 
         const runner = Matter.Runner.create();
         engine.timing.runner = runner;
-        Matter.Runner.run(runner,engine);
+        Matter.Runner.run(runner, engine);
         Render.run(render);
 
-        window.addEventListener('resize',()=>{
+        window.addEventListener('resize', () => {
             const w = sceneRef.current.clientWidth;
             const h = sceneRef.current.clientHeight;
             render.bounds.max.x = w;
@@ -68,93 +68,103 @@ export default function MegaPhysicsDemo() {
             render.canvas.height = h;
         });
 
-        return ()=>{
+        return () => {
             Matter.Render.stop(render);
-            Matter.World.clear(engine.world,false);
+            Matter.World.clear(engine.world, false);
             Matter.Engine.clear(engine);
             render.canvas && render.canvas.remove();
-            render.textures={};
+            render.textures = {};
         }
-    },[]);
+    }, []);
 
-    useEffect(()=>{
-        if(engineRef.current) engineRef.current.gravity.y = gravity;
-    },[gravity]);
+    useEffect(() => {
+        if (engineRef.current) engineRef.current.gravity.y = gravity;
+    }, [gravity]);
 
     // Clear all dynamic bodies + constraints but preserve MouseConstraint
     const handleClear = () => {
-        if(!engineRef.current || !mouseConstraintRef.current) return;
+        if (!engineRef.current || !mouseConstraintRef.current) return;
         const engine = engineRef.current;
         const allBodies = Matter.Composite.allBodies(engine.world);
         const allConstraints = Matter.Composite.allConstraints(engine.world);
-        for(const b of allBodies){
-            if(!b.isStatic && b!==mouseConstraintRef.current.bodyA && b!==mouseConstraintRef.current.bodyB){
-                Matter.Composite.remove(engine.world,b);
+        for (const b of allBodies) {
+            if (!b.isStatic && b !== mouseConstraintRef.current.bodyA && b !== mouseConstraintRef.current.bodyB) {
+                Matter.Composite.remove(engine.world, b);
             }
         }
-        for(const c of allConstraints){
-            if(c!==mouseConstraintRef.current.constraint){
-                Matter.Composite.remove(engine.world,c);
+        for (const c of allConstraints) {
+            if (c !== mouseConstraintRef.current.constraint) {
+                Matter.Composite.remove(engine.world, c);
             }
         }
     };
 
     const handleSpawn = () => {
-        if(!engineRef.current||!renderRef.current) return;
+        if (!engineRef.current || !renderRef.current) return;
         const engine = engineRef.current;
         const render = renderRef.current;
-        if(activeDemo==='mixed') {
-            MixedDemo({engine,render,spawnCount});
-        } else if(activeDemo==='chains') {
-            ChainsDemo({engine,render,spawnCount});
-        } else if(activeDemo==='avalanche') {
-            AvalancheDemo({engine,render,spawnCount});
-        } else if(activeDemo==='constraints') {
-            ConstraintsDemo({engine,render});
+        if (activeDemo === 'mixed') {
+            MixedDemo({ engine, render, spawnCount });
+        } else if (activeDemo === 'chains') {
+            ChainsDemo({ engine, render, spawnCount });
+        } else if (activeDemo === 'avalanche') {
+            AvalancheDemo({ engine, render, spawnCount });
+        } else if (activeDemo === 'constraints') {
+            ConstraintsDemo({ engine, render });
+        } else if (activeDemo === 'double') {
+            DoublePendulumDemo({ engine, render });
         }
+
     };
 
     const handlePauseResume = () => {
-        if(!engineRef.current) return;
+        if (!engineRef.current) return;
         const engine = engineRef.current;
-        if(running){
-            try{ Matter.Runner.stop(engine.timing.runner); } catch(e){}
+        if (running) {
+            try { Matter.Runner.stop(engine.timing.runner); } catch (e) { }
         } else {
             const runner = Matter.Runner.create();
             engine.timing.runner = runner;
-            Matter.Runner.run(runner,engine);
+            Matter.Runner.run(runner, engine);
         }
         setRunning(!running);
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         handleClear(); // clear all bodies + constraints except mouse
         handleSpawn();
-    },[activeDemo,spawnCount]);
+    }, [activeDemo, spawnCount]);
 
     return (
         <div className="matter-container">
             <div className="matter-controls">
-                <button className={`btn ${activeDemo==='mixed'?'btn-indigo':'btn-slate'}`} onClick={()=>setActiveDemo('mixed')}>Mixed Physics</button>
-                <button className={`btn ${activeDemo==='chains'?'btn-teal':'btn-slate'}`} onClick={()=>setActiveDemo('chains')}>Chains Demo</button>
-                <button className={`btn ${activeDemo==='avalanche'?'btn-yellow':'btn-slate'}`} onClick={()=>setActiveDemo('avalanche')}>Avalanche Demo</button>
-                <button className={`btn ${activeDemo==='constraints'?'btn-purple':'btn-slate'}`} onClick={()=>setActiveDemo('constraints')}>Constraints Demo</button>
+                <button className={`btn ${activeDemo === 'mixed' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('mixed')}>Mixed Physics</button>
+                <button className={`btn ${activeDemo === 'chains' ? 'btn-teal' : 'btn-slate'}`} onClick={() => setActiveDemo('chains')}>Chains Demo</button>
+                <button className={`btn ${activeDemo === 'avalanche' ? 'btn-yellow' : 'btn-slate'}`} onClick={() => setActiveDemo('avalanche')}>Avalanche Demo</button>
+                <button className={`btn ${activeDemo === 'constraints' ? 'btn-purple' : 'btn-slate'}`} onClick={() => setActiveDemo('constraints')}>Constraints Demo</button>
+                <button
+                    className={`btn ${activeDemo === 'double' ? 'btn-orange' : 'btn-slate'}`}
+                    onClick={() => setActiveDemo('double')}
+                >
+                    Double Pendulum
+                </button>
+
 
                 <button className="btn btn-indigo" onClick={handleSpawn}>Spawn {spawnCount}</button>
-                <button className="btn btn-yellow" onClick={handlePauseResume}>{running?'Pause':'Resume'}</button>
+                <button className="btn btn-yellow" onClick={handlePauseResume}>{running ? 'Pause' : 'Resume'}</button>
                 <button className="btn btn-rose" onClick={handleClear}>Clear</button>
 
                 <label>Gravity
-                    <input type="range" min="-2" max="3" step="0.1" value={gravity} onChange={e=>setGravity(parseFloat(e.target.value))} />
+                    <input type="range" min="-2" max="3" step="0.1" value={gravity} onChange={e => setGravity(parseFloat(e.target.value))} />
                     <span>{gravity.toFixed(1)}</span>
                 </label>
 
                 <label>Count
-                    <input type="number" min="1" max="60" value={spawnCount} onChange={e=>setSpawnCount(Math.max(1,Math.min(60,parseInt(e.target.value||'12',10))))} />
+                    <input type="number" min="1" max="60" value={spawnCount} onChange={e => setSpawnCount(Math.max(1, Math.min(60, parseInt(e.target.value || '12', 10))))} />
                 </label>
 
             </div>
-            <div ref={sceneRef} className="scene-area"/>
+            <div ref={sceneRef} className="scene-area" />
         </div>
     );
 }
