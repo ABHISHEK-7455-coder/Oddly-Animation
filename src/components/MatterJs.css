@@ -7,6 +7,10 @@
     background-color: #0f172a;
     color: white;
     font-family: sans-serif;
+    height: 86vh;
+    width: 85%;
+    margin: 10px auto;
+    border-radius: 16px;
 }
 
 .matter-controls {

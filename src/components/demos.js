@@ -232,3 +232,217 @@ export function DoublePendulumDemo({ engine, render }) {
     Matter.Body.applyForce(bob1, bob1.position, { x: 0.05, y: 0 });
 }
 
+// ===== WreckingBallDemo =====
+// Follows same pattern as other demos: signature, walls, bodies, constraints, World.add
+// Colors chosen to match the original Matter.js wrecking-ball demo (yellow boxes, gray/steel ball, muted ropes).
+
+export function WreckingBallDemo({ engine, render }) {
+    const { Bodies, Constraint, World } = Matter;
+
+    const width = render.options.width;
+    const height = render.options.height;
+
+    // --- walls & floor (same style as other demos) ---
+    const wallThickness = 60;
+    const floor = Bodies.rectangle(
+        width / 2,
+        height + wallThickness / 2,
+        width + 2 * wallThickness,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: '#111827' } }
+    );
+    const left = Bodies.rectangle(
+        -wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: '#111827' } }
+    );
+    const right = Bodies.rectangle(
+        width + wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: '#111827' } }
+    );
+    const ceiling = Bodies.rectangle(
+        width / 2,
+        -wallThickness / 2,
+        width,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: '#0b1220' } }
+    );
+
+    World.add(engine.world, [floor, left, right, ceiling]);
+
+    // ---- Wrecking ball chain (left side) ----
+    const anchorX = Math.max(120, width * 0.12);
+    const anchorY = 60;
+    const linkCount = 10;
+    const linkRadius = 10;
+    const linkSpacing = linkRadius * 2 + 2;
+
+    // anchor point (a small static circle so it appears as a pin)
+    const anchor = Bodies.circle(anchorX, anchorY, 4, {
+        isStatic: true,
+        render: { fillStyle: '#f8fafc' }
+    });
+
+    const links = [anchor];
+    const constraints = [];
+
+    // create chain links
+    for (let i = 0; i < linkCount; i++) {
+        const x = anchorX;
+        const y = anchorY + (i + 1) * linkSpacing;
+        const link = Bodies.circle(x, y, linkRadius, {
+            friction: 0.1,
+            restitution: 0.0,
+            density: 0.0008,
+            render: { fillStyle: '#8b8f95' } // muted steel for chain links
+        });
+        links.push(link);
+
+        const prev = links[links.length - 2];
+        const cons = Constraint.create({
+            bodyA: prev,
+            bodyB: link,
+            length: linkSpacing,
+            stiffness: 1,
+            render: { visible: true, lineWidth: 3, strokeStyle: '#94a3b8' }
+        });
+        constraints.push(cons);
+    }
+
+    // wrecking ball (heavy)
+    const lastLink = links[links.length - 1];
+    const ballRadius = 36;
+    const wreckingBall = Bodies.circle(
+        lastLink.position.x,
+        lastLink.position.y + linkSpacing + ballRadius / 2,
+        ballRadius,
+        {
+            friction: 0.4,
+            restitution: 0.2,
+            density: 0.02, // heavy
+            render: { fillStyle: '#555555' } // dark gray / steel
+        }
+    );
+
+    // connect last link to wrecking ball
+    const endConstraint = Constraint.create({
+        bodyA: lastLink,
+        bodyB: wreckingBall,
+        length: linkSpacing + ballRadius / 2,
+        stiffness: 1,
+        render: { visible: true, lineWidth: 4, strokeStyle: '#94a3b8' }
+    });
+    constraints.push(endConstraint);
+
+    World.add(engine.world, [...links.slice(1), ...constraints, wreckingBall, anchor]); // slice to avoid adding anchor twice
+
+    // give a gentle initial nudge so ball swings a bit on spawn
+    Matter.Body.applyForce(wreckingBall, wreckingBall.position, { x: 0.06, y: 0 });
+
+    // ---- Stack / tower of boxes to wreck ----
+    // place a multi-column stack a bit to the right of the ball
+    const stackBaseX = Math.max(width * 0.45, anchorX + 260);
+    const stackBaseY = height - 120;
+    const cols = 6;
+    const rows = 8;
+    const boxW = 40;
+    const boxH = 36;
+    const gap = 2;
+
+    const boxes = [];
+    for (let col = 0; col < cols; col++) {
+        for (let row = 0; row < rows; row++) {
+            const bx = stackBaseX + col * (boxW + gap);
+            const by = stackBaseY - row * (boxH + gap);
+            const box = Bodies.rectangle(bx, by, boxW, boxH, {
+                restitution: 0.1,
+                friction: 0.6,
+                density: 0.002,
+                render: { fillStyle: '#F5C45A' } // yellow-ish like original demo blocks
+            });
+            boxes.push(box);
+        }
+    }
+    World.add(engine.world, boxes);
+
+    // ---- optional: few loose boxes nearby for variety ----
+    const loose = [
+        Bodies.rectangle(stackBaseX - 140, stackBaseY - 20, 48, 36, { render: { fillStyle: '#F5C45A' } }),
+        Bodies.rectangle(stackBaseX - 100, stackBaseY - 60, 36, 36, { render: { fillStyle: '#F5C45A' } })
+    ];
+    World.add(engine.world, loose);
+}
+
+export function TimeScaleDemo({ engine, render }) {
+    const { Bodies, World, Composite } = Matter;
+
+    const width = render.options.width;
+    const height = render.options.height;
+
+    // Remove old bodies (except mouse)
+    const mouseConstraint = engine.world.bodies.find(b => b.label === "Mouse Body");
+    Composite.clear(engine.world, false);
+    if (mouseConstraint) Composite.add(engine.world, mouseConstraint);
+
+    // Walls
+    const wallThickness = 60;
+    const floor = Bodies.rectangle(width / 2, height + wallThickness / 2, width + 200, wallThickness, {
+        isStatic: true, render: { fillStyle: "#111827" }
+    });
+    const left = Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height, {
+        isStatic: true, render: { fillStyle: "#111827" }
+    });
+    const right = Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height, {
+        isStatic: true, render: { fillStyle: "#111827" }
+    });
+
+    World.add(engine.world, [floor, left, right]);
+
+    // Spawn blocks
+    function spawnBlocks() {
+        const blocks = [];
+        for (let i = 0; i < 20; i++) {
+            const box = Bodies.rectangle(
+                width * 0.5 + (Math.random() - 0.5) * 200,
+                0 - i * 40,
+                40, 40,
+                {
+                    restitution: 0.2,
+                    friction: 0.6,
+                    density: 0.002,
+                    render: { fillStyle: "#F5C45A" }
+                }
+            );
+            blocks.push(box);
+        }
+        World.add(engine.world, blocks);
+    }
+
+    spawnBlocks();
+
+    // --- THE REAL MAGIC: AUTO TIME-SCALE LOOP ---
+    let t = 0;
+
+    Matter.Events.on(engine, "beforeUpdate", () => {
+        t += 0.05;
+        engine.timing.timeScale = 0.5 + 0.5 * Math.sin(t * 0.5);  // smooth loop
+
+        // Auto-clean & respawn when blocks settle
+        const bodies = Composite.allBodies(engine.world);
+
+        // If almost all blocks on the floor → respawn
+        const resting = bodies.filter(b => !b.isStatic && Math.abs(b.velocity.y) < 0.2);
+
+        if (resting.length > 18) {
+            Composite.clear(engine.world, false);
+            if (mouseConstraint) Composite.add(engine.world, mouseConstraint);
+            World.add(engine.world, [floor, left, right]);
+            spawnBlocks();
+        }
+    });
+}
