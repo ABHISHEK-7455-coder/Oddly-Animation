@@ -378,71 +378,120 @@ export function WreckingBallDemo({ engine, render }) {
     World.add(engine.world, loose);
 }
 
-export function TimeScaleDemo({ engine, render }) {
+export function TimescaleDemo({ engine, render }) {
     const { Bodies, World, Composite } = Matter;
+    const width = render.options.width;
+    const height = render.options.height;
+
+    // Floor & walls
+    const wallThickness = 60;
+    const floor = Bodies.rectangle(width / 2, height + wallThickness / 2, width + 2 * wallThickness, wallThickness, { isStatic: true, render: { fillStyle: '#111827' } });
+    const leftWall = Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: '#111827' } });
+    const rightWall = Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: '#111827' } });
+    const ceiling = Bodies.rectangle(width / 2, -wallThickness / 2, width, wallThickness, { isStatic: true, render: { fillStyle: '#0b1220' } });
+    World.add(engine.world, [floor, leftWall, rightWall, ceiling]);
+
+    // Random color palette
+    const palette = ['#60A5FA', '#F472B6', '#34D399', '#F59E0B', '#A78BFA', '#F87171', '#FCD34D'];
+
+    // Auto spawn shapes
+    let spawnTimer = setInterval(() => {
+        const size = 20 + Math.random() * 40;
+        const x = 50 + Math.random() * (width - 100);
+        const y = -50;
+        const kind = Math.floor(Math.random() * 2);
+        let body;
+        if (kind === 0) {
+            body = Bodies.rectangle(x, y, size, size, { restitution: 0.3, friction: 0.1, render: { fillStyle: palette[Math.floor(Math.random() * palette.length)] } });
+        } else {
+            body = Bodies.circle(x, y, size / 2, { restitution: 0.3, friction: 0.1, render: { fillStyle: palette[Math.floor(Math.random() * palette.length)] } });
+        }
+        World.add(engine.world, body);
+    }, 400); // spawn every 0.4s
+
+    // TimeScale oscillation
+    let t = 0;
+    let timeScaleFrame = requestAnimationFrame(function updateTimeScale() {
+        if (!engine) return;
+        t += 0.02;
+        engine.timing.timeScale = 0.5 + 0.5 * Math.sin(t); // oscillates between 0 → 1
+        timeScaleFrame = requestAnimationFrame(updateTimeScale);
+    });
+
+    // Cleanup function when switching demos
+    return () => {
+        clearInterval(spawnTimer);
+        cancelAnimationFrame(timeScaleFrame);
+
+        // remove all non-static bodies
+        const allBodies = Composite.allBodies(engine.world);
+        for (const b of allBodies) {
+            if (!b.isStatic) Composite.remove(engine.world, b);
+        }
+    };
+}
+
+// ===== CompoundStackDemo.js =====
+
+export function CompoundStackDemo({ engine, render }) {
+    const { Bodies, Composites, World } = Matter;
 
     const width = render.options.width;
     const height = render.options.height;
 
-    // Remove old bodies (except mouse)
-    const mouseConstraint = engine.world.bodies.find(b => b.label === "Mouse Body");
-    Composite.clear(engine.world, false);
-    if (mouseConstraint) Composite.add(engine.world, mouseConstraint);
-
-    // Walls
+    // --- Walls & Floor ---
     const wallThickness = 60;
-    const floor = Bodies.rectangle(width / 2, height + wallThickness / 2, width + 200, wallThickness, {
-        isStatic: true, render: { fillStyle: "#111827" }
-    });
-    const left = Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height, {
-        isStatic: true, render: { fillStyle: "#111827" }
-    });
-    const right = Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height, {
-        isStatic: true, render: { fillStyle: "#111827" }
-    });
 
-    World.add(engine.world, [floor, left, right]);
+    const floor = Bodies.rectangle(
+        width / 2,
+        height + wallThickness / 2,
+        width + 2 * wallThickness,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
 
-    // Spawn blocks
-    function spawnBlocks() {
-        const blocks = [];
-        for (let i = 0; i < 20; i++) {
-            const box = Bodies.rectangle(
-                width * 0.5 + (Math.random() - 0.5) * 200,
-                0 - i * 40,
-                40, 40,
-                {
-                    restitution: 0.2,
-                    friction: 0.6,
-                    density: 0.002,
-                    render: { fillStyle: "#F5C45A" }
-                }
-            );
-            blocks.push(box);
+    const left = Bodies.rectangle(
+        -wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const right = Bodies.rectangle(
+        width + wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const ceiling = Bodies.rectangle(
+        width / 2,
+        -wallThickness / 2,
+        width,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: "#0b1220" } }
+    );
+
+    World.add(engine.world, [floor, left, right, ceiling]);
+
+    // --- COMPOUND STACK (Matter.js style) ---
+    const stack = Composites.stack(
+        width * 0.2,         // X start
+        height - 460,        // Y start
+        6,                   // columns
+        9,                   // rows
+        0, 0,                // gaps
+        (x, y) => {
+            return Bodies.rectangle(x, y, 40, 40, {
+                restitution: 0.1,
+                friction: 0.6,
+                density: 0.002,
+                render: { fillStyle: "#F5C45A" } // Yellowish block (same as WreckingBall)
+            });
         }
-        World.add(engine.world, blocks);
-    }
+    );
 
-    spawnBlocks();
-
-    // --- THE REAL MAGIC: AUTO TIME-SCALE LOOP ---
-    let t = 0;
-
-    Matter.Events.on(engine, "beforeUpdate", () => {
-        t += 0.05;
-        engine.timing.timeScale = 0.5 + 0.5 * Math.sin(t * 0.5);  // smooth loop
-
-        // Auto-clean & respawn when blocks settle
-        const bodies = Composite.allBodies(engine.world);
-
-        // If almost all blocks on the floor → respawn
-        const resting = bodies.filter(b => !b.isStatic && Math.abs(b.velocity.y) < 0.2);
-
-        if (resting.length > 18) {
-            Composite.clear(engine.world, false);
-            if (mouseConstraint) Composite.add(engine.world, mouseConstraint);
-            World.add(engine.world, [floor, left, right]);
-            spawnBlocks();
-        }
-    });
+    World.add(engine.world, stack);
 }

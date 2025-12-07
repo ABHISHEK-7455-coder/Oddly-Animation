@@ -4,7 +4,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import Matter from 'matter-js';
-import { MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo, DoublePendulumDemo, WreckingBallDemo, TimeScaleDemo } from './demos';
+import { MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo, DoublePendulumDemo, WreckingBallDemo, TimescaleDemo, CompoundStackDemo } from './demos';
 // import { AvalancheDemo } from './AvalancheDemo';
 import './MatterJs.css';
 
@@ -14,9 +14,12 @@ export default function MegaPhysicsDemo() {
     const renderRef = useRef(null);
     const mouseConstraintRef = useRef(null);
     const [activeDemo, setActiveDemo] = useState('mixed');
-    const [gravity, setGravity] = useState(0.5);
+    const [gravity, setGravity] = useState(0.2);
     const [spawnCount, setSpawnCount] = useState(12);
     const [running, setRunning] = useState(true);
+
+    let TimescaleDemoCleanup = null;
+
 
     useEffect(() => {
         const Engine = Matter.Engine;
@@ -116,9 +119,11 @@ export default function MegaPhysicsDemo() {
         } else if (activeDemo === 'wreckingball') {
             WreckingBallDemo({ engine, render });
         } else if (activeDemo === 'timescale') {
-            TimeScaleDemo({ engine, render });
+            if (typeof TimescaleDemoCleanup === 'function') TimescaleDemoCleanup(); // previous cleanup
+            TimescaleDemoCleanup = TimescaleDemo({ engine, render }); // store cleanup function
+        } else if (activeDemo === "compound") {
+            CompoundStackDemo({ engine, render });
         }
-
     };
 
     const handlePauseResume = () => {
@@ -149,6 +154,7 @@ export default function MegaPhysicsDemo() {
                 <button className={`btn ${activeDemo === 'double' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('double')}>Double Pendulum</button>
                 <button className={`btn ${activeDemo === 'wreckingBall' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('wreckingball')}>Wrecking Ball</button>
                 <button className={`btn ${activeDemo === 'wreckingBall' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('timescale')}>Time Scale</button>
+                <button className={`btn ${activeDemo === 'compound' ? 'btn-green' : 'btn-slate'}`} onClick={() => setActiveDemo('compound')}>Compound Stack</button>
 
                 <button className="btn btn-indigo" onClick={handleSpawn}>Spawn {spawnCount}</button>
                 <button className="btn btn-yellow" onClick={handlePauseResume}>{running ? 'Pause' : 'Resume'}</button>
