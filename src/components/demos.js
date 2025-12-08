@@ -431,15 +431,12 @@ export function TimescaleDemo({ engine, render }) {
     };
 }
 
-// ===== CompoundStackDemo.js =====
-
 export function CompoundStackDemo({ engine, render }) {
     const { Bodies, Composites, World } = Matter;
 
     const width = render.options.width;
     const height = render.options.height;
 
-    // --- Walls & Floor ---
     const wallThickness = 60;
 
     const floor = Bodies.rectangle(
@@ -476,7 +473,7 @@ export function CompoundStackDemo({ engine, render }) {
 
     World.add(engine.world, [floor, left, right, ceiling]);
 
-    // --- COMPOUND STACK (Matter.js style) ---
+    //--- (style) ---
     const stack = Composites.stack(
         width * 0.2,         // X start
         height - 460,        // Y start
@@ -495,3 +492,130 @@ export function CompoundStackDemo({ engine, render }) {
 
     World.add(engine.world, stack);
 }
+
+export function RopeBridgeDemo({ engine, render }) {
+    const { Bodies, Constraint, Composites, World } = Matter;
+
+    const width = render.options.width;
+    const height = render.options.height;
+
+    const wallThickness = 60;
+
+    // ==== Walls + Floor ====
+    const floor = Bodies.rectangle(
+        width / 2,
+        height + wallThickness / 2,
+        width + 2 * wallThickness,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const left = Bodies.rectangle(
+        -wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const right = Bodies.rectangle(
+        width + wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const ceiling = Bodies.rectangle(
+        width / 2,
+        -wallThickness / 2,
+        width,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: "#0b1220" } }
+    );
+
+    World.add(engine.world, [floor, left, right, ceiling]);
+
+    // ==== ROPE BRIDGE ====
+    const segmentWidth = 60;
+    const segmentHeight = 24;
+    const segments = 12;
+
+    const bridgeY = height * 0.45;
+    const bridgeX = width * 0.15;
+
+    const rope = Composites.stack(
+        bridgeX, bridgeY,
+        segments, 1,
+        0, 0,
+        (x, y) => {
+            return Bodies.rectangle(x, y, segmentWidth, segmentHeight, {
+                friction: 0.6,
+                density: 0.002,
+                render: { fillStyle: "#8b8f95" } // steel grey (matches chains)
+            });
+        }
+    );
+
+    Composites.chain(rope, 0.4, 0, 0.6, 0, {
+        stiffness: 1,
+        render: { visible: true, strokeStyle: "#94a3b8", lineWidth: 3 }
+    });
+
+    // Anchor left
+    const anchorLeft = Bodies.rectangle(
+        bridgeX - 40,
+        bridgeY,
+        20, 20,
+        { isStatic: true, render: { fillStyle: "#f8fafc" } }
+    );
+
+    // Anchor right
+    const anchorRight = Bodies.rectangle(
+        bridgeX + segments * segmentWidth + 40,
+        bridgeY,
+        20, 20,
+        { isStatic: true, render: { fillStyle: "#f8fafc" } }
+    );
+
+    World.add(engine.world, [anchorLeft, anchorRight]);
+
+    // attach first segment to left anchor
+    World.add(engine.world,
+        Constraint.create({
+            bodyA: rope.bodies[0],
+            pointB: { x: anchorLeft.position.x, y: anchorLeft.position.y },
+            stiffness: 1,
+            render: { visible: true, strokeStyle: "#94a3b8", lineWidth: 3 }
+        })
+    );
+
+    // attach last segment to right anchor
+    World.add(engine.world,
+        Constraint.create({
+            bodyA: rope.bodies[rope.bodies.length - 1],
+            pointB: { x: anchorRight.position.x, y: anchorRight.position.y },
+            stiffness: 1,
+            render: { visible: true, strokeStyle: "#94a3b8", lineWidth: 3 }
+        })
+    );
+
+    World.add(engine.world, rope);
+
+    // ==== Add falling boxes ====
+    for (let i = 0; i < 10; i++) {
+        const box = Bodies.rectangle(
+            width * 0.3 + i * 60,
+            0,
+            36, 36,
+            {
+                friction: 0.5,
+                restitution: 0.2,
+                density: 0.002,
+                render: { fillStyle: "#F5C45A" } // yellow blocks (same as stack)
+            }
+        );
+        World.add(engine.world, box);
+    }
+}
+

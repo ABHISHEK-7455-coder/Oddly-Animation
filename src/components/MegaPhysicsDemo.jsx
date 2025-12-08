@@ -4,7 +4,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import Matter from 'matter-js';
-import { MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo, DoublePendulumDemo, WreckingBallDemo, TimescaleDemo, CompoundStackDemo } from './demos';
+import { MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo, DoublePendulumDemo, WreckingBallDemo, TimescaleDemo, CompoundStackDemo, RopeBridgeDemo } from './demos';
 // import { AvalancheDemo } from './AvalancheDemo';
 import './MatterJs.css';
 
@@ -123,6 +123,8 @@ export default function MegaPhysicsDemo() {
             TimescaleDemoCleanup = TimescaleDemo({ engine, render }); // store cleanup function
         } else if (activeDemo === "compound") {
             CompoundStackDemo({ engine, render });
+        } else if (activeDemo === 'rope') {
+            RopeBridgeDemo({ engine, render });
         }
     };
 
@@ -155,6 +157,8 @@ export default function MegaPhysicsDemo() {
                 <button className={`btn ${activeDemo === 'wreckingBall' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('wreckingball')}>Wrecking Ball</button>
                 <button className={`btn ${activeDemo === 'wreckingBall' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('timescale')}>Time Scale</button>
                 <button className={`btn ${activeDemo === 'compound' ? 'btn-green' : 'btn-slate'}`} onClick={() => setActiveDemo('compound')}>Compound Stack</button>
+                <button className={`btn ${activeDemo === 'rope' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('rope')}>Rope Bridge</button>
+
 
                 <button className="btn btn-indigo" onClick={handleSpawn}>Spawn {spawnCount}</button>
                 <button className="btn btn-yellow" onClick={handlePauseResume}>{running ? 'Pause' : 'Resume'}</button>
