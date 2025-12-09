@@ -494,14 +494,14 @@ export function CompoundStackDemo({ engine, render }) {
 }
 
 export function RopeBridgeDemo({ engine, render }) {
-    const { Bodies, Constraint, Composites, World } = Matter;
+    const { Bodies, Constraint, Composites, World, Body } = Matter;
 
     const width = render.options.width;
     const height = render.options.height;
 
     const wallThickness = 60;
 
-    // ==== Walls + Floor ====
+    // ==== Walls & Floor ====
     const floor = Bodies.rectangle(
         width / 2,
         height + wallThickness / 2,
@@ -537,8 +537,8 @@ export function RopeBridgeDemo({ engine, render }) {
     World.add(engine.world, [floor, left, right, ceiling]);
 
     // ==== ROPE BRIDGE ====
-    const segmentWidth = 60;
-    const segmentHeight = 24;
+    const segmentW = 60;
+    const segmentH = 24;
     const segments = 12;
 
     const bridgeY = height * 0.45;
@@ -548,13 +548,11 @@ export function RopeBridgeDemo({ engine, render }) {
         bridgeX, bridgeY,
         segments, 1,
         0, 0,
-        (x, y) => {
-            return Bodies.rectangle(x, y, segmentWidth, segmentHeight, {
-                friction: 0.6,
-                density: 0.002,
-                render: { fillStyle: "#8b8f95" } // steel grey (matches chains)
-            });
-        }
+        (x, y) => Bodies.rectangle(x, y, segmentW, segmentH, {
+            friction: 0.6,
+            density: 0.002,
+            render: { fillStyle: "#8b8f95" }
+        })
     );
 
     Composites.chain(rope, 0.4, 0, 0.6, 0, {
@@ -562,17 +560,14 @@ export function RopeBridgeDemo({ engine, render }) {
         render: { visible: true, strokeStyle: "#94a3b8", lineWidth: 3 }
     });
 
-    // Anchor left
     const anchorLeft = Bodies.rectangle(
         bridgeX - 40,
         bridgeY,
         20, 20,
         { isStatic: true, render: { fillStyle: "#f8fafc" } }
     );
-
-    // Anchor right
     const anchorRight = Bodies.rectangle(
-        bridgeX + segments * segmentWidth + 40,
+        bridgeX + segments * segmentW + 40,
         bridgeY,
         20, 20,
         { isStatic: true, render: { fillStyle: "#f8fafc" } }
@@ -580,21 +575,19 @@ export function RopeBridgeDemo({ engine, render }) {
 
     World.add(engine.world, [anchorLeft, anchorRight]);
 
-    // attach first segment to left anchor
     World.add(engine.world,
         Constraint.create({
             bodyA: rope.bodies[0],
-            pointB: { x: anchorLeft.position.x, y: anchorLeft.position.y },
+            pointB: anchorLeft.position,
             stiffness: 1,
             render: { visible: true, strokeStyle: "#94a3b8", lineWidth: 3 }
         })
     );
 
-    // attach last segment to right anchor
     World.add(engine.world,
         Constraint.create({
             bodyA: rope.bodies[rope.bodies.length - 1],
-            pointB: { x: anchorRight.position.x, y: anchorRight.position.y },
+            pointB: anchorRight.position,
             stiffness: 1,
             render: { visible: true, strokeStyle: "#94a3b8", lineWidth: 3 }
         })
@@ -602,20 +595,518 @@ export function RopeBridgeDemo({ engine, render }) {
 
     World.add(engine.world, rope);
 
-    // ==== Add falling boxes ====
-    for (let i = 0; i < 10; i++) {
+    // ==== PLAYER BODY ====
+    const playerWidth = 26;
+    const playerHeight = 48;
+
+    const player = Bodies.rectangle(
+        bridgeX + 40,           // start at left of bridge
+        bridgeY - 40,
+        playerWidth,
+        playerHeight,
+        {
+            friction: 0.6,
+            restitution: 0,
+            density: 0.004,
+            render: { fillStyle: "#4ade80" }  // green player
+        }
+    );
+
+    // Feet for stability (small circles)
+    const leftFoot = Bodies.circle(player.position.x - 10, player.position.y + 20, 6, {
+        friction: 1,
+        density: 0.004,
+        render: { fillStyle: "#22c55e" }
+    });
+
+    const rightFoot = Bodies.circle(player.position.x + 10, player.position.y + 20, 6, {
+        friction: 1,
+        density: 0.004,
+        render: { fillStyle: "#22c55e" }
+    });
+
+    // Constraints to keep feet attached to body
+    const footConstraints = [
+        Constraint.create({
+            bodyA: player,
+            bodyB: leftFoot,
+            pointA: { x: -10, y: 22 },
+            stiffness: 0.8,
+            render: { visible: false }
+        }),
+        Constraint.create({
+            bodyA: player,
+            bodyB: rightFoot,
+            pointA: { x: 10, y: 22 },
+            stiffness: 0.8,
+            render: { visible: false }
+        })
+    ];
+
+    World.add(engine.world, [player, leftFoot, rightFoot, ...footConstraints]);
+
+    // ==== PLAYER AUTO-WALK LOGIC ====
+    Matter.Events.on(engine, "beforeUpdate", () => {
+        // gentle walking force
+        Body.setVelocity(player, { x: 1.2, y: player.velocity.y });
+
+        // keep player upright
+        Body.setAngle(player, 0);
+
+        // adjust feet to stay underneath
+        Body.setPosition(leftFoot, {
+            x: player.position.x - 10,
+            y: player.position.y + 22
+        });
+
+        Body.setPosition(rightFoot, {
+            x: player.position.x + 10,
+            y: player.position.y + 22
+        });
+    });
+
+    // ==== FALLING BLOCKS ====
+    for (let i = 0; i < 6; i++) {
         const box = Bodies.rectangle(
-            width * 0.3 + i * 60,
+            width * 0.4 + i * 60,
             0,
             36, 36,
             {
                 friction: 0.5,
-                restitution: 0.2,
                 density: 0.002,
-                render: { fillStyle: "#F5C45A" } // yellow blocks (same as stack)
+                render: { fillStyle: "#F5C45A" }
             }
         );
         World.add(engine.world, box);
     }
 }
 
+export function NewtonsCradleDemo({ engine, render }) {
+    const { Composites, World, Bodies, Body } = Matter;
+
+    const width = render.options.width;
+    const height = render.options.height;
+
+    // optional floor (so balls don't drop out of screen)  
+    const floor = Bodies.rectangle(width/2, height + 50, width + 200, 100, {
+        isStatic: true,
+        render: { fillStyle: "#111827" }
+    });
+    World.add(engine.world, floor);
+
+    // create cradle: x, y, number of balls, ball radius, string length
+    const cradle = Composites.newtonsCradle(
+        width / 2 - 100, // x — start a bit left of center
+        100,             // y — top of strings
+        5,               // number of balls
+        20,              // ball radius
+        200              // length of rope/pendulum
+    );
+
+    World.add(engine.world, cradle);
+
+    // move first ball aside to start motion
+    Body.translate(cradle.bodies[0], { x: -120, y: -100 });
+}
+
+export function ClothDemo({ engine, render }) {
+    const { Bodies, Composites, Constraint, World, MouseConstraint, Mouse } = Matter;
+
+    const width = render.options.width;
+    const height = render.options.height;
+
+    // --- Walls ---
+    const wallThickness = 60;
+
+    const floor = Bodies.rectangle(
+        width / 2,
+        height + wallThickness / 2,
+        width + 2 * wallThickness,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const left = Bodies.rectangle(
+        -wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const right = Bodies.rectangle(
+        width + wallThickness / 2,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true, render: { fillStyle: "#111827" } }
+    );
+
+    const ceiling = Bodies.rectangle(
+        width / 2,
+        -wallThickness / 2,
+        width,
+        wallThickness,
+        { isStatic: true, render: { fillStyle: "#0b1220" } }
+    );
+
+    World.add(engine.world, [floor, left, right, ceiling]);
+
+    // --- Cloth Grid ---
+    const columns = 15;       // width segments
+    const rows = 12;          // height segments
+    const spacing = 30;       // distance between nodes
+    const startX = width / 2 - (columns * spacing) / 2;
+    const startY = 80;
+
+    const cloth = Composites.stack(startX, startY, columns, rows, 0, 0, (x, y) => {
+        return Bodies.circle(x, y, 6, {
+            frictionAir: 0.02,
+            render: {
+                fillStyle: "#F5C45A" // same yellow-ish color
+            }
+        });
+    });
+
+    // Create constraints between nodes
+    Composites.mesh(cloth, columns, rows, true, {
+        stiffness: 0.9,
+        damping: 0.1,
+        render: {
+            strokeStyle: "#F5C45A",
+            lineWidth: 1
+        }
+    });
+
+    // Pin the top row
+    for (let i = 0; i < columns; i++) {
+        const ball = cloth.bodies[i];
+        World.add(engine.world, Constraint.create({
+            bodyA: ball,
+            pointB: { x: ball.position.x, y: ball.position.y },
+            stiffness: 1,
+            render: { visible: false }
+        }));
+    }
+
+    World.add(engine.world, cloth);
+
+    // --- Mouse drag support ---
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.98,
+            render: {
+                visible: false
+            }
+        }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+}
+
+
+export function MagnetFieldDemo({ engine, render }) {
+    const { Bodies, Body, Composite, Composites, World, Vector } = Matter;
+
+    const width = render.options.width;
+    const height = render.options.height;
+
+    // ----- Walls -----
+    const walls = [
+        Bodies.rectangle(width / 2, height + 30, width, 60, { isStatic: true }),
+        Bodies.rectangle(width / 2, -30, width, 60, { isStatic: true }),
+        Bodies.rectangle(-30, height / 2, 60, height, { isStatic: true }),
+        Bodies.rectangle(width + 30, height / 2, 60, height, { isStatic: true })
+    ];
+    World.add(engine.world, walls);
+
+    // ----- Spawn random particles -----
+    const particles = Composites.stack(width * 0.2, height * 0.2, 10, 4, 10, 10, (x, y) => {
+        return Bodies.circle(x, y, 10, {
+            restitution: 0.4,
+            frictionAir: 0.04,
+            render: {
+                fillStyle: "#4ea1f5"
+            }
+        });
+    });
+
+    World.add(engine.world, particles);
+
+    // ----- Magnetic Points -----
+    const magnets = [
+        { pos: { x: width * 0.25, y: height * 0.25 }, strength: 0.0003 },
+        { pos: { x: width * 0.75, y: height * 0.25 }, strength: 0.0003 },
+        { pos: { x: width * 0.5, y: height * 0.75 }, strength: 0.0003 }
+    ];
+
+    // Visual magnet bodies
+    const magnetBodies = magnets.map(m =>
+        Bodies.circle(m.pos.x, m.pos.y, 18, {
+            isStatic: true,
+            render: {
+                fillStyle: "#F87171" // red magnets
+            }
+        })
+    );
+
+    World.add(engine.world, magnetBodies);
+
+    // ---- Move magnets in circular motion ----
+    let angle = 0;
+    Matter.Events.on(engine, "beforeUpdate", () => {
+        angle += 0.02;
+
+        magnetBodies.forEach((mag, i) => {
+            const radius = 80 + i * 40;
+            const cx = (width / 2);
+            const cy = (height / 2);
+
+            const offsetAngle = angle + i * 1.5;
+
+            Body.setPosition(mag, {
+                x: cx + Math.cos(offsetAngle) * radius,
+                y: cy + Math.sin(offsetAngle) * radius
+            });
+
+            magnets[i].pos = mag.position;
+        });
+
+        // Apply magnetic attraction
+        Composite.allBodies(engine.world).forEach(body => {
+            if (body.isStatic) return;
+
+            magnets.forEach(m => {
+                const dir = Vector.sub(m.pos, body.position);
+                const dist = Vector.magnitude(dir);
+
+                // Limit force range
+                if (dist < 300) {
+                    const force = Vector.mult(Vector.normalise(dir), m.strength * (300 - dist));
+                    Body.applyForce(body, body.position, force);
+                }
+            });
+        });
+    });
+
+    return () => {};
+}
+
+// ===== HelicopterRescueDemo =====
+// High-quality helicopter + swinging rope + rescue crate
+// Usage: export function HelicopterRescueDemo({ engine, render }) { ... }
+
+export function HelicopterRescueDemo({ engine, render }) {
+  const { Bodies, Body, Composite, Composites, Constraint, World, Events, Vector } = Matter;
+
+  const width = render.options.width || window.innerWidth;
+  const height = render.options.height || window.innerHeight;
+
+  // --- static world (floor + side walls) ---
+  const wallThickness = 80;
+  const floor = Bodies.rectangle(
+    width / 2,
+    height + wallThickness / 2,
+    width + 2 * wallThickness,
+    wallThickness,
+    { isStatic: true, render: { fillStyle: '#0b1220' } }
+  );
+  const left = Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: '#0b1220' } });
+  const right = Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { fillStyle: '#0b1220' } });
+
+  World.add(engine.world, [floor, left, right]);
+
+  // --- some scenery buildings to rescue from ---
+  const buildings = [];
+  const buildingCols = 5;
+  const baseX = Math.max(180, width * 0.25);
+  for (let i = 0; i < buildingCols; i++) {
+    const bw = 90 + Math.round(Math.random() * 40);
+    const bh = 160 + Math.round(Math.random() * 220);
+    const bx = baseX + i * (bw + 20);
+    const by = height - wallThickness - bh / 2;
+    const building = Bodies.rectangle(bx, by, bw, bh, {
+      isStatic: true,
+      render: { fillStyle: '#1f2937' }
+    });
+    buildings.push(building);
+  }
+  World.add(engine.world, buildings);
+
+  // --- helicopter body (dynamic) ---
+  const heliW = 160;
+  const heliH = 40;
+  const heliStartX = Math.max(120, width * 0.12);
+  const heliStartY = Math.max(80, height * 0.15);
+
+  const helicopter = Bodies.rectangle(heliStartX, heliStartY, heliW, heliH, {
+    frictionAir: 0.02,
+    density: 0.004,
+    render: {
+      fillStyle: '#3b82f6', // blue helicopter body
+      strokeStyle: '#93c5fd',
+      lineWidth: 2
+    }
+  });
+
+  // cockpit circle for aesthetic
+  const cockpit = Bodies.circle(heliStartX + heliW / 3, heliStartY, 16, {
+    isSensor: true,
+    render: { fillStyle: '#60a5fa' }
+  });
+
+  World.add(engine.world, [helicopter, cockpit]);
+
+  // rotor (visual) - we'll keep it kinematic: position + angle driven each frame
+  const rotor = Bodies.rectangle(helicopter.position.x, helicopter.position.y - heliH / 2 - 6, heliW * 0.9, 6, {
+    isStatic: true, // static so it doesn't add physics complexity, we'll update position manually
+    render: { fillStyle: '#111827' }
+  });
+  World.add(engine.world, rotor);
+
+  // --- rope / rescue chain ---
+  const ropeSegments = 10;
+  const segW = 8;
+  const segH = 22;
+  const ropeStartX = helicopter.position.x;
+  const ropeStartY = helicopter.position.y + heliH / 2 + 6;
+  const rope = Composites.stack(ropeStartX - 0, ropeStartY + 20, ropeSegments, 1, 0, 0, (x, y) => {
+    return Bodies.rectangle(x, y, segW, segH, {
+      collisionFilter: { group: Body.nextGroup(true) },
+      chamfer: 2,
+      density: 0.0015,
+      friction: 0.5,
+      render: { fillStyle: '#9ca3af' }
+    });
+  });
+
+  Composites.chain(rope, 0.5, 0, -0.5, 0, {
+    stiffness: 0.9,
+    length: 2,
+    render: { visible: true, strokeStyle: '#94a3b8', lineWidth: 3 }
+  });
+
+  // attach top rope link to helicopter via constraint
+  const topConstraint = Constraint.create({
+    bodyA: helicopter,
+    pointA: { x: 0, y: heliH / 2 },
+    bodyB: rope.bodies[0],
+    pointB: { x: 0, y: -segH / 2 },
+    length: 2,
+    stiffness: 1,
+    render: { visible: false }
+  });
+
+  // rescue crate at the end (or "person")
+  const crateW = 44;
+  const crateH = 34;
+  const lastLink = rope.bodies[rope.bodies.length - 1];
+  const crate = Bodies.rectangle(lastLink.position.x, lastLink.position.y + segH + crateH / 2, crateW, crateH, {
+    density: 0.006,
+    friction: 0.6,
+    restitution: 0.0,
+    render: { fillStyle: '#f59e0b' } // golden crate
+  });
+
+  const endConstraint = Constraint.create({
+    bodyA: lastLink,
+    pointA: { x: 0, y: segH / 2 },
+    bodyB: crate,
+    pointB: { x: 0, y: -crateH / 2 },
+    length: 2,
+    stiffness: 1,
+    render: { visible: false }
+  });
+
+  World.add(engine.world, [rope, topConstraint, crate, endConstraint]);
+
+  // --- helper: keep cockpit visually attached to helicopter position ---
+  Events.on(engine, 'beforeUpdate', () => {
+    // position rotor and cockpit to helicopter
+    Body.setPosition(rotor, { x: helicopter.position.x, y: helicopter.position.y - heliH / 2 - 6 });
+    Body.setPosition(cockpit, { x: helicopter.position.x + heliW / 3, y: helicopter.position.y });
+  });
+
+  // --- rotor spin and helicopter movement / sway ---
+  let rotorAngle = 0;
+  let heliDir = 1; // 1 = right, -1 = left
+  const heliSpeed = Math.max(1.0, (width / 1200)); // adaptive speed
+  Events.on(engine, 'afterUpdate', () => {
+    // rotor spin (visual)
+    rotorAngle += 0.8; // speed of blade rotation
+    Body.setAngle(rotor, rotorAngle);
+
+    // gentle horizontal patrol movement
+    // change direction near edges
+    const margin = 120;
+    if (helicopter.position.x > width - margin) heliDir = -1;
+    else if (helicopter.position.x < margin) heliDir = 1;
+
+    // set velocity while preserving Y velocity from interactions
+    Body.setVelocity(helicopter, { x: heliDir * heliSpeed, y: helicopter.velocity.y });
+
+    // small automatic yaw/pitch stabilization (so helicopter doesn't spin)
+    Body.setAngle(helicopter, 0);
+  });
+
+  // --- wind gusts to make rope sway more natural ---
+  let gustTimer = 0;
+  Events.on(engine, 'beforeUpdate', () => {
+    gustTimer += 1;
+    if (gustTimer % 160 === 0) {
+      // apply a random sideways impulse to crate & rope
+      const forceMag = 0.0035;
+      const dir = (Math.random() > 0.5) ? 1 : -1;
+      Body.applyForce(crate, crate.position, { x: dir * forceMag, y: -0.0006 });
+    }
+  });
+
+  // --- optional: make crate drop when clicked (user could drag) ---
+  // We'll add a tiny collision filter so mouse can grab the crate (global mouseConstraint already present)
+
+  // --- falling objects to rescue from (debris) ---
+  const debris = [];
+  for (let i = 0; i < 6; i++) {
+    const box = Bodies.rectangle(
+      buildings[0] ? buildings[0].position.x + (Math.random() * 60 - 30) : width * 0.4 + i * 60,
+      height - wallThickness - (Math.random() * 80 + 40),
+      28 + Math.random() * 30,
+      28 + Math.random() * 30,
+      { density: 0.002, friction: 0.6, render: { fillStyle: '#ef4444' } }
+    );
+    debris.push(box);
+    World.add(engine.world, box);
+  }
+
+  // --- camera-like small follow (visual only) ---
+  // We won't change canvas transform (to keep things simple); user can always pan externally.
+
+  // --- cleanup handler (so if you store and call it before switching demos, events won't leak) ---
+  const cleanup = () => {
+    // remove engine events by removing all listeners we've added
+    Events.off(engine, 'beforeUpdate');
+    Events.off(engine, 'afterUpdate');
+
+    // remove created bodies/constraints (MegaPhysics handleClear removes non-static bodies,
+    // but if you want immediate cleanup, remove these explicitly)
+    try {
+      Composite.remove(engine.world, helicopter);
+      Composite.remove(engine.world, rotor);
+      Composite.remove(engine.world, cockpit);
+      Composite.remove(engine.world, rope);
+      Composite.remove(engine.world, crate);
+      Composite.remove(engine.world, topConstraint);
+      Composite.remove(engine.world, endConstraint);
+      debris.forEach(d => Composite.remove(engine.world, d));
+      buildings.forEach(b => Composite.remove(engine.world, b));
+    } catch (e) {
+      // ignore if already removed
+    }
+  };
+
+  // return cleanup so caller can call it when switching demos
+  return cleanup;
+}
