@@ -5,7 +5,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Matter from 'matter-js';
 import { MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo, DoublePendulumDemo, WreckingBallDemo, TimescaleDemo, CompoundStackDemo, RopeBridgeDemo, NewtonsCradleDemo, ClothDemo, MagnetFieldDemo, 
-    HelicopterRescueDemo
+    HelicopterRescueDemo, EventsDemo, FallingBuildings
  } from './demos';
 // import { AvalancheDemo } from './AvalancheDemo';
 import './MatterJs.css';
@@ -133,9 +133,12 @@ export default function MegaPhysicsDemo() {
             ClothDemo({ engine, render });
         } else if (activeDemo === 'magnet') {
             MagnetFieldDemo({ engine, render });
-        }
-        else if (activeDemo === 'helicopter') {
+        } else if (activeDemo === 'helicopter') {
            HelicopterRescueDemo({ engine, render });
+        } else if (activeDemo === 'events') {
+           EventsDemo({ engine, render });
+        } else if (activeDemo === 'fallings') {
+           FallingBuildings({ engine, render });
         }
     };
 
@@ -166,7 +169,7 @@ export default function MegaPhysicsDemo() {
                 <button className={`btn ${activeDemo === 'constraints' ? 'btn-purple' : 'btn-slate'}`} onClick={() => setActiveDemo('constraints')}>Constraints Demo</button>
                 <button className={`btn ${activeDemo === 'double' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('double')}>Double Pendulum</button>
                 <button className={`btn ${activeDemo === 'wreckingBall' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('wreckingball')}>Wrecking Ball</button>
-                <button className={`btn ${activeDemo === 'wreckingBall' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('timescale')}>Time Scale</button>
+                <button className={`btn ${activeDemo === 'timescale' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('timescale')}>Time Scale</button>
                 <button className={`btn ${activeDemo === 'compound' ? 'btn-green' : 'btn-slate'}`} onClick={() => setActiveDemo('compound')}>Compound Stack</button>
                 <button className={`btn ${activeDemo === 'rope' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('rope')}>Rope Bridge</button>
                 <button className={`btn ${activeDemo === 'cradle' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('cradle')}>Newton's Cradle</button>
@@ -175,7 +178,9 @@ export default function MegaPhysicsDemo() {
                     onClick={() => setActiveDemo('magnet')}>
                     Magnet Fields
                 </button>
-                <button className={`btn ${activeDemo === 'cradle' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('helicopter')}>Helicopter</button>
+                <button className={`btn ${activeDemo === 'helicopter' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('helicopter')}>Helicopter</button>
+                <button className={`btn ${activeDemo === 'events' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('events')}>Events</button>
+                <button className={`btn ${activeDemo === 'fallings' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('fallings')}>Falling</button>
 
                 <button className="btn btn-indigo" onClick={handleSpawn}>Spawn {spawnCount}</button>
                 <button className="btn btn-yellow" onClick={handlePauseResume}>{running ? 'Pause' : 'Resume'}</button>
