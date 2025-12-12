@@ -39,8 +39,10 @@ import About from "./pages/About";
 import Gallery from "./components/Gallery";
 import AnimationPage from "./pages/AnimationPage";  // ✅ NEW PAGE
 import AnimatedBackground from "./AnimatedBackground";
-import "./App.css";
+import PianoPlayer from "./components/PianoPlayer"
 import  LogIn  from "C:/OddlyAnimation/src/pages/Login.jsx";
+import MegaPhysicsDemo from "./components/MegaPhysicsDemo";
+import "./App.css";
 
 function App() {
     return (
@@ -53,7 +55,7 @@ function App() {
                         path="/" 
                         element={
                             <>
-                                <AnimatedBackground />
+                                {/* <AnimatedBackground /> */}
                                 <Header />
                                 <Home />
                             </>
@@ -65,7 +67,7 @@ function App() {
                         path="/about" 
                         element={
                             <>
-                                <AnimatedBackground />
+                                {/* <AnimatedBackground /> */}
                                 <Header />
                                 <About />
                             </>
@@ -79,6 +81,26 @@ function App() {
                             <>
                                 <Header />
                                 <Gallery />
+                            </>
+                        } 
+                    />
+
+                    <Route 
+                        path="/piano-player" 
+                        element={
+                            <>
+                                <Header />
+                                <PianoPlayer />
+                            </>
+                        } 
+                    />
+
+                    <Route 
+                        path="/matter.js" 
+                        element={
+                            <>
+                                <Header />
+                                <MegaPhysicsDemo />
                             </>
                         } 
                     />

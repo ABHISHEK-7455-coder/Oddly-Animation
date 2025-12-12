@@ -22,7 +22,8 @@ html,
   
 }
 body{
-  background-color: #000;
+  /* background-color: #000; */
+  background: linear-gradient(135deg, #DFEBF9, #F4F7F9);
 }
 
 .app-wrapper {

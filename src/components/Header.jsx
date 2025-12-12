@@ -2,76 +2,98 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "./Header.css";
 
-const Header = () => {
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+// const Header = () => {
+    // const navigate = useNavigate();
+//     const [menuOpen, setMenuOpen] = useState(false);
 
-  // Close menu when a link is clicked
-  const handleLinkClick = () => setMenuOpen(false);
+//     // Close menu when a link is clicked
+//     const handleLinkClick = () => setMenuOpen(false);
 
-  return (
-    <header className="header">
-      {/* Logo */}
-      <div className="logo" onClick={() => navigate("/")}>
-        <h2>MeloMotion</h2>
-      </div>
+//     return (
+//         <header className="header">
+//             {/* Logo */}
+//             <div className="logo" onClick={() => navigate("/")}>
+//                 <h2>MeloMotion</h2>
+//             </div>
 
-      {/* Hamburger Menu (visible on mobile) */}
-      <div
-        className={`menu-toggle ${menuOpen ? "open" : ""}`}
-        onClick={() => setMenuOpen(!menuOpen)}
-      >
-        <span style={{background:"white"}}></span>
-        <span style={{background:"white"}}></span>
-        <span style={{background:"white"}}></span>
-      </div>
+//             {/* Hamburger Menu (visible on mobile) */}
+//             <div
+//                 className={`menu-toggle ${menuOpen ? "open" : ""}`}
+//                 onClick={() => setMenuOpen(!menuOpen)}
+//             >
+//                 <span style={{ background: "white" }}></span>
+//                 <span style={{ background: "white" }}></span>
+//                 <span style={{ background: "white" }}></span>
+//             </div>
 
-      {/* Navigation Links */}
-      <nav className={`nav ${menuOpen ? "open" : ""}`}>
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            `nav-link ${isActive ? "active" : ""}`
-          }
-          onClick={handleLinkClick}
-        >
-          Home
-        </NavLink>
+//             {/* Navigation Links */}
+//             <nav className={`nav ${menuOpen ? "open" : ""}`}>
+//                 <NavLink
+//                     to="/"
+//                     className={({ isActive }) =>
+//                         `nav-link ${isActive ? "active" : ""}`
+//                     }
+//                     onClick={handleLinkClick}
+//                 >
+//                     Home
+//                 </NavLink>
 
-        <NavLink
-        to="/gallery"
-          className={({ isActive }) =>
-            `nav-link ${isActive ? "active" : ""}`
-          }
-          onClick={() => {
-            handleLinkClick();
-          }}
-        >
-          Gallery
-        </NavLink>
+//                 <NavLink
+//                     to="/gallery"
+//                     className={({ isActive }) =>
+//                         `nav-link ${isActive ? "active" : ""}`
+//                     }
+//                     onClick={() => {
+//                         handleLinkClick();
+//                     }}
+//                 >
+//                     Gallery
+//                 </NavLink>
 
-        <NavLink
-          to="/about"
-          className={({ isActive }) =>
-            `nav-link ${isActive ? "active" : ""}`
-          }
-          onClick={handleLinkClick}
-        >
-          About
-        </NavLink>
+//                 <NavLink
+//                     to="/about"
+//                     className={({ isActive }) =>
+//                         `nav-link ${isActive ? "active" : ""}`
+//                     }
+//                     onClick={handleLinkClick}
+//                 >
+//                     About
+//                 </NavLink>
 
-        <NavLink
-          to="/login"
-          className={({ isActive }) =>
-            `nav-link ${isActive ? "active" : ""}`
-          }
-          onClick={handleLinkClick}
-        >
-          Login
-        </NavLink>
-      </nav>
-    </header>
-  );
-};
+//                 <NavLink
+//                     to="/login"
+//                     className={({ isActive }) =>
+//                         `nav-link ${isActive ? "active" : ""}`
+//                     }
+//                     onClick={handleLinkClick}
+//                 >
+//                     Login
+//                 </NavLink>
+//             </nav>
+//         </header>
+//     );
+// };
 
-export default Header;
+// export default Header;
+
+export default function Header(){
+    const navigate = useNavigate();
+    return(
+        <header>
+            <div className="header-container">
+                <div className="logo" onClick={() => navigate("/")}>MeloMotion</div>
+                <div className="header-login-btn">
+                    <NavLink
+                    to="/login"
+                    className={({ isActive }) =>
+                        `header-nav-link ${isActive ? "active" : ""}`
+                    }
+                    
+                >
+                    Login
+                 </NavLink>
+                </div>
+            </div>
+        </header>
+    );
+}

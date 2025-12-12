@@ -1,4 +1,4 @@
-.header {
+/* .header {
   background-color: rgba(249, 247, 247, 0.1);
   padding: 0px 50px;
   box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.1);
@@ -15,7 +15,7 @@
 }
 
 .header .logo {
-  /* background-image: url("src/assets/bubble.png"); */
+  /* background-image: url("src/assets/bubble.png"); 
   color: white;
 }
 
@@ -36,38 +36,33 @@
   border: none;
 }
 
-.nav-link:hover {
-  /* background-color: white; */
-}
-
 .active {
   background: rgba(155, 154, 154, 0.3);
   border-radius: 16px;
-  /* border: 1px solid rgba(245, 245, 245, 0.9); */
+
 }
 
-/* ✅ Optional: if button styled same as nav links */
 .gallery-btn {
   background: none;
   border: none;
   cursor: pointer;
 }
 
-/* ===== TABLET ADJUSTMENTS ===== */
+
 @media (max-width: 1024px) {
   .nav {
     gap: 40px;
   }
 }
 
-/* ====== MOBILE RESPONSIVE ====== */
+
 @media (max-width: 768px) {
   .header {
     padding: 10px 25px;
     border-radius: 20px;
   }
 
-  /* Hide nav initially */
+ 
   .nav {
     position: fixed;
     top: 80px;
@@ -84,7 +79,7 @@
     pointer-events: none;
   }
 
-  /* When menu open */
+  
   .nav.open {
     transform: translateY(0);
     opacity: 1;
@@ -96,7 +91,7 @@
     width: 100%;
   }
 
-  /* ===== HAMBURGER MENU ===== */
+  
   .menu-toggle {
     display: flex;
     flex-direction: column;
@@ -105,7 +100,7 @@
     height: 22px;
     cursor: pointer;
     z-index: 1000;
-    /* background-color: white; */
+    
   }
 
   .menu-toggle span {
@@ -117,7 +112,6 @@
     transition: all 0.3s ease;
   }
 
-  /* Animate hamburger → X */
   .menu-toggle.open span:nth-child(1) {
     transform: rotate(45deg) translate(5px, 6px);
     background-color: white;
@@ -134,7 +128,6 @@
   }
 }
 
-/* ===== SMALL MOBILE ===== */
 @media (max-width: 480px) {
   .header {
     width: 95%;
@@ -159,4 +152,35 @@
     text-align: center;
     letter-spacing: 1px;
   }
+} */
+
+
+header {
+    background-color: white;
+    width: 75%;
+    margin: auto;
+    border-radius: 50px;
+    
+    margin-top: 16px;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 18px;
+}
+
+.logo {
+    color: black;
+    text-align: center;
+    align-self: center;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.header-nav-link {
+    background: black;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
 }

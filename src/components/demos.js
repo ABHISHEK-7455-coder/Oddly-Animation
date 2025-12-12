@@ -608,7 +608,7 @@ export function RopeBridgeDemo({ engine, render }) {
             World.remove(engine.world, boxes);
             World.remove(engine.world, anchorLeft);
             World.remove(engine.world, anchorRight);
-        } catch (e) {}
+        } catch (e) { }
     };
 }
 
@@ -1198,6 +1198,190 @@ export function FallingBuildings({ engine, render }) {
 
         buildings.forEach(b => { try { World.remove(engine.world, b); } catch (_) { } });
         wreckingBalls.forEach(w => { try { World.remove(engine.world, w); } catch (_) { } });
+    };
+
+    return cleanup;
+}
+
+export function FloatingLanterns({ engine, render, spawnCount = 8 }) {
+    const { Bodies, Body, World, Composite, Events } = Matter;
+
+    // --- preserve mouse constraint if present (same pattern as your other demos) ---
+    const mouseConstraint = engine.world.constraints.find(c => c.label === "Mouse Constraint");
+
+    // --- clear previous dynamic objects (preserve mouseConstraint) ---
+    Composite.allBodies(engine.world).forEach(b => {
+        if (!b.isStatic) World.remove(engine.world, b);
+    });
+    Composite.allConstraints(engine.world).forEach(c => {
+        if (c !== mouseConstraint) World.remove(engine.world, c);
+    });
+
+    // --- disable gravity so lanterns freely float ---
+    engine.gravity.x = 0;
+    engine.gravity.y = 0;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // store lantern meta
+    const lanterns = [];
+
+    // create lanterns (circle bodies) with visual metadata
+    for (let i = 0; i < spawnCount; i++) {
+        const radius = 14 + Math.random() * 18; // radius in px
+        const hue = 30 + Math.random() * 40; // warm hue range
+        const coreColor = `hsl(${hue}, 80%, ${55 + Math.random() * 10}%)`;
+        const glowAlpha = 0.28 + Math.random() * 0.35;
+
+        const b = Bodies.circle(
+            Math.random() * w,
+            Math.random() * h,
+            radius,
+            {
+                label: "lantern",
+                frictionAir: 0.02,
+                restitution: 0.95,
+                render: {
+                    // fallback fill (Matter's shape fill) — actual glow drawn on canvas below
+                    fillStyle: coreColor,
+                }
+            }
+        );
+
+        // store custom visual props on body
+        b._lantern = {
+            radius,
+            coreColor,
+            glowAlpha,
+            bobPhase: Math.random() * Math.PI * 2
+        };
+
+        // gentle initial velocity
+        Body.setVelocity(b, {
+            x: (Math.random() - 0.5) * 1.6,
+            y: (Math.random() - 0.5) * 1.6
+        });
+
+        lanterns.push(b);
+        World.add(engine.world, b);
+    }
+
+    // --- physics step: drift, bob, wall-bounce, clamp speed ---
+    const beforeUpdate = () => {
+        for (const l of lanterns) {
+            if (!l.position) continue;
+            const r = l.circleRadius || l._lantern.radius;
+            const v = l.velocity;
+
+            // soft upward tendency + slow horizontal wind (sine)
+            const wind = Math.sin((l.position.y + Date.now() * 0.0004) * 0.01) * 0.00008;
+            Body.applyForce(l, l.position, {
+                x: (Math.random() - 0.5) * 0.00008 + wind,
+                y: -0.00018 + (Math.random() - 0.5) * 0.00003
+            });
+
+            // bobbing: tiny vertical oscillation by adjusting velocity slightly
+            const bob = Math.sin(l._lantern.bobPhase + Date.now() * 0.002) * 0.00002;
+            Body.applyForce(l, l.position, { x: 0, y: bob });
+
+            // WALL bounce + fix: reflect velocity and nudge position inside bounds
+            if (l.position.x - r <= 0 && v.x < 0) {
+                Body.setVelocity(l, { x: Math.abs(v.x) * 0.9, y: v.y });
+                Body.setPosition(l, { x: r + 1, y: l.position.y });
+            }
+            if (l.position.x + r >= w && v.x > 0) {
+                Body.setVelocity(l, { x: -Math.abs(v.x) * 0.9, y: v.y });
+                Body.setPosition(l, { x: w - r - 1, y: l.position.y });
+            }
+            if (l.position.y - r <= 0 && v.y < 0) {
+                Body.setVelocity(l, { x: v.x, y: Math.abs(v.y) * 0.9 });
+                Body.setPosition(l, { x: l.position.x, y: r + 1 });
+            }
+            if (l.position.y + r >= h && v.y > 0) {
+                Body.setVelocity(l, { x: v.x, y: -Math.abs(v.y) * 0.9 });
+                Body.setPosition(l, { x: l.position.x, y: h - r - 1 });
+            }
+
+            // clamp speed
+            const speed = Math.hypot(v.x, v.y);
+            const maxSpeed = 2.2;
+            if (speed > maxSpeed) {
+                Body.setVelocity(l, { x: (v.x / speed) * maxSpeed, y: (v.y / speed) * maxSpeed });
+            }
+        }
+    };
+
+    Events.on(engine, "beforeUpdate", beforeUpdate);
+
+    // --- visual glow drawing using renderer canvas after matter rendered ---
+    // We draw radial gradient glows + core circle using render.context
+    const afterRender = () => {
+        try {
+            const ctx = render.context;
+            if (!ctx) return;
+
+            // use additive blending for nicer glow
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+
+            for (const l of lanterns) {
+                if (!l.position) continue;
+                const { x, y } = l.position;
+                const { radius, coreColor, glowAlpha } = l._lantern;
+
+                // radial gradient for glow
+                const g = ctx.createRadialGradient(x, y, 0, x, y, radius * 4.2);
+                // inner (bright) --> outer (transparent)
+                g.addColorStop(0, coreColor);
+                g.addColorStop(0.25, `rgba(255,230,180,${Math.min(0.9, glowAlpha + 0.35)})`);
+                g.addColorStop(0.6, `rgba(255,200,140,${Math.max(0, glowAlpha - 0.04)})`);
+                g.addColorStop(1, 'rgba(0,0,0,0)');
+
+                ctx.beginPath();
+                ctx.fillStyle = g;
+                ctx.arc(x, y, radius * 4.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // core soft circle
+                ctx.beginPath();
+                ctx.globalCompositeOperation = 'source-over';
+                // slight inner gradient for core
+                const g2 = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                g2.addColorStop(0, 'rgba(255,255,255,0.9)');
+                g2.addColorStop(0.15, coreColor);
+                g2.addColorStop(1, `rgba(255,255,255,0.02)`);
+                ctx.fillStyle = g2;
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // subtle stroke
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255,230,160,0.28)';
+                ctx.lineWidth = Math.max(1, radius * 0.12);
+                ctx.arc(x, y, radius * 0.9, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // reset composite mode for next
+                ctx.globalCompositeOperation = 'lighter';
+            }
+
+            ctx.restore();
+        } catch (e) {
+            // ignore render errors
+        }
+    };
+
+    // Attach afterRender via Events on the renderer
+    // Render has its own events 'afterRender' available via Matter.Events
+    Events.on(render, "afterRender", afterRender);
+
+    // --- cleanup function ---
+    const cleanup = () => {
+        Events.off(engine, "beforeUpdate", beforeUpdate);
+        Events.off(render, "afterRender", afterRender);
+        // remove bodies
+        try { Composite.remove(engine.world, lanterns); } catch (e) { /* ignore */ }
     };
 
     return cleanup;
