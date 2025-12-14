@@ -252,7 +252,7 @@ export default function PianoPlayer() {
 
     return (
         <div className="piano-container">
-            <h2 className="piano-title">Real Piano</h2>
+            <h2 className="piano-title">Piano Board</h2>
 
             {/* PIANO BOARD */}
             <div className="piano-board">

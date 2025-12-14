@@ -2,7 +2,7 @@
     /* display: flex; */
     height: auto;
     width: 84vw;
-    background: #1A1A1A;
+    background: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     /* padding: 20px; */
     margin-top: 0px;
@@ -26,11 +26,11 @@
     width: 100%;
     padding: 16px;
     border-radius: 40px;
-    border: none;
+    border: 1px solid lightgray;
     font-size: 14px;
     outline: none;
     transition: 0.2s;
-    background-color: rgb(10, 10, 10);
+    background-color: white;
     color: white;
     font-size: 20px;
 }
@@ -88,7 +88,7 @@
 /* Sidebar */
 .sidebar {
     width: 20%;
-    background: #0A0A0A;
+    background: white;
     backdrop-filter: blur(10px);
     padding: 0px 8px 0px 8px;
     overflow-x: auto;
@@ -143,6 +143,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: black;
 }
 
 .controls label {
@@ -176,11 +177,11 @@
 }
 
 .size label {
-    color: white;
+    color: black;
 }
 
 .color label {
-    color: white;
+    color: black;
 }
 
 .input {
@@ -442,6 +443,8 @@
     margin-top: 15px;
     background-color: #0A0A0A;
     gap: 20px;
+    color: black;
+
 }
 
 .size-color {
@@ -475,8 +478,9 @@
 
 .dropdown-content {
     padding: 10px 14px;
-    background: #0A0A0A;
+    background: white;
     height: fit-content;
+    color: black;
 }
 
 .dropdown-section.inner summary {

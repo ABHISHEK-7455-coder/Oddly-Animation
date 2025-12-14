@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Animation from "../components/Animation";
 import { animationData } from "../data/animationConfig.js"; // 50 animations ka data
 import { useLocation } from "react-router-dom";
-// import PianoPlayer from "./PianoPlayer.jsx";
-// import PhysicsMixedDemo from './MatterJs.jsx';
+import PianoPlayer from "./PianoPlayer.jsx";
+import PhysicsMixedDemo from './MatterJs.jsx';
 import "./Gallery.css";
-import MegaPhysicsDemo from "./MegaPhysicsDemo.jsx";
+// import MegaPhysicsDemo from "./MegaPhysicsDemo.jsx";
 
 const Gallery = () => {
     const [selectedAnimation, setSelectedAnimation] = useState(0);
@@ -31,15 +31,15 @@ const Gallery = () => {
             {/* <div className="logo" onClick={() => navigate("/")}>
                 <h2>MeloMotion</h2>
             </div> */}
-            {/* <Animation
+            <Animation
                 type={selectedAnimation}
                 color={color}
                 size={size}
                 speed={speed}
-            /> */}
+            />
             {/* <PianoPlayer /> */}
             {/* <PhysicsMixedDemo /> */}
-            <MegaPhysicsDemo />
+            {/* <MegaPhysicsDemo /> */}
         </div>
     );
 };

@@ -27,8 +27,8 @@ const HeroSection = () => {
         <span className="shape shape3"></span>
         <span className="shape shape4"></span>
       </div> */}
-            <div>
-                    <p>QUICK NAVIGATIONS</p>
+            <div className="navs">
+                    <p>Explore the Collection</p>
                 <nav>
                     <NavLink
                         to="/gallery"
