@@ -254,7 +254,7 @@ export default function PhysicsMixedDemo() {
                 </label>
 
                 <label className="label-row">
-                    Spawn Count
+                    Count
                     <input
                         type="number"
                         min="1"

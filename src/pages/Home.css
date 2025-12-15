@@ -16,7 +16,7 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 20px;
-  color: white;
+  color: black;
   /* margin-top: -20px; */
 }
 
@@ -25,7 +25,7 @@
   max-width: 700px;
   margin: 0 auto;
   line-height: 1.6;
-  color: white;
+  color: rgb(115, 99, 99);
 }
 
 .anim-cards {
@@ -36,6 +36,11 @@
   scrollbar-width: none;
   padding: 4px;
   gap: 40px;
+}
+
+.anim-cards h3 {
+  color: rgb(115, 99, 99);
+  font-weight: 500;
 }
 
 .bubbles img {
