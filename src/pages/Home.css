@@ -38,6 +38,10 @@
   gap: 40px;
 }
 
+.anim-cards img {
+  border-radius: 16px;
+}
+
 .anim-cards h3 {
   color: rgb(115, 99, 99);
   font-weight: 500;

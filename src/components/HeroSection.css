@@ -121,16 +121,24 @@ nav {
   color: black;
   display: flex;
   justify-content: space-between;
+  background-color: white;
+  border-radius: 20px;
+  padding: 8px 20px;
 }
 
 .nav-link {
-  border: 1px solid lightgray;
-  border-radius: 20px;
-  width: 150px;
-  height: 180px;
   text-align: center;
   align-self: center;
   color: black;
+  background: #E3F1FD;
+  border-radius: 16px;
+  padding: 4px 16px;
+}
+
+.nav-link:hover {
+  background: rgb(119, 147, 239);
+  border-radius: 16px;
+  padding: 4px 16px;
 }
 
 /* ✨ Keyframes */
