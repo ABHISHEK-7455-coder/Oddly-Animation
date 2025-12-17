@@ -21,14 +21,8 @@ const HeroSection = () => {
                 </button>
             </div>
 
-            {/* <div className="floating-shapes">
-        <span className="shape shape1"></span>
-        <span className="shape shape2"></span>
-        <span className="shape shape3"></span>
-        <span className="shape shape4"></span>
-      </div> */}
             <div className="navs">
-                    <p>Explore the Collection</p>
+                    <h3>Explore the Collection</h3>
                 <nav>
                     <NavLink
                         to="/gallery"

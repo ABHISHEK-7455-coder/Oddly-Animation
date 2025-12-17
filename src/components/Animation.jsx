@@ -1,729 +1,312 @@
 import { animationData } from "../data/animationConfig";
 import { useState, useEffect, useRef } from "react";
 import { ref, uploadString, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase"; // adjust path if needed
+import { storage } from "../firebase";
 
-// --- FFmpeg (new SDK)
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 
 import "./Animation.css";
 
 const Animation = () => {
-    const [selectedAnimation, setSelectedAnimation] = useState(0);
-    const [speed, setSpeed] = useState(1);
-    const [size, setSize] = useState(1);
-    const [hueShift, setHueShift] = useState(20);
-    const [isAudioPlaying, setIsAudioPlaying] = useState(true);
+  // ---------------- STATES ----------------
+  const [selectedAnimation, setSelectedAnimation] = useState(0);
+  const [showAnimationView, setShowAnimationView] = useState(false);
 
-    const [isRecording, setIsRecording] = useState(false);
-    const [recordingsList, setRecordingsList] = useState(
-        JSON.parse(localStorage.getItem("savedRecordings") || "[]")
-    );
-    const [isPlayingSaved, setIsPlayingSaved] = useState(false);
-    const [playingVideoSrc, setPlayingVideoSrc] = useState(null);
+  const [speed, setSpeed] = useState(1);
+  const [size, setSize] = useState(1);
+  const [hueShift, setHueShift] = useState(20);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(true);
 
-    const [search, setSearch] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingsList, setRecordingsList] = useState(
+    JSON.parse(localStorage.getItem("savedRecordings") || "[]")
+  );
 
-    const [editingId, setEditingId] = useState(null);
-    const [newName, setNewName] = useState("");
+  const [isPlayingSaved, setIsPlayingSaved] = useState(false);
+  const [playingVideoSrc, setPlayingVideoSrc] = useState(null);
 
-    // --- NEW: states for download format menu ---
-    const [showFormatMenuId, setShowFormatMenuId] = useState(null); // id of recording showing format menu
-    const [selectedRec, setSelectedRec] = useState(null);
-    const [isConverting, setIsConverting] = useState(false);
+  const [search, setSearch] = useState("");
 
-    // --- NEW: share menu state (inline) ---
-    const [showShareMenuId, setShowShareMenuId] = useState(null);
+  const [showShareMenuId, setShowShareMenuId] = useState(null);
 
-    const canvasRef = useRef(null);
-    const recorderRef = useRef(null);
-    const chunksRef = useRef([]);
-    const animationRef = useRef(null);
-    const audioRef = useRef(null);
+  // ---------------- REFS ----------------
+  const canvasRef = useRef(null);
+  const recorderRef = useRef(null);
+  const chunksRef = useRef([]);
+  const animationRef = useRef(null);
+  const audioRef = useRef(null);
 
-    // --- ffmpeg instance ref ---
-    const ffmpegRef = useRef(null);
-    const ffmpegLoadingRef = useRef(false);
+  // ---------------- LOAD RECORDINGS ----------------
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("savedRecordings")) || [];
+    setRecordingsList(saved);
+  }, []);
 
-    // Browser flags
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isSamsung = /SamsungBrowser/i.test(navigator.userAgent);
-    const isChrome = /Chrome/i.test(navigator.userAgent);
+  // ---------------- RECORDING ----------------
+  const startRecording = async () => {
+    if (!canvasRef.current || !window.MediaRecorder) return alert("Recording not supported");
 
-    // Simple toast fallback (replace with your toast if you have one)
-    const showToast = (msg) => {
-        try {
-            // prefer non-blocking notification if available
-            // Replace this with your toast component call if you have one
-            alert(msg);
-        } catch {
-            console.log(msg);
-        }
+    const canvasStream = canvasRef.current.captureStream(30);
+    const mediaRecorder = new MediaRecorder(canvasStream);
+
+    chunksRef.current = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunksRef.current.push(e.data);
     };
 
-    // 🌀 Load recordings on mount
-    useEffect(() => {
-        const saved = JSON.parse(localStorage.getItem("savedRecordings")) || [];
-        setRecordingsList(saved);
-    }, []);
-
-    // ---------- FFmpeg loader (NEW SDK) ----------
-    // NOTE: For Vite you must copy ffmpeg core files to /assets/ffmpeg via vite-plugin-static-copy.
-    // Example coreURL: "/assets/ffmpeg/ffmpeg-core.js"
-    const ensureFfmpeg = async () => {
-        try {
-            if (!ffmpegRef.current) {
-                ffmpegRef.current = new FFmpeg();
-            }
-            // load only once
-            if (!ffmpegRef.current.loaded && !ffmpegLoadingRef.current) {
-                ffmpegLoadingRef.current = true;
-                try {
-                    await ffmpegRef.current.load({
-                        // These paths assume you copied core files to /assets/ffmpeg
-                        coreURL: "/assets/ffmpeg/ffmpeg-core.js",
-                        wasmURL: "/assets/ffmpeg/ffmpeg-core.wasm",
-                        workerURL: "/assets/ffmpeg/ffmpeg-core.worker.js",
-                    });
-                } catch (err) {
-                    console.error("ffmpeg load failed", err);
-                    showToast("ffmpeg failed to load (conversion unavailable)");
-                } finally {
-                    ffmpegLoadingRef.current = false;
-                }
-            }
-        } catch (e) {
-            console.error("ensureFfmpeg error", e);
-        }
-    };
-
-    // 🎬 Start recording
-    const startRecording = async () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        // Browser compatibility check
-        if (!window.MediaRecorder || isSafari) {
-            alert("🎥 Recording not supported on this browser (Safari / Vivo).");
-            return;
-        }
-
-        try {
-            const canvasStream = canvas.captureStream(30);
-            const audioStream = audioRef.current
-                ? audioRef.current.captureStream()
-                : null;
-
-            const combinedStream = audioStream
-                ? new MediaStream([...canvasStream.getTracks(), ...audioStream.getTracks()])
-                : canvasStream;
-
-            const mediaRecorder = new MediaRecorder(combinedStream, {
-                mimeType: "video/webm;codecs=vp9,opus",
-            });
-
-            chunksRef.current = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunksRef.current.push(e.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                const blob = new Blob(chunksRef.current, { type: "video/webm" });
-                const base64 = await blobToBase64(blob);
-                const newRecording = {
-                    id: Date.now(),
-                    name: `Recording ${recordingsList.length + 1}`,
-                    data: base64,
-                };
-
-                const updated = [newRecording, ...recordingsList];
-                setRecordingsList(updated);
-                localStorage.setItem("savedRecordings", JSON.stringify(updated));
-                alert("✅ Recording saved successfully!");
-            };
-
-            mediaRecorder.start();
-            recorderRef.current = mediaRecorder;
-            setIsRecording(true);
-        } catch (err) {
-            console.error(err);
-            alert("⚠️ Unable to start recording on this browser.");
-        }
-    };
-
-    // ⏹️ Stop recording
-    const stopRecording = () => {
-        if (recorderRef.current) {
-            recorderRef.current.stop();
-            setIsRecording(false);
-        }
-    };
-
-    // 🧩 Convert Blob to Base64
-    const blobToBase64 = (blob) =>
-        new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-
-    // 🧩 Convert DataURL (base64) to Blob
-    const dataURLToBlob = (dataURL) => {
-        // dataURL example: "data:video/webm;base64,AAAA..."
-        const arr = dataURL.split(',');
-        const mime = arr[0].match(/:(.*?);/)[1];
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new Blob([u8arr], { type: mime });
-    };
-
-    // ▶️ Play Saved Recording
-    const playSavedRecording = (videoSrc) => {
-        if (animationRef.current) cancelAnimationFrame(animationRef.current);
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-
-        setIsPlayingSaved(true);
-        setPlayingVideoSrc(videoSrc);
-    };
-
-    // 🔙 Back to Live Animations
-    const backToLive = () => {
-        setIsPlayingSaved(false);
-        setPlayingVideoSrc(null);
-    };
-
-    // 🌀 Main Animation Logic
-    useEffect(() => {
-        if (isPlayingSaved) return;
-
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-
-        if (animationRef.current) cancelAnimationFrame(animationRef.current);
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-
-        const currentAnim = animationData[selectedAnimation];
-        const config = { ...currentAnim.config, speed, size, hueShift };
-
-        if (isAudioPlaying && currentAnim.audio) {
-            const audio = new Audio(currentAnim.audio);
-            audio.volume = 0.5;
-            audio.loop = true;
-            audio.play().catch(() => { });
-            audioRef.current = audio;
-        }
-
-        const state = currentAnim.init(canvas, config);
-        const animate = () => {
-            currentAnim.animate(ctx, canvas, config, state);
-            animationRef.current = requestAnimationFrame(animate);
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(chunksRef.current, { type: "video/webm" });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newRec = {
+          id: Date.now(),
+          name: `Recording ${recordingsList.length + 1}`,
+          data: reader.result,
         };
-        animate();
-
-        return () => {
-            if (animationRef.current) cancelAnimationFrame(animationRef.current);
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.currentTime = 0;
-            }
-            if (state.cleanup) state.cleanup();
-        };
-    }, [selectedAnimation, speed, size, hueShift, isAudioPlaying, isPlayingSaved]);
-
-    const filteredAnimations = animationData.filter(anim =>
-        anim.name.toLowerCase().includes(search.toLowerCase())
-    );
-
-    const startEditing = (item) => {
-        setEditingId(item.id);
-        setNewName(item.name);
-    };
-
-    const saveNewName = (id) => {
-        const updated = recordingsList.map(item =>
-            item.id === id ? { ...item, name: newName } : item
-        );
-
+        const updated = [newRec, ...recordingsList];
         setRecordingsList(updated);
         localStorage.setItem("savedRecordings", JSON.stringify(updated));
-        setEditingId(null);
+      };
+      reader.readAsDataURL(blob);
     };
 
-    const copyToClipboard = async (text) => {
-        if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text);
-        } else {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-999px";
-            textArea.style.top = "-999px";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
+    mediaRecorder.start();
+    recorderRef.current = mediaRecorder;
+    setIsRecording(true);
+  };
 
-            return new Promise((resolve, reject) => {
-                if (document.execCommand("copy")) {
-                    resolve();
-                } else {
-                    reject();
-                }
-                document.body.removeChild(textArea);
-            });
-        }
-    };
+  const stopRecording = () => {
+    recorderRef.current?.stop();
+    setIsRecording(false);
+  };
 
-    // ----------------- Upload & Share (Firebase + Direct share) -----------------
+  // ---------------- PLAY SAVED ----------------
+  const playSavedRecording = (src) => {
+    cancelAnimationFrame(animationRef.current);
+    audioRef.current?.pause();
+    setIsPlayingSaved(true);
+    setPlayingVideoSrc(src);
+  };
 
-    async function getActualBlob(localUrl) {
-        try {
-            const res = await fetch(localUrl);
-            const blob = await res.blob();
-            return blob;
-        } catch (e) {
-            console.error("Blob fetch error:", e);
-            return null;
-        }
+  const backToLive = () => {
+    setIsPlayingSaved(false);
+    setPlayingVideoSrc(null);
+  };
+
+  // ---------------- CANVAS ANIMATION ----------------
+  useEffect(() => {
+    if (!showAnimationView || isPlayingSaved) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const anim = animationData[selectedAnimation];
+    const config = { ...anim.config, speed, size, hueShift };
+
+    if (isAudioPlaying && anim.audio) {
+      audioRef.current = new Audio(anim.audio);
+      audioRef.current.loop = true;
+      audioRef.current.play().catch(() => {});
     }
 
+    const state = anim.init(canvas, config);
 
-    // Upload base64 dataURL to Firebase Storage and return URL
-    const uploadRecordingDataURL = async (rec) => {
-        try {
-            if (!rec) throw new Error("record not found");
-            // ensure `storage` import exists (uncomment at top if needed)
-            if (typeof storage === "undefined") {
-                console.warn("Firebase 'storage' is not defined. Make sure to import it from your firebase config.");
-                throw new Error("Firebase storage not available");
-            }
-            const uid = crypto.randomUUID();
-            const fileRef = ref(storage, `recordings/${uid}.webm`);
-            await uploadString(fileRef, rec.data, 'data_url');
-            const url = await getDownloadURL(fileRef);
-            return url;
-        } catch (err) {
-            console.error("uploadRecordingDataURL error", err);
-            throw err;
-        }
+    const loop = () => {
+      anim.animate(ctx, canvas, config, state);
+      animationRef.current = requestAnimationFrame(loop);
     };
+    loop();
 
-    // Existing function (kept) but improved error handling & toast
-    const uploadAndShareById = async (id) => {
-        try {
-            const rec = recordingsList.find(r => r.id === id);
-            if (!rec) {
-                console.error('uploadAndShareById: record not found for id', id);
-                showToast('Upload failed: record not found');
-                return;
-            }
-
-            console.log('Uploading record:', rec);
-            showToast('Uploading...');
-
-            const url = await uploadRecordingDataURL(rec);
-
-            await copyToClipboard(url);
-            showToast('Share link copied!');
-            console.log('Share URL:', url);
-        } catch (err) {
-            console.error('uploadAndShareById error', err);
-            showToast('Upload failed!');
-        } finally {
-            setShowShareMenuId(null);
-            setShowFormatMenuId(null);
-        }
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      audioRef.current?.pause();
+      state.cleanup?.();
     };
+  }, [showAnimationView, selectedAnimation, size, hueShift, speed, isAudioPlaying]);
 
-    // Direct share (Web Share API) — share video file directly
-    const shareWebmDirectById = async (id) => {
-        try {
-            const rec = recordingsList.find(r => r.id === id);
-            if (!rec) {
-                showToast("Record not found");
-                return;
-            }
+  // ---------------- HELPERS ----------------
+  const downloadWebM = (rec) => {
+    const a = document.createElement("a");
+    a.href = rec.data;
+    a.download = `${rec.name}.webm`;
+    a.click();
+  };
 
-            const blob = dataURLToBlob(rec.data);
-            const file = new File([blob], `${rec.name}.webm`, { type: blob.type });
+  const filteredAnimations = animationData.filter((a) =>
+    a.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-            // Feature-detect sharing files
-            const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+  // ====================== JSX ======================
+  return (
+    <div className="main-container">
 
-            if (canShareFiles) {
-                try {
-                    await navigator.share({
-                        title: rec.name,
-                        text: "Check out this animation",
-                        files: [file],
-                    });
-                    showToast("Shared successfully!");
-                } catch (err) {
-                    console.log("share cancelled or failed", err);
-                    showToast("Sharing cancelled or failed");
-                }
-            } else {
-                // Fallback: offer download + optional copy link (upload to firebase if user wants link)
-                // We'll trigger a download so user can manually share the file from their device
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `${rec.name}.webm`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                showToast("Download started (sharing not supported on this device).");
-            }
-        } catch (err) {
-            console.error("shareWebmDirectById error", err);
-            showToast("Direct share failed");
-        } finally {
-            setShowShareMenuId(null);
-        }
-    };
-
-    // ----------------- Download helpers (MP4/GIF fixes) -----------------
-
-    const downloadWebM = (rec) => {
-        if (!rec) return;
-        const a = document.createElement("a");
-        a.href = rec.data;
-        a.download = `${rec.name}.webm`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setShowFormatMenuId(null);
-    };
-
-    return (
-        <div className="main-container">
-            {/* Mobile Dropdowns */}
-            <div className="mobile-dropdowns">
-                <details className="dropdown-section dropdown-animation">
-                    <summary>
-                        <span className="material-symbols-outlined">palette</span> Animations
-                    </summary>
-                    <div className="dropdown-content">
-                        {filteredAnimations.map((anim) => (
-                            <button
-                                key={anim.id}
-                                className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
-                                onClick={() => {
-                                    setIsPlayingSaved(false);
-                                    setSelectedAnimation(anim.id);
-                                }}
-                            >
-                                {anim.name}
-                                {selectedAnimation === anim.id && (
-                                    <button
-                                        className="audio-toggle"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (audioRef.current) {
-                                                if (isAudioPlaying) audioRef.current.pause();
-                                                else audioRef.current.play();
-                                            }
-                                            setIsAudioPlaying(!isAudioPlaying);
-                                        }}
-                                    >
-                                        <span className="material-symbols-outlined">
-                                            {isAudioPlaying ? "volume_up" : "volume_off"}
-                                        </span>
-                                    </button>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </details>
-
-                <details className="dropdown-section">
-                    <summary>
-                        <span className="material-symbols-outlined">tune</span> Customize Here
-                    </summary>
-                </details>
+      {/* ================= CARDS VIEW ================= */}
+      {!showAnimationView && (
+        <div className="container">
+          <div className="sidebar">
+            <div className="animations">
+              {filteredAnimations.map((anim) => (
+                <button
+                  key={anim.id}
+                  className="animation-btn"
+                  onClick={() => {
+                    setSelectedAnimation(anim.id);
+                    setShowAnimationView(true);
+                  }}
+                >
+                  <img src={anim.image} width="100%" height="150" />
+                  <div className="anim-name">{anim.name}</div>
+                </button>
+              ))}
             </div>
-
-            {/* Desktop Layout */}
-            <div className="container">
-                <div className="sidebar desktop-only">
-                    <h1 className="sidebar-title">
-                        <span className="material-symbols-outlined">auto_awesome</span> Explore more ...
-                    </h1>
-                    <div className="animations">
-                        {filteredAnimations.map((anim) => (
-                            <button
-                                key={anim.id}
-                                className={`animation-btn ${selectedAnimation === anim.id ? "active" : ""}`}
-                                onClick={() => {
-                                    setIsPlayingSaved(false);
-                                    setSelectedAnimation(anim.id);
-                                }}
-                            >
-                                <img src={anim.image} width="100%" height="150px" style={{ borderRadius: "12px" }} />
-                                <div className="anim-name">
-                                    {anim.name}
-                                    {selectedAnimation === anim.id && (
-                                        <button
-                                            className="audio-toggle"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (audioRef.current) {
-                                                    if (isAudioPlaying) audioRef.current.pause();
-                                                    else audioRef.current.play();
-                                                }
-                                                setIsAudioPlaying(!isAudioPlaying);
-                                            }}
-                                        >
-                                            <span className="material-symbols-outlined">
-                                                {isAudioPlaying ? "volume_up" : "volume_off"}
-                                            </span>
-                                        </button>
-                                    )}
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="canvas-area">
-                    <div className="search-box">
-                        <input
-                            type="text"
-                            placeholder="Search animations..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                    {!isPlayingSaved ? (
-                        <canvas ref={canvasRef} className="animation-canvas" />
-                    ) : (
-                        <>
-                            <video
-                                src={playingVideoSrc}
-                                className="video-player"
-                                controls
-                                autoPlay
-                                loop
-                                playsInline
-                                muted
-                            />
-                            <button onClick={backToLive} className="back-btn">
-                                <span className="material-symbols-outlined">arrow_back</span> Back to Live
-                            </button>
-                        </>
-                    )}
-
-                    <div className="dropdown-content dropdown-controls">
-                        <div className="size-color">
-                            <div className="size">
-                                <label>Size : </label>
-                                <div className="input">
-                                    <input
-                                        className="range"
-                                        type="range"
-                                        min="0.3"
-                                        max="2"
-                                        step="0.1"
-                                        value={size}
-                                        onChange={(e) => setSize(parseFloat(e.target.value))}
-                                    />
-                                    {size.toFixed(1)}x
-                                </div>
-                            </div>
-
-                            <div className="color">
-                                <label>Color Shift : </label>
-                                <div className="input">
-                                    <input
-                                        className="range"
-                                        type="range"
-                                        min="0"
-                                        max="360"
-                                        step="10"
-                                        value={hueShift}
-                                        onChange={(e) => setHueShift(parseInt(e.target.value))}
-                                    />
-                                    {hueShift}°
-                                </div>
-                            </div>
-                            {/* SHARE - kept visually same, now toggles inline share menu */}
-                            {/* <button className="share-btn" onClick={() => uploadAndShare(rec)}>
-                                <span className="material-symbols-outlined">share</span>
-                            </button> */}
-                        </div>
-
-                        <div className="record-saved">
-                            {/* Record Buttons */}
-                            {!isRecording ? (
-                                <button className="record-btn start" onClick={startRecording}>
-                                    {/* <span className="material-symbols-outlined">arrow_down</span>  */}
-                                    Start Recording
-                                </button>
-                            ) : (
-                                <button className="record-btn stop" onClick={stopRecording}>
-                                    Stop Recording
-                                </button>
-                            )}
-
-                            {/* Saved Recordings */}
-                            {recordingsList.length > 0 && (
-                                <details className="dropdown-section inner">
-                                    <summary>
-                                        <span className="material-symbols-outlined">movie</span> Saved Recordings
-                                    </summary>
-
-                                    <div className="recordings-items">
-                                        {recordingsList.map((rec) => (
-                                            <div key={rec.id} className="recording-item">
-
-                                                {/* PLAY */}
-                                                <button className="play-btn" onClick={() => playSavedRecording(rec.data)}>
-                                                    <span className="material-symbols-outlined">play_arrow</span>
-                                                    <span>{rec.name}</span>
-                                                </button>
-
-                                                {/* DIRECT DOWNLOAD - no dropdown */}
-                                                <button
-                                                    className="download-btn"
-                                                    onClick={() => downloadWebM(rec)}
-                                                >
-                                                    <span className="material-symbols-outlined">download</span>
-                                                </button>
-
-                                                {/* Inline format menu (minimal, placed next to buttons) */}
-                                                {/* {showFormatMenuId === rec.id && (
-                                                    <div className="format-menu-inline">
-                                                        <button
-                                                            disabled={isConverting}
-                                                            onClick={() => downloadWebM(rec)}
-                                                        >
-                                                            .webm
-                                                        </button>
-                                                        <button
-                                                            disabled={isConverting}
-                                                            onClick={() => downloadAsMP4(rec)}
-                                                        >
-                                                            .mp4
-                                                        </button>
-                                                        <button
-                                                            disabled={isConverting}
-                                                            onClick={() => downloadAsGIF(rec)}
-                                                        >
-                                                            .gif
-                                                        </button>
-                                                        <button
-                                                            disabled={isConverting}
-                                                            onClick={() => downloadJSON(rec)}
-                                                        >
-                                                            .json
-                                                        </button>
-                                                        <button
-                                                            className="format-close"
-                                                            onClick={() => setShowFormatMenuId(null)}
-                                                        >
-                                                            ✕
-                                                        </button>
-                                                    </div>
-                                                )} */}
-
-                                                {/* SHARE (now toggles an inline share menu with two options) */}
-                                                <div style={{ display: "inline-block", position: "relative" }}>
-                                                    <button
-                                                        className="share-btn"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedRec(rec);
-                                                            setShowShareMenuId(prev => (prev === rec.id ? null : rec.id));
-                                                            // close other menus
-                                                            setShowFormatMenuId(null);
-                                                        }}
-                                                    >
-                                                        <span className="material-symbols-outlined">share</span>
-                                                    </button>
-
-                                                    {showShareMenuId === rec.id && (
-                                                        <div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
-                                                            <button className="share-btn"
-                                                                onClick={() => shareWebmDirectById(rec.id)}
-                                                                disabled={isConverting}
-                                                            >
-                                                                Share Video
-                                                            </button>
-                                                            {/* <button className="share-btn"
-                                                                onClick={() => uploadAndShareById(rec.id)}
-                                                                disabled={isConverting}
-                                                            >
-                                                                Share Link (Upload)
-                                                            </button> */}
-                                                            <button className="format-close" onClick={() => setShowShareMenuId(null)}>✕</button>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* EDIT NAME */}
-                                                <button
-                                                    className="edit-btn"
-                                                    onClick={() => {
-                                                        const newName = prompt("Rename recording:", rec.name);
-                                                        if (!newName) return;
-
-                                                        const updated = recordingsList.map((r) =>
-                                                            r.id === rec.id ? { ...r, name: newName } : r
-                                                        );
-
-                                                        setRecordingsList(updated);
-                                                        localStorage.setItem("savedRecordings", JSON.stringify(updated));
-                                                        showToast("Name updated");
-                                                    }}
-                                                >
-                                                    <span className="material-symbols-outlined">edit</span>
-                                                </button>
-
-                                                {/* DELETE */}
-                                                <button
-                                                    className="delete-btn"
-                                                    onClick={() => {
-                                                        if (window.confirm(`Delete "${rec.name}"?`)) {
-                                                            const updated = recordingsList.filter((r) => r.id !== rec.id);
-                                                            setRecordingsList(updated);
-                                                            localStorage.setItem("savedRecordings", JSON.stringify(updated));
-                                                            showToast("Recording deleted");
-                                                        }
-                                                    }}
-                                                >
-                                                    <span className="material-symbols-outlined">delete</span>
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </details>
-                            )}
-
-
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+      )}
 
-    );
+      {/* ================= ANIMATION VIEW ================= */}
+      {showAnimationView && (
+        <div className="container">
+          <div className="canvas-area">
+
+            <div className="search-box">
+              <input
+                placeholder="Search animations..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {!isPlayingSaved ? (
+              <canvas ref={canvasRef} className="animation-canvas" />
+            ) : (
+              <>
+                <video
+                  src={playingVideoSrc}
+                  className="video-player"
+                  controls
+                  autoPlay
+                  loop
+                />
+                <button className="back-btn" onClick={backToLive}>
+                  Back
+                </button>
+              </>
+            )}
+
+            <button
+              className="back-btn"
+              onClick={() => {
+                setShowAnimationView(false);
+                setIsPlayingSaved(false);
+              }}
+            >
+              ✕ Close
+            </button>
+
+            {/* ========== CONTROLS ========== */}
+            <div className="dropdown-controls">
+              <div className="size-color">
+                <div className="size">
+                  <label>Size</label>
+                  <input
+                    className="range"
+                    type="range"
+                    min="0.3"
+                    max="2"
+                    step="0.1"
+                    value={size}
+                    onChange={(e) => setSize(+e.target.value)}
+                  />
+                </div>
+
+                <div className="color">
+                  <label>Color</label>
+                  <input
+                    className="range"
+                    type="range"
+                    min="0"
+                    max="360"
+                    step="10"
+                    value={hueShift}
+                    onChange={(e) => setHueShift(+e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="record-saved">
+                {!isRecording ? (
+                  <button className="record-btn start" onClick={startRecording}>
+                    Start Recording
+                  </button>
+                ) : (
+                  <button className="record-btn stop" onClick={stopRecording}>
+                    Stop Recording
+                  </button>
+                )}
+
+                {recordingsList.length > 0 && (
+                  <details className="dropdown-section inner">
+                    <summary>Saved Recordings</summary>
+                    <div className="recordings-items">
+                      {recordingsList.map((rec) => (
+                        <div key={rec.id} className="recording-item">
+                          <button
+                            className="play-btn"
+                            onClick={() => playSavedRecording(rec.data)}
+                          >
+                            {rec.name}
+                          </button>
+
+                          <button
+                            className="download-btn"
+                            onClick={() => downloadWebM(rec)}
+                          >
+                            ⬇
+                          </button>
+
+                          <button
+                            className="edit-btn"
+                            onClick={() => {
+                              const name = prompt("Rename", rec.name);
+                              if (!name) return;
+                              const updated = recordingsList.map((r) =>
+                                r.id === rec.id ? { ...r, name } : r
+                              );
+                              setRecordingsList(updated);
+                              localStorage.setItem("savedRecordings", JSON.stringify(updated));
+                            }}
+                          >
+                            ✎
+                          </button>
+
+                          <button
+                            className="delete-btn"
+                            onClick={() => {
+                              if (!window.confirm("Delete recording?")) return;
+                              const updated = recordingsList.filter((r) => r.id !== rec.id);
+                              setRecordingsList(updated);
+                              localStorage.setItem("savedRecordings", JSON.stringify(updated));
+                            }}
+                          >
+                            🗑
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Animation;
