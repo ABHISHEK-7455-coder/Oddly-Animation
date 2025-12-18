@@ -11,20 +11,27 @@
 .container {
     display: flex;
     height: 100%;
-    /* flex-direction: column-reverse; */
-    padding: 20px 0px 0px 20px;
+    flex-direction: column;
+    padding: 20px 0px 0px 0px;
 }
 
 .search-box {
     padding: 0px;
-    margin-bottom: 16px;
-    width: 100%;
+    margin: 12px auto;
+    width: 95%;
     color: white;
+    display: flex;
+}
+
+.search-box h3 {
+    background: linear-gradient(90deg, #3b82f6, #22c55e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .search-box input {
     width: 100%;
-    padding: 16px;
+    padding: 12px;
     border-radius: 40px;
     border: 1px solid lightgray;
     font-size: 14px;
@@ -88,16 +95,14 @@
 /* Sidebar */
 .sidebar {
     width: 95%;
-    background: white;
+    background-color: transparent;
     backdrop-filter: blur(10px);
     padding: 0px 8px 0px 8px;
     overflow-x: auto;
-    box-shadow: 0px 0px 10px 10px rgba(0, 0, 0, 0.2);
-    /* border: 1px solid #0A0A0A; */
     border-radius: 16px;
     margin: auto;
-    display: grid;
-    grid-template-rows: 1fr 1fr;
+    /* display: grid;
+    grid-template-columns: 1fr 1fr 1fr; */
     scrollbar-width: none;
     height: 94vh;
 }
@@ -115,17 +120,17 @@
 }
 
 .animations {
-    width: 300px;
-    padding: 0px 0px;
+    width: 100%;
+    padding: 10px 0px;
     overflow-x: auto;
     margin-top: 0px;
     margin-left: 20px;
     margin-bottom: 50px;
     margin-right: 20px;
     margin: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 24px;
     scrollbar-width: none;
     border-radius: 16px;
 }
@@ -302,18 +307,23 @@
 
 /* Animation Buttons */
 .animation-btn {
-    width: 95%;
-    height: 50%;
+    width: 80%;
+    height: 100%;
     padding: 8px 8px;
     margin: 4px auto;
     /* background: rgba(255, 255, 255, 0.1); */
     /* color: #764ba2; */
+    box-shadow: 0px 8px 20px black;
     border: none;
     border-radius: 16px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.animation-btn img {
+    border-radius: 12px;
 }
 
 .animation-btn.active {
@@ -375,15 +385,19 @@
 
 .back-btn {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    background: #667eea;
+    top: 93px;
+    right: 190px;
+    /* background: #667eea; */
     color: #fff;
     padding: 10px 15px;
-    border-radius: 0px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
     font-weight: 600;
+}
+
+.back-btn:hover {
+    font-size: 14px;
 }
 
 @media (max-width: 1024px) {
