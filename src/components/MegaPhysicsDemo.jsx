@@ -1,204 +1,197 @@
 // ===== MegaPhysicsDemo.jsx =====
-// Full UI + Renderer + Engine + Demo Switch with controls (Spawn, Pause/Resume, Gravity, Count)
-// Includes AvalancheDemo, MixedDemo, ChainsDemo, ConstraintsDemo
-
 import React, { useRef, useEffect, useState } from 'react';
 import Matter from 'matter-js';
 import {
-    MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo, DoublePendulumDemo, WreckingBallDemo, TimescaleDemo, CompoundStackDemo, RopeBridgeDemo, NewtonsCradleDemo, ClothDemo, MagnetFieldDemo,
-    HelicopterRescueDemo, EventsDemo, FallingBuildings, FloatingLanterns
+  MixedDemo, ChainsDemo, ConstraintsDemo, AvalancheDemo,
+  DoublePendulumDemo, WreckingBallDemo, TimescaleDemo,
+  CompoundStackDemo, RopeBridgeDemo, NewtonsCradleDemo,
+  ClothDemo, MagnetFieldDemo, HelicopterRescueDemo,
+  EventsDemo, FallingBuildings, FloatingLanterns
 } from './demos';
-// import { AvalancheDemo } from './AvalancheDemo';
 import './MatterJs.css';
 
 export default function MegaPhysicsDemo() {
-    const sceneRef = useRef(null);
-    const engineRef = useRef(null);
-    const renderRef = useRef(null);
-    const mouseConstraintRef = useRef(null);
-    const [activeDemo, setActiveDemo] = useState('mixed');
-    const [gravity, setGravity] = useState(0.2);
-    const [spawnCount, setSpawnCount] = useState(12);
-    const [running, setRunning] = useState(true);
+  const sceneRef = useRef(null);
+  const engineRef = useRef(null);
+  const renderRef = useRef(null);
+  const mouseConstraintRef = useRef(null);
 
-    let TimescaleDemoCleanup = null;
+  const [activeDemo, setActiveDemo] = useState(null); // ⬅ gallery mode
+  const [gravity, setGravity] = useState(0.2);
+  const [spawnCount, setSpawnCount] = useState(12);
+  const [running, setRunning] = useState(true);
 
+  let TimescaleDemoCleanup = null;
 
-    useEffect(() => {
-        const Engine = Matter.Engine;
-        const Render = Matter.Render;
-        const Mouse = Matter.Mouse;
-        const MouseConstraint = Matter.MouseConstraint;
+  /* ================= ENGINE INIT ================= */
+  useEffect(() => {
+    if (!sceneRef.current || !activeDemo) return;
 
-        const engine = Engine.create();
-        engine.gravity.y = gravity;
-        engineRef.current = engine;
+    const { Engine, Render, Mouse, MouseConstraint, Runner } = Matter;
 
-        const width = sceneRef.current.clientWidth || 800;
-        const height = sceneRef.current.clientHeight || 600;
+    const engine = Engine.create();
+    engine.gravity.y = gravity;
+    engineRef.current = engine;
 
-        const render = Render.create({
-            element: sceneRef.current,
-            engine,
-            options: {
-                width, height,
-                wireframes: false,
-                background: '#0f172a'
-            }
-        });
-        renderRef.current = render;
+    const width = sceneRef.current.clientWidth;
+    const height = sceneRef.current.clientHeight;
 
-        // Add mouse constraint ONCE
-        const mouse = Mouse.create(render.canvas);
-        const mouseConstraint = MouseConstraint.create(engine, {
-            mouse,
-            constraint: { stiffness: 0.2, render: { visible: true } }
-        });
-        Matter.World.add(engine.world, mouseConstraint);
-        mouseConstraintRef.current = mouseConstraint;
-        render.mouse = mouse;
+    const render = Render.create({
+      element: sceneRef.current,
+      engine,
+      options: {
+        width,
+        height,
+        wireframes: false,
+        background: '#0f172a'
+      }
+    });
 
-        const runner = Matter.Runner.create();
-        engine.timing.runner = runner;
-        Matter.Runner.run(runner, engine);
-        Render.run(render);
+    renderRef.current = render;
 
-        window.addEventListener('resize', () => {
-            const w = sceneRef.current.clientWidth;
-            const h = sceneRef.current.clientHeight;
-            render.bounds.max.x = w;
-            render.bounds.max.y = h;
-            render.options.width = w;
-            render.options.height = h;
-            render.canvas.width = w;
-            render.canvas.height = h;
-        });
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse,
+      constraint: { stiffness: 0.2 }
+    });
 
-        return () => {
-            Matter.Render.stop(render);
-            Matter.World.clear(engine.world, false);
-            Matter.Engine.clear(engine);
-            render.canvas && render.canvas.remove();
-            render.textures = {};
-        }
-    }, []);
+    Matter.World.add(engine.world, mouseConstraint);
+    mouseConstraintRef.current = mouseConstraint;
 
-    useEffect(() => {
-        if (engineRef.current) engineRef.current.gravity.y = gravity;
-    }, [gravity]);
+    const runner = Runner.create();
+    engine.timing.runner = runner;
+    Runner.run(runner, engine);
+    Render.run(render);
 
-    // Clear all dynamic bodies + constraints but preserve MouseConstraint
-    const handleClear = () => {
-        if (!engineRef.current || !mouseConstraintRef.current) return;
-        const engine = engineRef.current;
-        const allBodies = Matter.Composite.allBodies(engine.world);
-        const allConstraints = Matter.Composite.allConstraints(engine.world);
-        for (const b of allBodies) {
-            if (!b.isStatic && b !== mouseConstraintRef.current.bodyA && b !== mouseConstraintRef.current.bodyB) {
-                Matter.Composite.remove(engine.world, b);
-            }
-        }
-        for (const c of allConstraints) {
-            if (c !== mouseConstraintRef.current.constraint) {
-                Matter.Composite.remove(engine.world, c);
-            }
-        }
+    handleSpawn(); // ⬅ auto spawn on open
+
+    return () => {
+      Render.stop(render);
+      Matter.World.clear(engine.world, false);
+      Matter.Engine.clear(engine);
+      render.canvas.remove();
+      render.textures = {};
     };
+  }, [activeDemo]);
 
-    const handleSpawn = () => {
-        if (!engineRef.current || !renderRef.current) return;
-        const engine = engineRef.current;
-        const render = renderRef.current;
-        if (activeDemo === 'mixed') {
-            MixedDemo({ engine, render, spawnCount });
-        } else if (activeDemo === 'chains') {
-            ChainsDemo({ engine, render, spawnCount });
-        } else if (activeDemo === 'avalanche') {
-            AvalancheDemo({ engine, render, spawnCount });
-        } else if (activeDemo === 'constraints') {
-            ConstraintsDemo({ engine, render });
-        } else if (activeDemo === 'double') {
-            DoublePendulumDemo({ engine, render });
-        } else if (activeDemo === 'wreckingball') {
-            WreckingBallDemo({ engine, render });
-        } else if (activeDemo === 'timescale') {
-            if (typeof TimescaleDemoCleanup === 'function') TimescaleDemoCleanup(); // previous cleanup
-            TimescaleDemoCleanup = TimescaleDemo({ engine, render }); // store cleanup function
-        } else if (activeDemo === "compound") {
-            CompoundStackDemo({ engine, render });
-        } else if (activeDemo === 'rope') {
-            RopeBridgeDemo({ engine, render });
-        } else if (activeDemo === 'cradle') {
-            NewtonsCradleDemo({ engine, render });
-        } else if (activeDemo === 'cloth') {
-            ClothDemo({ engine, render });
-        } else if (activeDemo === 'magnet') {
-            MagnetFieldDemo({ engine, render });
-        } else if (activeDemo === 'helicopter') {
-            HelicopterRescueDemo({ engine, render });
-        } else if (activeDemo === 'events') {
-            EventsDemo({ engine, render });
-        } else if (activeDemo === 'fallings') {
-            FallingBuildings({ engine, render });
-        } else if (activeDemo === 'lanterns') {
-            FloatingLanterns({ engine, render });
-        }
-    };
+  /* ================= HELPERS ================= */
+  const handleClear = () => {
+    if (!engineRef.current || !mouseConstraintRef.current) return;
 
-    const handlePauseResume = () => {
-        if (!engineRef.current) return;
-        const engine = engineRef.current;
-        if (running) {
-            try { Matter.Runner.stop(engine.timing.runner); } catch (e) { }
-        } else {
-            const runner = Matter.Runner.create();
-            engine.timing.runner = runner;
-            Matter.Runner.run(runner, engine);
-        }
-        setRunning(!running);
-    };
+    const engine = engineRef.current;
+    const bodies = Matter.Composite.allBodies(engine.world);
+    const constraints = Matter.Composite.allConstraints(engine.world);
 
-    useEffect(() => {
-        handleClear(); // clear all bodies + constraints except mouse
-        handleSpawn();
-    }, [activeDemo, spawnCount]);
+    bodies.forEach(b => !b.isStatic && Matter.Composite.remove(engine.world, b));
+    constraints.forEach(c => Matter.Composite.remove(engine.world, c));
+  };
 
+  const handleSpawn = () => {
+    if (!engineRef.current || !renderRef.current) return;
+    const engine = engineRef.current;
+    const render = renderRef.current;
+
+    handleClear();
+
+    switch (activeDemo) {
+      case 'mixed': MixedDemo({ engine, render, spawnCount }); break;
+      case 'chains': ChainsDemo({ engine, render, spawnCount }); break;
+      case 'avalanche': AvalancheDemo({ engine, render, spawnCount }); break;
+      case 'constraints': ConstraintsDemo({ engine, render }); break;
+      case 'double': DoublePendulumDemo({ engine, render }); break;
+      case 'wreckingball': WreckingBallDemo({ engine, render }); break;
+      case 'timescale':
+        if (TimescaleDemoCleanup) TimescaleDemoCleanup();
+        TimescaleDemoCleanup = TimescaleDemo({ engine, render });
+        break;
+      case 'compound': CompoundStackDemo({ engine, render }); break;
+      case 'rope': RopeBridgeDemo({ engine, render }); break;
+      case 'cradle': NewtonsCradleDemo({ engine, render }); break;
+      case 'cloth': ClothDemo({ engine, render }); break;
+      case 'magnet': MagnetFieldDemo({ engine, render }); break;
+      case 'helicopter': HelicopterRescueDemo({ engine, render }); break;
+      case 'events': EventsDemo({ engine, render }); break;
+      case 'fallings': FallingBuildings({ engine, render }); break;
+      case 'lanterns': FloatingLanterns({ engine, render }); break;
+      default: break;
+    }
+  };
+
+  const handlePauseResume = () => {
+    if (!engineRef.current) return;
+    const runner = engineRef.current.timing.runner;
+    running ? Matter.Runner.stop(runner) : Matter.Runner.run(runner, engineRef.current);
+    setRunning(!running);
+  };
+
+  /* ================= UI ================= */
+
+  // -------- GALLERY --------
+  if (!activeDemo) {
     return (
-        <div className="matter-container">
-            <div className="matter-controls">
-                <button className="btn btn-indigo" onClick={handleSpawn}>Spawn {spawnCount}</button>
-                <button className="btn btn-yellow" onClick={handlePauseResume}>{running ? 'Pause' : 'Resume'}</button>
-                <button className="btn btn-rose" onClick={handleClear}>Clear</button>
+      <div className="physics-gallery">
+        <h1>Satisfying Physics Demos</h1>
+        <p>Click a card to play simulation</p>
 
-                <label>Gravity
-                    <input type="range" min="-2" max="3" step="0.1" value={gravity} onChange={e => setGravity(parseFloat(e.target.value))} />
-                    <span>{gravity.toFixed(1)}</span>
-                </label>
-
-                <label>Count
-                    <input type="number" min="1" max="60" value={spawnCount} onChange={e => setSpawnCount(Math.max(1, Math.min(60, parseInt(e.target.value || '12', 10))))} />
-                </label>
-
+        <div className="physics-grid">
+          {[
+            ['mixed','Mixed'], ['chains','Chains'], ['avalanche','Avalanche'],
+            ['constraints','Constraints'], ['double','Pendulum'],
+            ['wreckingball','Wrecking Ball'], ['timescale','Time Scale'],
+            ['compound','Compound'], ['rope','Rope'],
+            ['cradle','Cradle'], ['cloth','Cloth'],
+            ['magnet','Magnet'], ['fallings','Falling'],
+            ['lanterns','Lanterns']
+          ].map(([key, title]) => (
+            <div key={key} className="physics-card" onClick={() => setActiveDemo(key)}>
+              <div className="card-preview" />
+              <h3>{title}</h3>
             </div>
-            <div ref={sceneRef} className="scene-area" />
-            <div className="demos-btn">
-                <button className={`btn ${activeDemo === 'mixed' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('mixed')}>Mixed Physics</button>
-                <button className={`btn ${activeDemo === 'chains' ? 'btn-teal' : 'btn-slate'}`} onClick={() => setActiveDemo('chains')}>Chains Demo</button>
-                <button className={`btn ${activeDemo === 'avalanche' ? 'btn-yellow' : 'btn-slate'}`} onClick={() => setActiveDemo('avalanche')}>Avalanche Demo</button>
-                <button className={`btn ${activeDemo === 'constraints' ? 'btn-purple' : 'btn-slate'}`} onClick={() => setActiveDemo('constraints')}>Constraints Demo</button>
-                <button className={`btn ${activeDemo === 'double' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('double')}>Double Pendulum</button>
-                <button className={`btn ${activeDemo === 'wreckingBall' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('wreckingball')}>Wrecking Ball</button>
-                <button className={`btn ${activeDemo === 'timescale' ? 'btn-orange' : 'btn-slate'}`} onClick={() => setActiveDemo('timescale')}>Time Scale</button>
-                <button className={`btn ${activeDemo === 'compound' ? 'btn-green' : 'btn-slate'}`} onClick={() => setActiveDemo('compound')}>Compound Stack</button>
-                <button className={`btn ${activeDemo === 'rope' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('rope')}>Rope Bridge</button>
-                <button className={`btn ${activeDemo === 'cradle' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('cradle')}>Newton's Cradle</button>
-                <button className={`btn ${activeDemo === 'cradle' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('cloth')}>Cloth</button>
-                <button className={`btn ${activeDemo === 'magnet' ? 'btn-pink' : 'btn-slate'}`} onClick={() => setActiveDemo('magnet')}>Magnet Field</button>
-                <button className={`btn ${activeDemo === 'helicopter' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('helicopter')}>Helicopter</button>
-                <button className={`btn ${activeDemo === 'events' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('events')}>Events</button>
-                <button className={`btn ${activeDemo === 'fallings' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('fallings')}>Falling</button>
-                <button className={`btn ${activeDemo === 'lanterns' ? 'btn-indigo' : 'btn-slate'}`} onClick={() => setActiveDemo('lanterns')}>Lanterns</button>
-            </div>
+          ))}
         </div>
+      </div>
     );
+  }
+
+  // -------- VIEWER --------
+  return (
+    <div className="matter-container">
+      <div className="viewer-topbar">
+        <button onClick={() => setActiveDemo(null)}>✕</button>
+        <button>🎥</button>
+        <button>⬇</button>
+        <button
+          onClick={() =>
+            navigator.share?.({ title: 'Physics Demo', url: window.location.href })
+          }
+        >🔗</button>
+      </div>
+
+      <div className="matter-controls">
+        <button className="btn btn-indigo" onClick={handleSpawn}>Spawn</button>
+        <button className="btn btn-yellow" onClick={handlePauseResume}>
+          {running ? 'Pause' : 'Resume'}
+        </button>
+        <button className="btn btn-rose" onClick={handleClear}>Clear</button>
+
+        <label>
+          Gravity
+          <input type="range" min="-2" max="3" step="0.1"
+            value={gravity}
+            onChange={e => setGravity(+e.target.value)}
+          />
+        </label>
+
+        <label>
+          Count
+          <input type="number" min="1" max="60"
+            value={spawnCount}
+            onChange={e => setSpawnCount(+e.target.value)}
+          />
+        </label>
+      </div>
+
+      <div ref={sceneRef} className="scene-area" />
+    </div>
+  );
 }

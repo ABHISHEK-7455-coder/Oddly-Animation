@@ -29,6 +29,8 @@ const Animation = () => {
     const [search, setSearch] = useState("");
 
     const [showShareMenuId, setShowShareMenuId] = useState(null);
+    const [selectedRec, setSelectedRec] = useState(null);
+    const [isConverting, setIsConverting] = useState(false);
 
     // ---------------- REFS ----------------
     const canvasRef = useRef(null);
@@ -136,6 +138,86 @@ const Animation = () => {
         a.click();
     };
 
+    async function getActualBlob(localUrl) {
+        try {
+            const res = await fetch(localUrl);
+            const blob = await res.blob(); return blob;
+        }
+        catch (e) {
+            console.error("Blob fetch error:", e);
+            return null;
+        }
+    }
+    // Upload base64 dataURL to Firebase Storage and return URL
+    const uploadRecordingDataURL = async (rec) => {
+        try {
+            if (!rec) throw new Error("record not found");
+            // ensure storage import exists (uncomment at top if needed) 
+            if (typeof storage === "undefined") {
+                console.warn("Firebase 'storage' is not defined. Make sure to import it from your firebase config.");
+                throw new Error("Firebase storage not available");
+            }
+            const uid = crypto.randomUUID();
+            const fileRef = ref`(storage, recordings / ${uid}.webm)`;
+            await uploadString(fileRef, rec.data, 'data_url');
+            const url = await getDownloadURL(fileRef); return url;
+        } catch (err) { console.error("uploadRecordingDataURL error", err); throw err; }
+    };
+    // Existing function (kept) but improved error handling & toast 
+    const uploadAndShareById = async (id) => {
+        try {
+            const rec = recordingsList.find(r => r.id === id);
+            if (!rec) {
+                console.error('uploadAndShareById: record not found for id', id);
+                showToast('Upload failed: record not found'); return;
+            }
+            console.log('Uploading record:', rec);
+            showToast('Uploading...');
+            const url = await uploadRecordingDataURL(rec);
+            await copyToClipboard(url);
+            showToast('Share link copied!');
+            console.log('Share URL:', url);
+        } catch (err) {
+            console.error('uploadAndShareById error', err);
+            showToast('Upload failed!');
+        }
+        finally {
+            setShowShareMenuId(null);
+            setShowFormatMenuId(null);
+        }
+    };
+    // Direct share (Web Share API) — share video file directly 
+    const shareWebmDirectById = async (id) => {
+        try {
+            const rec = recordingsList.find(r => r.id === id);
+            if (!rec) { showToast("Record not found"); return; }
+            const blob = dataURLToBlob(rec.data);
+            const file = new File([blob], `${rec.name}.webm`, { type: blob.type });
+            // Feature-detect sharing files 
+            const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+            if (canShareFiles) {
+                try {
+                    await navigator.share({ title: rec.name, text: "Check out this animation", files: [file], });
+                    showToast("Shared successfully!");
+                }
+                catch (err) { console.log("share cancelled or failed", err); showToast("Sharing cancelled or failed"); }
+            } else {
+                // Fallback: offer download + optional copy link (upload to firebase if user wants link) // We'll trigger a download so user can manually share the file from their device 
+                const url = URL.createObjectURL(blob); const a = document.createElement("a");
+                a.href = url;
+                a.download = `${rec.name}.webm`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("Download started (sharing not supported on this device).");
+            }
+        } catch (err) { console.error("shareWebmDirectById error", err); 
+            showToast("Direct share failed"); } 
+            finally { setShowShareMenuId(null); }
+    };
+
+
     const filteredAnimations = animationData.filter((a) =>
         a.name.toLowerCase().includes(search.toLowerCase())
     );
@@ -168,7 +250,7 @@ const Animation = () => {
                                         setShowAnimationView(true);
                                     }}
                                 >
-                                    <img src={anim.image} width="100%" height="150" />
+                                    <img src={anim.image}  />
                                     <div className="anim-name">{anim.name}</div>
                                 </button>
                             ))}
@@ -269,6 +351,26 @@ const Animation = () => {
                                                     >
                                                         ⬇
                                                     </button>
+
+                                                    <div style={{ display: "inline-block", position: "relative" }}>
+                                                        <button 
+                                                        className="share-btn"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedRec(rec);
+                                                                setShowShareMenuId(prev => (prev === rec.id ? null : rec.id)) 
+                                                                // close other menus 
+                                                                setShowFormatMenuId(null); 
+                                                                }} >
+
+                                                                    <span className="material-symbols-outlined">share</span> 
+                                                        </button>
+                                                    {showShareMenuId === rec.id && (<div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
+                                                        <button className="share-btn" onClick={() => shareWebmDirectById(rec.id)} disabled={isConverting} > Share Video </button>
+                                                        {/* <button className="share-btn" onClick={() => uploadAndShareById(rec.id)} disabled={isConverting} > Share Link (Upload) </button> */}
+                                                        <button className="format-close" onClick={() => setShowShareMenuId(null)}>✕</button>
+                                                    </div>)}
+                                                    </div>
 
                                                     <button
                                                         className="edit-btn"
