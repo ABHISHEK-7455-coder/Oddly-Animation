@@ -4,17 +4,17 @@
   overflow: hidden;
   color: white;
   text-align: left;
-  width: 75%;
-  margin: 24px auto;
+  width: 84%;
+  margin: 2px auto;
   
 }
 
 .hero-content {
   /* text-align: center; */
   z-index: 2;
-  padding: 20px;
-  margin-bottom: 20px;
-  background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBLyViKCGAAXPryn2NOk1BtvFO_lycvdSlSIInjxsr1I_T_CInGBRcrDXPKrg3w2nl7UCf7ye335FqPRsZkUTtfYy18Y08jfwWsxvVSXgH-vLPgQb1HG_ugRlvvGyEK_pdDAvt03pp5urkrakIC0j4bz_rVt-UCAVYpxI0zqj8yaWF2d9rA2Z1zUtuNyUFomgM2gxjZVR5lMyKg5XwANhbxtS7YM98s-OPo52W4WVaZKa5F5Jo7R-X-FC7SGg5lSHeY5kwc4PL6Niqd");
+  /* padding: 20px; */
+  margin-bottom: 0px;
+  /* background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBLyViKCGAAXPryn2NOk1BtvFO_lycvdSlSIInjxsr1I_T_CInGBRcrDXPKrg3w2nl7UCf7ye335FqPRsZkUTtfYy18Y08jfwWsxvVSXgH-vLPgQb1HG_ugRlvvGyEK_pdDAvt03pp5urkrakIC0j4bz_rVt-UCAVYpxI0zqj8yaWF2d9rA2Z1zUtuNyUFomgM2gxjZVR5lMyKg5XwANhbxtS7YM98s-OPo52W4WVaZKa5F5Jo7R-X-FC7SGg5lSHeY5kwc4PL6Niqd"); */
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -28,7 +28,7 @@
   /* animation: fadeIn 2s ease forwards; */
   color: white;
   text-align: left;
-  margin-left: 25px;
+  /* margin-left: 0px; */
   margin-top: 24px;
 }
 
@@ -68,12 +68,12 @@
   width: 75%;
 } */
 
-.navs h3 {
+/* .navs h3 {
   color: rgb(115, 99, 99);
   margin-bottom: 16px;
-}
+} */
 
-nav {
+/* nav {
   color: black;
   display: flex;
   justify-content: space-between;
@@ -95,7 +95,7 @@ nav {
   background: rgb(119, 147, 239);
   border-radius: 16px;
   padding: 4px 16px;
-}
+} */
 
 /* ✨ Keyframes */
 @keyframes fadeIn {

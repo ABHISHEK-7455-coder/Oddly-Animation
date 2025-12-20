@@ -21,7 +21,7 @@ const HeroSection = () => {
                 </button>
             </div>
 
-            <div className="navs">
+            {/* <div className="navs">
                     <h3>Explore the Collection</h3>
                 <nav>
                     <NavLink
@@ -74,7 +74,7 @@ const HeroSection = () => {
                         Login
                     </NavLink>
                 </nav>
-            </div>
+            </div> */}
         </section>
     );
 };

@@ -4,6 +4,7 @@ export const animationData = [
         name: '✨Particle Rain',
         audio: "/sounds/Heart-Of-The-Ocean(chosic.com).mp3",
         image:"public/pictures/particle rain.png",
+        video:"public/videos/particle rain.mp4",
         config: {
             count: 100,
             baseSpeed: 2,
@@ -55,6 +56,7 @@ export const animationData = [
         name: '🎯 Orbit Dance',
         audio: "/sounds/waves.mp3",
         image:"/pictures/orbit dance.png",
+        video:"public/videos/orbit dance.mp4",
         config: {
             count: 8,
             baseRadius: 100,
@@ -110,6 +112,7 @@ export const animationData = [
         name: '🌊 Wave Pool',
         image:"/pictures/wave motion.png",
         audio: "/sounds/Fragments(chosic.com).mp3",
+        video:"public/videos/wave pool.mp4",
         config: {
             cols: 50,
             rows: 30,
@@ -156,6 +159,7 @@ export const animationData = [
         name: '🌀 Spiral Galaxy',
         audio: "/sounds/pad-gentle-and-soothing-strings-background-358649.mp3",
         image:"/pictures/spiral galaxy.png",
+        video:"public/videos/spiral galaxy.mp4",
         config: {
             particleCount: 200,
             spiralTurns: 8,

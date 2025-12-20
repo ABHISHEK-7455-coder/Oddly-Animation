@@ -226,8 +226,6 @@ const Animation = () => {
     return (
         <div className="main-container">
 
-
-
             {/* ================= CARDS VIEW ================= */}
             {!showAnimationView && (
                 <div className="container">
@@ -250,7 +248,8 @@ const Animation = () => {
                                         setShowAnimationView(true);
                                     }}
                                 >
-                                    <img src={anim.image}  />
+                                    {/* <img src={anim.image}  /> */}
+                                    <video src={anim.video}/>
                                     <div className="anim-name">{anim.name}</div>
                                 </button>
                             ))}
