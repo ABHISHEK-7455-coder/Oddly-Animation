@@ -212,9 +212,11 @@ const Animation = () => {
                 URL.revokeObjectURL(url);
                 showToast("Download started (sharing not supported on this device).");
             }
-        } catch (err) { console.error("shareWebmDirectById error", err); 
-            showToast("Direct share failed"); } 
-            finally { setShowShareMenuId(null); }
+        } catch (err) {
+            console.error("shareWebmDirectById error", err);
+            showToast("Direct share failed");
+        }
+        finally { setShowShareMenuId(null); }
     };
 
 
@@ -249,7 +251,15 @@ const Animation = () => {
                                     }}
                                 >
                                     {/* <img src={anim.image}  /> */}
-                                    <video src={anim.video}/>
+                                    {/* <video
+                                        className="card-video"
+                                        src={anim.video}
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                    /> */}
+                                    <canvas ref={canvasRef} className="animation-canvas" />
                                     <div className="anim-name">{anim.name}</div>
                                 </button>
                             ))}
@@ -274,9 +284,9 @@ const Animation = () => {
                                     autoPlay
                                     loop
                                 />
-                                <button className="back-btn" onClick={backToLive}>
+                                {/* <button className="back-btn" onClick={backToLive}>
                                     Back
-                                </button>
+                                </button> */}
                             </>
                         )}
 
@@ -352,23 +362,23 @@ const Animation = () => {
                                                     </button>
 
                                                     <div style={{ display: "inline-block", position: "relative" }}>
-                                                        <button 
-                                                        className="share-btn"
+                                                        <button
+                                                            className="share-btn"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 setSelectedRec(rec);
-                                                                setShowShareMenuId(prev => (prev === rec.id ? null : rec.id)) 
+                                                                setShowShareMenuId(prev => (prev === rec.id ? null : rec.id))
                                                                 // close other menus 
-                                                                setShowFormatMenuId(null); 
-                                                                }} >
+                                                                setShowFormatMenuId(null);
+                                                            }} >
 
-                                                                    <span className="material-symbols-outlined">share</span> 
+                                                            <span className="material-symbols-outlined">share</span>
                                                         </button>
-                                                    {showShareMenuId === rec.id && (<div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
-                                                        <button className="share-btn" onClick={() => shareWebmDirectById(rec.id)} disabled={isConverting} > Share Video </button>
-                                                        {/* <button className="share-btn" onClick={() => uploadAndShareById(rec.id)} disabled={isConverting} > Share Link (Upload) </button> */}
-                                                        <button className="format-close" onClick={() => setShowShareMenuId(null)}>✕</button>
-                                                    </div>)}
+                                                        {showShareMenuId === rec.id && (<div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
+                                                            <button className="share-btn" onClick={() => shareWebmDirectById(rec.id)} disabled={isConverting} > Share Video </button>
+                                                            {/* <button className="share-btn" onClick={() => uploadAndShareById(rec.id)} disabled={isConverting} > Share Link (Upload) </button> */}
+                                                            <button className="format-close" onClick={() => setShowShareMenuId(null)}>✕</button>
+                                                        </div>)}
                                                     </div>
 
                                                     <button

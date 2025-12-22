@@ -213,6 +213,7 @@ export const animationData = [
         name: '💫 Bouncing Balls',
         audio: "/sounds/Lovely-Long-Version-chosic.com_.mp3",
         image:"/pictures/bouncing ball.png",
+        video:"public/videos/bouncing balls.mp4",
         config: {
             count: 30,
             baseRadius: 10,
@@ -270,6 +271,7 @@ export const animationData = [
         name: '🌟 Star Field',
         audio: "/sounds/Downpour-Sad-Dramatic-Music-chosic.com_.mp3",
         image:"/pictures/star field.png",
+        video:"public/videos/star field.mp4",
         config: {
             starCount: 200,
             baseSpeed: 5,
@@ -320,6 +322,7 @@ export const animationData = [
         name: '🧲 Magnetic Particles',
         audio: "/sounds/tokyo-music-walker-day-off-chosic.com_.mp3",
         image:"/pictures/magnetic particles.png",
+        video:"public/videos/magnetic particles.mp4",
         config: {
             particleCount: 100,
             magnetForce: 0.1,
@@ -385,6 +388,7 @@ export const animationData = [
         name: '🎪 Carousel',
         audio: "/sounds/echoes-in-blue-by-tokyo-music-walker-chosic.com_.mp3",
         image:"/pictures/carousel.png",
+        video:"public/videos/carousel.mp4",
         config: {
             seats: 12,
             radius: 120,
@@ -433,6 +437,7 @@ export const animationData = [
         name: '🌈 Color Waves',
         audio: "/sounds/Magical-Moments-chosic.com_.mp3",
         image:"/pictures/color waves.png",
+        video:"public/videos/color waves.mp4",
         config: {
             spacing: 5,
             wave1Frequency: 0.01,
@@ -470,6 +475,7 @@ export const animationData = [
         name: '🌀 Vortex Flow',
         audio: "/sounds/Satellite-chosic.com_.mp3",
         image:"/pictures/vortex flow.png",
+        video:"public/videos/vortex flow.mp4",
         config: {
             particleCount: 200,
             maxRadius: 300,
@@ -533,6 +539,7 @@ export const animationData = [
         name: '✨ Sparkle Trail',
         audio: "/sounds/Constellations-chosic.com_.mp3",
         image:"/pictures/sparkle trail.png",
+        video:"public/videos/sparkle trail.mp4",
         config: {
             sparklesPerFrame: 3,
             autoSparkles: 2,
@@ -629,6 +636,7 @@ export const animationData = [
         name: '🫧 Floating Bubbles',
         audio: "/sounds/Elevated-chosic.com_.mp3",
         image:"public/pictures/floating bubbles.png",
+        video:"public/videos/floating bubbles.mp4",
         config: {
             bubbleCount: 50,
             baseSize: 10,
@@ -685,6 +693,7 @@ export const animationData = [
         name: '🌸 Petal Fall',
         audio: "/sounds/Oddity-chosic.com_.mp3",
         image:"public/pictures/petal fall.png",
+        video:"public/videos/petal falls.mp4",
         config: {
             petalCount: 60,
             baseSize: 8,
@@ -744,6 +753,7 @@ export const animationData = [
         name: '🌊 Ocean Waves',
         audio: "/sounds/Shindao-chosic.com_.mp3",
         image:"public/pictures/ocean waves.png",
+        video:"public/videos/oceab waves.mp4",
         config: {
             waveCount: 5,
             baseAmplitude: 40,
@@ -797,6 +807,7 @@ export const animationData = [
         name: '❄️ Snowfall',
         audio:"/sounds/Trip(chosic.com).mp3",
         image:"public/pictures/snow fall.png",
+        video:"public/videos/snow falls.mp4",
         config: {
             flakeCount: 100,
             baseSize: 3,
@@ -850,6 +861,7 @@ export const animationData = [
         name: '🔮 Crystal Growth',
         audio: "/sounds/Sunset-Landscape(chosic.com).mp3",
         image:"public/pictures/crystal growth.png",
+        video:"public/videos/crysral growth.mp4",
         config: {
             segments: 12,
             maxRadius: 200,
@@ -900,6 +912,7 @@ export const animationData = [
         name: '🌙 Moon Phases',
         audio: "/sounds/Amberlight-chosic.com_.mp3",
         image:"public/pictures/moon phases - Copy.png",
+        video:"public/videos/moon phases.mp4",
         config: {
             moonSize: 80,
             orbitRadius: 150,
@@ -949,6 +962,7 @@ export const animationData = [
         name: '🎨 Paint Drips',
         audio: "/sounds/Transcendence-chosic.com_.mp3",
         image:"public/pictures/paint drips - Copy.png",
+        video:"public/videos/paint drips.mp4",
         config: {
             dripCount: 15,
             baseSpeed: 2,
@@ -993,6 +1007,7 @@ export const animationData = [
         name: '🌺 Mandala Bloom',
         audio: "/sounds/Birds-Of-Passage-Between-The-Hours-Spheria-Rework-chosic.com_.mp3",
         image:"public/pictures/mandala bloom - Copy.png",
+        video:"public/videos/mandala blooms.mp4",
         config: {
             petals: 16,
             layers: 5,
@@ -1042,6 +1057,7 @@ export const animationData = [
         name: '💎 Diamond Rain',
         audio: "/sounds/Late-at-Night(chosic.com).mp3",
         image:"public/pictures/diamond rain - Copy.png",
+        video:"public/videos/diamond rains.mp4",
         config: {
             diamondCount: 40,
             baseSize: 8,
@@ -1114,6 +1130,7 @@ export const animationData = [
         name: '🌟 Starburst',
         audio: "/sounds/Missing-You(chosic.com).mp3",
         image:"public/pictures/starbust - Copy.png",
+        video:"public/videos/starbust.mp4",
         config: {
             rayCount: 20,
             pulseSpeed: 0.05,
@@ -1163,6 +1180,7 @@ export const animationData = [
         name: '🦋 Butterfly Swarm',
         audio: "public/sounds/Little-Wishes-chosic.com_.mp3",
         image:"public/pictures/butterfly swarn.png",
+        video:"public/videos/butterfly swarm.mp4",
         config: {
             butterflyCount: 25,
             baseSpeed: 2,
@@ -1221,6 +1239,7 @@ export const animationData = [
         name: '🌀 DNA Helix',
         audio: "/sounds/Sonder(chosic.com).mp3",
         image:"public/pictures/dna helix.png",
+        video:"public/videos/dna helix.mp4",
         config: {
             strands: 2,
             pointsPerStrand: 100,
@@ -1274,6 +1293,7 @@ export const animationData = [
         name: '🌊 Liquid Ripple',
         audio: "/sounds/Luke-Bergs-AgusAlvarez-LYCKEBORN-Horizon(chosic.com).mp3",
         image:"public/pictures/liquid ripple.png",
+        video:"public/videos/liquid ripple.mp4",
         config: {
             rippleCount: 8,
             maxRadius: 300,
@@ -1328,6 +1348,7 @@ export const animationData = [
         name: '🎪 Ferris Wheel',
         audio: "/sounds/Balynt-Memory(chosic.com).mp3",
         image:"public/pictures/ferris wheel.png",
+        video:"public/videos/ferris wheel.mp4",
         config: {
             gondolas: 16,
             wheelRadius: 140,
@@ -1400,6 +1421,7 @@ export const animationData = [
         name: '🔥 Flame Dance',
         audio: "/sounds/Luke-Bergs-High-Vibration(chosic.com).mp3",
         image:"public/pictures/flame dance.png",
+        video:"public/videos/flame dance.mp4",
         config: {
             particleCount: 150,
             riseSpeed: 3,
@@ -1456,6 +1478,7 @@ export const animationData = [
         name: '🌸 Blooming Flowers',
         audio: "/sounds/Luke-Bergs-Hangin-On-Palm-Treesmp3(chosic.com).mp3",
         image:"public/pictures/blooming flowers.png",
+        video:"public/videos/blooming flower.mp4",
         config: {
             flowerCount: 12,
             petalCount: 8,
@@ -1526,6 +1549,7 @@ export const animationData = [
         name: '⚡ Lightning Storm',
         audio: "/sounds/Luke-Bergs-Burning-In-My-Soul(chosic.com).mp3",
         image:"",
+        video:"public/videos/lightning storm.mp4",
         config: {
             boltChance: 0.03,
             segments: 20,
@@ -1600,6 +1624,7 @@ export const animationData = [
         name: '🧬 Cellular Division',
         audio: "/sounds/Luke-Bergs-AuroraMp3(chosic.com).mp3",
         image:"public/pictures/cellular division.png",
+        video:"",
         config: {
             maxCells: 32,
             initialSize: 40,
@@ -1674,6 +1699,7 @@ export const animationData = [
         name: '🎵 Sound Wave',
         audio: "/sounds/Luke-Bergs-Bliss(chosic.com).mp3",
         image:"public/pictures/sound wave.png",
+        video:"",
         config: {
             bars: 64,
             baseHeight: 20,
@@ -1726,6 +1752,7 @@ export const animationData = [
         name: '🌀 Hypnotic Spiral',
         audio: "/sounds/Luke-Bergs-Ocean(chosic.com).mp3",
         image:"public/pictures/hypnotic spiral.png",
+        video:"",
         config: {
             segments: 200,
             rotationSpeed: 0.02,
@@ -1780,6 +1807,7 @@ export const animationData = [
         name: '🎆 Firework Burst',
         audio: "/sounds/Luke-Bergs-x-Lichu-Summer-Breeze(chosic.com).mp3",
         image:"public/pictures/firework burst.png",
+        video:"",
         config: {
             maxFireworks: 5,
             particlesPerBurst: 80,
@@ -1859,6 +1887,7 @@ export const animationData = [
         name: '🌊 Tidal Wave',
         audio: "/sounds/Luke-Bergs-Waesto-Follow-The-Sun(chosic.com).mp3",
         image:"public/pictures/tidal wave.png",
+        video:"",
         config: {
             layers: 7,
             waveSpeed: 2,
@@ -1905,6 +1934,7 @@ export const animationData = [
         name: '🔮 Magic Orbs',
         audio: "/sounds/Luke-Bergs-Dayfox-I´m-Happy(chosic.com).mp3",
         image:"public/pictures/magic orbs.png",
+        video:"",
         config: {
             orbCount: 7,
             baseRadius: 30,
@@ -1967,6 +1997,7 @@ export const animationData = [
         name: '🎭 Kaleidoscope',
         audio: "/sounds/puzzle(chosic.com).mp3",
         image:"public/pictures/kaleidoscope.png",
+        video:"",
         config: {
             segments: 12,
             particleCount: 50,
@@ -2043,6 +2074,7 @@ export const animationData = [
         name: '🌌 Nebula Cloud',
         audio: "/sounds/Luke-Bergs-x-Lichu-Summer-Breeze(chosic.com).mp3",
         image:"public/pictures/nebula cloud.png",
+        video:"",
         config: {
             particleCount: 300,
             flowSpeed: 0.3,
