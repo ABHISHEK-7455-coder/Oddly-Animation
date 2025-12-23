@@ -89,3 +89,15 @@
 .viewer-topbar button:hover {
   background: #0ea5e9;
 }
+
+@media(max-width: 400px){
+  .physics-grid{
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .physics-gallery {
+    width: 100%;
+    margin: auto;
+    padding: 16px 16px;
+  }
+}

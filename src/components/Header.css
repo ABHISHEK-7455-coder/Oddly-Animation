@@ -114,24 +114,24 @@
         display: block;
         height: 5px;
         width: 100%;
-        background-color: white;
+        background-color: black;
         border-radius: 3px;
         transition: all 0.3s ease;
     }
 
     .menu-toggle.open span:nth-child(1) {
         transform: rotate(45deg) translate(5px, 6px);
-        background-color: white;
+        background-color: black;
     }
 
     .menu-toggle.open span:nth-child(2) {
         opacity: 0;
-        background-color: white;
+        background-color: black;
     }
 
     .menu-toggle.open span:nth-child(3) {
         transform: rotate(-45deg) translate(6px, -6px);
-        background-color: white;
+        background-color: black;
     }
 }
 
@@ -140,6 +140,9 @@
         width: 95%;
         padding: 8px 18px;
         border-radius: 50px;
+        position: sticky;
+        top: 10px;
+        margin: auto;
     }
 
     .logo {
@@ -158,6 +161,18 @@
         font-size: 15px;
         text-align: center;
         letter-spacing: 1px;
+    }
+    .menu-toggle span {
+        background-color: black;
+        margin-top: 0px;
+    }
+
+    .nav.open {
+        margin-top: -50px;
+    }
+
+    .nav-link:nth-child(6){
+        padding: 8px;
     }
 }
 

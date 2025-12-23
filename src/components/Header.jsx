@@ -21,9 +21,9 @@ const Header = () => {
                 className={`menu-toggle ${menuOpen ? "open" : ""}`}
                 onClick={() => setMenuOpen(!menuOpen)}
             >
-                <span style={{ background: "white" }}></span>
-                <span style={{ background: "white" }}></span>
-                <span style={{ background: "white" }}></span>
+                <span style={{ background: "black" }}></span>
+                <span style={{ background: "black" }}></span>
+                <span style={{ background: "black" }}></span>
             </div>
 
             {/* Navigation Links */}

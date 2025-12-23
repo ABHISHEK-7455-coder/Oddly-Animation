@@ -617,7 +617,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
     .sidebar {
         padding: 10px;
     }
@@ -629,11 +629,11 @@
 
     .size {
         width: 100%;
-        margin-bottom: 8px;
+        margin-bottom: -12px;
     }
 
     .color {
-        width: 105%;
+        width: 100%;
         margin-bottom: 8px;
     }
 
@@ -664,13 +664,13 @@
     }
 
     .recordings-items {
-        margin-left: 0px;
+        margin-top: -10px;
     }
 
     .recording-item {
         display: flex;
         flex-direction: row;
-        margin-top: 4px;
+        margin-top: 0px;
     }
 
     .play-btn {
@@ -691,6 +691,66 @@
 
     .dropdown-controls {
         display: block;
-        padding: 20px;
+        padding: 12px;
+    }
+
+    .inner {
+margin-top: 0px;
+border-radius: 16px;
+    }
+
+    .animations {
+        width: 100%;
+        padding: 10px 0px;
+        overflow-x: auto;
+        margin-top: 0px;
+        margin-left: 20px;
+        margin-bottom: 50px;
+        margin-right: 20px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        scrollbar-width: none;
+        border-radius: 16px;
+    }
+
+    .search-box {
+        padding: 0px;
+        margin: 4px auto;
+        width: 95%;
+        color: white;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .search-box h3 {
+        background: linear-gradient(90deg, #3b82f6, #22c55e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 8px;
+        border-radius: 40px;
+        border: 1px solid lightgray;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+        background-color: white;
+        color: white;
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+
+    .search-box input:focus {
+        border-color: #6c5ce7;
+        box-shadow: 0 0 4px rgba(108, 92, 231, 0.4);
+    }
+
+    .back-btn {
+        top: 80px;
     }
 }
