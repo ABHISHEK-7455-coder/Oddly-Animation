@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-html, body {
+ body {
   font-family: "Manrope", sans-serif;
   background: #ffffff;
   color: #0f172a;
@@ -58,6 +58,13 @@ button {
 @media (min-width: 768px) {
   .layout-container {
     padding: 0 4px;
+  }
+  
+}
+
+@media(max-width: 400px) {
+  .main-home-container {
+    padding: 12px;
   }
 }
 
@@ -319,6 +326,13 @@ button {
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 40px 80px rgba(0,0,0,0.35);
+}
+
+@media (max-width: 400px){
+  .visual-card{
+    box-shadow: 0 10px 10px rgba(0,0,0,0.35);
+    width: 100%;
+  }
 }
 
 .visual-header {

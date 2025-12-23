@@ -9,7 +9,7 @@ import { fetchFile } from "@ffmpeg/util";
 import "./Animation.css";
 
 const Animation = () => {
-    // ---------------- STATES ----------------
+    
     const [selectedAnimation, setSelectedAnimation] = useState(0);
     const [showAnimationView, setShowAnimationView] = useState(false);
 
@@ -32,20 +32,22 @@ const Animation = () => {
     const [selectedRec, setSelectedRec] = useState(null);
     const [isConverting, setIsConverting] = useState(false);
 
-    // ---------------- REFS ----------------
+   
     const canvasRef = useRef(null);
     const recorderRef = useRef(null);
     const chunksRef = useRef([]);
     const animationRef = useRef(null);
     const audioRef = useRef(null);
+    const previewRefs = useRef({});
 
-    // ---------------- LOAD RECORDINGS ----------------
+
+    
     useEffect(() => {
         const saved = JSON.parse(localStorage.getItem("savedRecordings")) || [];
         setRecordingsList(saved);
     }, []);
 
-    // ---------------- RECORDING ----------------
+    
     const startRecording = async () => {
         if (!canvasRef.current || !window.MediaRecorder) return alert("Recording not supported");
 
@@ -84,7 +86,7 @@ const Animation = () => {
         setIsRecording(false);
     };
 
-    // ---------------- PLAY SAVED ----------------
+    
     const playSavedRecording = (src) => {
         cancelAnimationFrame(animationRef.current);
         audioRef.current?.pause();
@@ -97,7 +99,77 @@ const Animation = () => {
         setPlayingVideoSrc(null);
     };
 
-    // ---------------- CANVAS ANIMATION ----------------
+    
+    useEffect(() => {
+        if (showAnimationView) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const id = entry.target.dataset.id;
+                    const item = previewRefs.current[id];
+                    if (!item) return;
+
+                    if (entry.isIntersecting) {
+                        if (item.running) return;
+                        item.running = true;
+
+                        const { canvas, anim } = item;
+                        const ctx = canvas.getContext("2d");
+
+                        canvas.width = canvas.offsetWidth;
+                        canvas.height = canvas.offsetHeight;
+
+                        const config = {
+                            ...anim.config,
+                            speed: 1.5,
+                            size: 0.6,
+                            hueShift: 0,
+                        };
+
+                        const state = anim.init(canvas, config);
+                        item.state = state;
+
+                        let last = 0;
+                        const fps = 12;
+
+                        const loop = (time) => {
+                            if (!item.running) return;
+
+                            if (time - last > 1000 / fps) {
+                                anim.animate(ctx, canvas, config, state);
+                                last = time;
+                            }
+                            item.raf = requestAnimationFrame(loop);
+                        };
+
+                        item.raf = requestAnimationFrame(loop);
+                    } else {
+                        item.running = false;
+                        cancelAnimationFrame(item.raf);
+                        item.state?.cleanup?.();
+                    }
+                });
+            },
+            { threshold: 0.2 }
+        );
+
+        Object.values(previewRefs.current).forEach((item) => {
+            if (item?.canvas) observer.observe(item.canvas);
+        });
+
+        return () => {
+            observer.disconnect();
+            Object.values(previewRefs.current).forEach((item) => {
+                cancelAnimationFrame(item.raf);
+                item.state?.cleanup?.();
+            });
+        };
+    }, [showAnimationView]);
+
+
+
+    
     useEffect(() => {
         if (!showAnimationView || isPlayingSaved) return;
 
@@ -130,7 +202,7 @@ const Animation = () => {
         };
     }, [showAnimationView, selectedAnimation, size, hueShift, speed, isAudioPlaying]);
 
-    // ---------------- HELPERS ----------------
+    
     const downloadWebM = (rec) => {
         const a = document.createElement("a");
         a.href = rec.data;
@@ -148,11 +220,11 @@ const Animation = () => {
             return null;
         }
     }
-    // Upload base64 dataURL to Firebase Storage and return URL
+    
     const uploadRecordingDataURL = async (rec) => {
         try {
             if (!rec) throw new Error("record not found");
-            // ensure storage import exists (uncomment at top if needed) 
+            
             if (typeof storage === "undefined") {
                 console.warn("Firebase 'storage' is not defined. Make sure to import it from your firebase config.");
                 throw new Error("Firebase storage not available");
@@ -163,7 +235,7 @@ const Animation = () => {
             const url = await getDownloadURL(fileRef); return url;
         } catch (err) { console.error("uploadRecordingDataURL error", err); throw err; }
     };
-    // Existing function (kept) but improved error handling & toast 
+    
     const uploadAndShareById = async (id) => {
         try {
             const rec = recordingsList.find(r => r.id === id);
@@ -186,14 +258,14 @@ const Animation = () => {
             setShowFormatMenuId(null);
         }
     };
-    // Direct share (Web Share API) — share video file directly 
+     
     const shareWebmDirectById = async (id) => {
         try {
             const rec = recordingsList.find(r => r.id === id);
             if (!rec) { showToast("Record not found"); return; }
             const blob = dataURLToBlob(rec.data);
             const file = new File([blob], `${rec.name}.webm`, { type: blob.type });
-            // Feature-detect sharing files 
+            
             const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
             if (canShareFiles) {
                 try {
@@ -202,7 +274,7 @@ const Animation = () => {
                 }
                 catch (err) { console.log("share cancelled or failed", err); showToast("Sharing cancelled or failed"); }
             } else {
-                // Fallback: offer download + optional copy link (upload to firebase if user wants link) // We'll trigger a download so user can manually share the file from their device 
+                
                 const url = URL.createObjectURL(blob); const a = document.createElement("a");
                 a.href = url;
                 a.download = `${rec.name}.webm`;
@@ -224,11 +296,11 @@ const Animation = () => {
         a.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    // ====================== JSX ======================
+    
     return (
         <div className="main-container">
 
-            {/* ================= CARDS VIEW ================= */}
+           
             {!showAnimationView && (
                 <div className="container">
                     <div className="search-box">
@@ -259,7 +331,21 @@ const Animation = () => {
                                         muted
                                         playsInline
                                     /> */}
-                                    <canvas ref={canvasRef} className="animation-canvas" />
+                                    <canvas
+                                        className="animation-canvas"
+                                        data-id={anim.id}
+                                        ref={(el) => {
+                                            if (!el) return;
+                                            previewRefs.current[anim.id] = {
+                                                canvas: el,
+                                                anim,
+                                                raf: null,
+                                                state: null,
+                                                running: false,
+                                            };
+                                        }}
+                                    />
+
                                     <div className="anim-name">{anim.name}</div>
                                 </button>
                             ))}
@@ -268,7 +354,7 @@ const Animation = () => {
                 </div>
             )}
 
-            {/* ================= ANIMATION VIEW ================= */}
+            
             {showAnimationView && (
                 <div className="container">
                     <div className="canvas-area">
@@ -284,9 +370,7 @@ const Animation = () => {
                                     autoPlay
                                     loop
                                 />
-                                {/* <button className="back-btn" onClick={backToLive}>
-                                    Back
-                                </button> */}
+                                
                             </>
                         )}
 
@@ -300,7 +384,7 @@ const Animation = () => {
                             ✕ Close
                         </button>
 
-                        {/* ========== CONTROLS ========== */}
+                        
                         <div className="dropdown-controls">
                             <div className="size-color">
                                 <div className="size">
@@ -376,7 +460,7 @@ const Animation = () => {
                                                         </button>
                                                         {showShareMenuId === rec.id && (<div className="share-menu-inline" onClick={(e) => e.stopPropagation()}>
                                                             <button className="share-btn" onClick={() => shareWebmDirectById(rec.id)} disabled={isConverting} > Share Video </button>
-                                                            {/* <button className="share-btn" onClick={() => uploadAndShareById(rec.id)} disabled={isConverting} > Share Link (Upload) </button> */}
+                                                            
                                                             <button className="format-close" onClick={() => setShowShareMenuId(null)}>✕</button>
                                                         </div>)}
                                                     </div>

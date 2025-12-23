@@ -8,7 +8,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div className="main-home-container">
       {/* BACKGROUND BLOBS */}
       <div class="bg-blob blob-primary"></div>
       <div class="bg-blob blob-accent"></div>
@@ -296,7 +296,7 @@ const Home = () => {
       </div>
     </div>
   </footer> */}
-    </>
+    </div>
   );
 };
 
