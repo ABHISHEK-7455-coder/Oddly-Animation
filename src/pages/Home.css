@@ -104,7 +104,7 @@ button {
 .blob-accent {
     background: var(--accent);
     top: 20%;
-    right: -150px;
+    right: 150px;
     animation-delay: 2s;
 }
 

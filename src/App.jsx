@@ -40,7 +40,7 @@ import Gallery from "./components/Gallery";
 import AnimationPage from "./pages/AnimationPage";  // ✅ NEW PAGE
 import AnimatedBackground from "./AnimatedBackground";
 import PianoPlayer from "./components/PianoPlayer"
-import  LogIn  from "C:/OddlyAnimation/src/pages/Login.jsx";
+import  Login  from "./pages/Login";
 import MegaPhysicsDemo from "./components/MegaPhysicsDemo";
 import "./App.css";
 
@@ -122,7 +122,7 @@ function App() {
                         element={
                             <>
                                 <Header />
-                                <LogIn />
+                                <Login />
                                 {/* <div className='text-center py-20'>Login Page (Coming Soon)</div> */}
                             </>
                         } 
