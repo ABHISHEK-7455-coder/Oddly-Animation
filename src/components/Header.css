@@ -1,5 +1,5 @@
 .header {
-    background-color: rgba(249, 247, 247, 0.1);
+    background-color: rgba(249, 247, 247, 0.2);
     padding: 16px 35px;
     box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -17,6 +17,10 @@
 .header .logo h2 {
     /* background-image: url("src/assets/bubble.png"); */
     color: black;
+}
+
+.logo {
+    cursor: pointer;
 }
 
 .nav {
@@ -96,6 +100,7 @@
     .nav-link {
         font-size: 16px;
         width: 100%;
+        color: white;
     }
 
 
@@ -117,6 +122,7 @@
         background-color: black;
         border-radius: 3px;
         transition: all 0.3s ease;
+        color: white;
     }
 
     .menu-toggle.open span:nth-child(1) {
@@ -132,6 +138,11 @@
     .menu-toggle.open span:nth-child(3) {
         transform: rotate(-45deg) translate(6px, -6px);
         background-color: black;
+    }
+
+    .nav-link:nth-child(6){
+        padding: 8px 12px;
+        text-align: center;
     }
 }
 
@@ -161,10 +172,12 @@
         font-size: 15px;
         text-align: center;
         letter-spacing: 1px;
+        color: white;
     }
     .menu-toggle span {
         background-color: black;
         margin-top: 0px;
+        color: white;
     }
 
     .nav.open {

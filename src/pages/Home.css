@@ -716,7 +716,7 @@ section {
     position: relative;
     height: 240px;
     border-radius: 20px;
-    background: radial-gradient(circle at center, #1e293b, #020617);
+    background: white;
     overflow: hidden;
     display: flex;
 }

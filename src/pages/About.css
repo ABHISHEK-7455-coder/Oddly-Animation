@@ -194,3 +194,14 @@
   line-height: 1.7;
 }
 
+@media (max-width: 400px){
+  .hero-card {
+    width: 85%;
+    padding: 40px 20px;
+    margin: 40px auto;
+  }
+  .info-section {
+    padding: 0px 0px;
+  }
+}
+
