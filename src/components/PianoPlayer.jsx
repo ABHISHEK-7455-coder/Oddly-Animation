@@ -1,18 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./PianoPlayer.css";
 
-/**
- * Updated PianoPlayer (real-piano board UI)
- * - Uses your provided WAV file paths (kept unchanged)
- * - Reordered into physical piano layout (C3 -> C5)
- * - Real white + black key UI
- * - Keyboard (A-Z) support preserved via KEY_MAP
- * - Recording, save to localStorage, play, download, delete — same as before
- */
-
-/* ---------- ORIGINAL file-path NOTES (kept as sources) ----------
-   I kept your file paths exactly; only re-mapped them into the correct piano order below.
-*/
 const SOURCE_NOTES = [
     { key: "C3", file: "/piano/pianoAudio/A1v16.wav" },
     { key: "C#3", file: "/piano/pianoAudio/A2v16.wav" },
@@ -42,7 +30,7 @@ const SOURCE_NOTES = [
     { key: "A#3", file: "/piano/pianoAudio/C5v14.wav" },
     { key: "B3", file: "/piano/pianoAudio/C6v14.wav" },
 
-    { key: "C5", file: "/piano/pianoAudio/A1v12.wav" },
+    { key: "C5", file: "/piano/pianoAudio/A1v13.wav" },
 ];
 // -------------------------------------------------------------------
 
