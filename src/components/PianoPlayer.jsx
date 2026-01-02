@@ -30,7 +30,7 @@ const SOURCE_NOTES = [
     { key: "A#3", file: "/piano/pianoAudio/C5v14.wav" },
     { key: "B3", file: "/piano/pianoAudio/C6v14.wav" },
 
-    { key: "C5", file: "/piano/pianoAudio/A1v13.wav" },
+    { key: "C5", file: "/piano/pianoAudio/A1v12.wav" },
 ];
 // -------------------------------------------------------------------
 
