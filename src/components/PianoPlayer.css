@@ -73,7 +73,7 @@
 .black-keys {
   position: absolute;
   top: 12px;
-  left: 0;
+  left: 150px;
   right: 0;
   height: 110px;
   pointer-events: none; /* let keys control pointer unless overridden */
@@ -84,6 +84,7 @@
 .black-key {
   pointer-events: auto; /* enable clicking */
   position: absolute;
+  /* right: 550px; */
   transform: translateX(-50%);
   width: 34px;
   height: 110px;
