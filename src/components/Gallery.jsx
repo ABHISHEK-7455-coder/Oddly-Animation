@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Animation from "../components/Animation";
 import { animationData } from "../data/animationConfig.js"; // 50 animations ka data
 import { useLocation } from "react-router-dom";
-import PianoPlayer from "./PianoPlayer.jsx";
-import PhysicsMixedDemo from './MatterJs.jsx';
+// import PianoPlayer from "./PianoPlayer.jsx";
+// import PhysicsMixedDemo from './MatterJs.jsx';
 import "./Gallery.css";
 // import MegaPhysicsDemo from "./MegaPhysicsDemo.jsx";
 

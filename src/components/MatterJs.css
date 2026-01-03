@@ -1,3 +1,10 @@
+.matter-container {
+  margin: 10px auto;
+  /* margin-bottom: 10px; */
+  /* border: 2px solid black; */
+  width: 84%;
+}
+
 /* ===== Gallery ===== */
 .physics-gallery {
   padding: 60px 80px;
@@ -6,13 +13,14 @@
   margin: auto;
 }
 
-.physics-gallery h1 , p {
-    color: black;
+.physics-gallery h1,
+p {
+  color: black;
 }
 
 .physics-gallery p {
-    color: black;
-    margin-bottom: 16px;
+  color: black;
+  margin-bottom: 16px;
 }
 
 .gallery-title {
@@ -36,7 +44,7 @@
   border-radius: 28px;
   padding: 20px;
   /* background: linear-gradient(145deg, #1e293b, #0f172a); */
-  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 0.35s ease, box-shadow 0.35s ease;
   display: flex;
@@ -46,7 +54,7 @@
 
 .physics-card:hover {
   transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 30px 60px rgba(0,0,0,0.55);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55);
 }
 
 .card-preview {
@@ -68,7 +76,7 @@
 }
 
 .viewer-topbar {
-  position: absolute;
+  /* position: absolute; */
   top: 20px;
   right: 20px;
   display: flex;
@@ -90,14 +98,82 @@
   background: #0ea5e9;
 }
 
-@media(max-width: 400px){
-  .physics-grid{
-    grid-template-columns: 1fr 1fr;
+.matter-controls {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+}
+
+.matter-controls button {
+  color: black;
+  font-size: 20px;
+  background: linear-gradient(135deg, rgb(75, 212, 246), #06b6d4);
+  border-radius: 16px;
+  padding: 2px 12px 4px 12px;
+}
+
+.matter-controls label {
+  color: black;
+  font-size: 20px;
+}
+
+.matter-controls input {
+  border: 2px solid black;
+  background-color: transparent;
+  margin-left: 16px;
+  padding: 0px 2px 1px 2px;
+}
+
+.scene-area {
+  /* margin: 20px; */
+  /* border: 2px solid black; */
+  height: 465px;
+  width: 100%;
+}
+
+.scene-area canvas {
+  height: 475px;
+  width: 100%;
+}
+
+@media(max-width: 413px) {
+  .physics-grid {
+    grid-template-columns: 1fr;
   }
 
   .physics-gallery {
     width: 100%;
     margin: auto;
-    padding: 16px 16px;
+    padding: 25px 30px;
   }
+
+  .matter-container {
+    width: 95%;
+    margin-bottom: 12px;
+  }
+
+  .matter-controls{
+    flex-wrap: wrap;
+  }
+
+  .matter-controls button {
+    color: black;
+    font-size: 20px;
+    background: linear-gradient(135deg, rgb(75, 212, 246), #06b6d4);
+    border-radius: 16px;
+    padding: 2px 12px 4px 12px;
+  }
+
+  .matter-controls label {
+    color: black;
+    font-size: 20px;
+  }
+
+  .matter-controls input {
+    border: 2px solid black;
+    background-color: transparent;
+    margin-left: 16px;
+    padding: 0px 2px 1px 2px;
+  }
+
 }

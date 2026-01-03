@@ -16,14 +16,17 @@ export default function MegaPhysicsDemo() {
   const renderRef = useRef(null);
   const mouseConstraintRef = useRef(null);
 
-  const [activeDemo, setActiveDemo] = useState(null); // ⬅ gallery mode
+  // 🔹 PREVIEW REFS (gallery cards)
+  const previewRefs = useRef({});
+
+  const [activeDemo, setActiveDemo] = useState(null);
   const [gravity, setGravity] = useState(0.2);
   const [spawnCount, setSpawnCount] = useState(12);
   const [running, setRunning] = useState(true);
 
   let TimescaleDemoCleanup = null;
 
-  /* ================= ENGINE INIT ================= */
+  /* ================= ENGINE INIT (VIEWER) ================= */
   useEffect(() => {
     if (!sceneRef.current || !activeDemo) return;
 
@@ -63,7 +66,7 @@ export default function MegaPhysicsDemo() {
     Runner.run(runner, engine);
     Render.run(render);
 
-    handleSpawn(); // ⬅ auto spawn on open
+    handleSpawn();
 
     return () => {
       Render.stop(render);
@@ -74,14 +77,91 @@ export default function MegaPhysicsDemo() {
     };
   }, [activeDemo]);
 
+  /* ================= PREVIEW CANVAS (OPTIMIZED) ================= */
+  useEffect(() => {
+    if (activeDemo) return; // viewer open → previews off
+
+    const { Engine, Render, Runner, World, Bodies } = Matter;
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const key = entry.target.dataset.key;
+        const item = previewRefs.current[key];
+        if (!item) return;
+
+        if (entry.isIntersecting) {
+          if (item.running) return;
+          item.running = true;
+
+          const engine = Engine.create();
+          engine.gravity.y = 0.6;
+          item.engine = engine;
+
+          const render = Render.create({
+            canvas: item.canvas,
+            engine,
+            options: {
+              width: item.canvas.offsetWidth,
+              height: item.canvas.offsetHeight,
+              wireframes: false,
+              background: '#020617'
+            }
+          });
+          item.render = render;
+
+          // 🔹 LIGHT PREVIEW BODIES
+          const w = render.options.width;
+          const h = render.options.height;
+
+          World.add(engine.world, [
+            Bodies.rectangle(w / 2, h + 10, w, 20, { isStatic: true }),
+            Bodies.circle(w / 2 - 20, 20, 10),
+            Bodies.circle(w / 2 + 20, 20, 10)
+          ]);
+
+          const runner = Runner.create();
+          item.runner = runner;
+
+          let last = 0;
+          const fps = 10;
+
+          const loop = (t) => {
+            if (!item.running) return;
+            if (t - last > 1000 / fps) {
+              Engine.update(engine, 1000 / fps);
+              last = t;
+            }
+            item.raf = requestAnimationFrame(loop);
+          };
+
+          Render.run(render);
+          item.raf = requestAnimationFrame(loop);
+        } else {
+          item.running = false;
+          cancelAnimationFrame(item.raf);
+
+          if (item.render) Render.stop(item.render);
+          if (item.engine) {
+            World.clear(item.engine.world);
+            Engine.clear(item.engine);
+          }
+        }
+      });
+    }, { threshold: 0.3 });
+
+    Object.values(previewRefs.current).forEach(p => {
+      if (p.canvas) observer.observe(p.canvas);
+    });
+
+    return () => observer.disconnect();
+  }, [activeDemo]);
+
   /* ================= HELPERS ================= */
   const handleClear = () => {
     if (!engineRef.current || !mouseConstraintRef.current) return;
-
     const engine = engineRef.current;
     const bodies = Matter.Composite.allBodies(engine.world);
     const constraints = Matter.Composite.allConstraints(engine.world);
-
     bodies.forEach(b => !b.isStatic && Matter.Composite.remove(engine.world, b));
     constraints.forEach(c => Matter.Composite.remove(engine.world, c));
   };
@@ -90,7 +170,6 @@ export default function MegaPhysicsDemo() {
     if (!engineRef.current || !renderRef.current) return;
     const engine = engineRef.current;
     const render = renderRef.current;
-
     handleClear();
 
     switch (activeDemo) {
@@ -120,7 +199,9 @@ export default function MegaPhysicsDemo() {
   const handlePauseResume = () => {
     if (!engineRef.current) return;
     const runner = engineRef.current.timing.runner;
-    running ? Matter.Runner.stop(runner) : Matter.Runner.run(runner, engineRef.current);
+    running
+      ? Matter.Runner.stop(runner)
+      : Matter.Runner.run(runner, engineRef.current);
     setRunning(!running);
   };
 
@@ -144,7 +225,21 @@ export default function MegaPhysicsDemo() {
             ['lanterns','Lanterns']
           ].map(([key, title]) => (
             <div key={key} className="physics-card" onClick={() => setActiveDemo(key)}>
-              <div className="card-preview" />
+              <canvas
+                className="card-preview"
+                data-key={key}
+                ref={el => {
+                  if (!el) return;
+                  previewRefs.current[key] = {
+                    canvas: el,
+                    running: false,
+                    raf: null,
+                    engine: null,
+                    render: null,
+                    runner: null
+                  };
+                }}
+              />
               <h3>{title}</h3>
             </div>
           ))}
@@ -156,23 +251,12 @@ export default function MegaPhysicsDemo() {
   // -------- VIEWER --------
   return (
     <div className="matter-container">
-      <div className="viewer-topbar">
-        <button onClick={() => setActiveDemo(null)}>✕</button>
-        <button>🎥</button>
-        <button>⬇</button>
-        <button
-          onClick={() =>
-            navigator.share?.({ title: 'Physics Demo', url: window.location.href })
-          }
-        >🔗</button>
-      </div>
-
       <div className="matter-controls">
-        <button className="btn btn-indigo" onClick={handleSpawn}>Spawn</button>
-        <button className="btn btn-yellow" onClick={handlePauseResume}>
+        <button onClick={handleSpawn}>Spawn</button>
+        <button onClick={handlePauseResume}>
           {running ? 'Pause' : 'Resume'}
         </button>
-        <button className="btn btn-rose" onClick={handleClear}>Clear</button>
+        <button onClick={handleClear}>Clear</button>
 
         <label>
           Gravity
@@ -189,6 +273,8 @@ export default function MegaPhysicsDemo() {
             onChange={e => setSpawnCount(+e.target.value)}
           />
         </label>
+
+        <button onClick={() => setActiveDemo(null)}>✕</button>
       </div>
 
       <div ref={sceneRef} className="scene-area" />
