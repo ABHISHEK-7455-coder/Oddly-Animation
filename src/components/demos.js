@@ -1386,3 +1386,7 @@ export function FloatingLanterns({ engine, render, spawnCount = 8 }) {
 
     return cleanup;
 }
+
+
+
+

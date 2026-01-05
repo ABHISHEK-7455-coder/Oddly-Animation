@@ -6,7 +6,8 @@ import {
   DoublePendulumDemo, WreckingBallDemo, TimescaleDemo,
   CompoundStackDemo, RopeBridgeDemo, NewtonsCradleDemo,
   ClothDemo, MagnetFieldDemo, HelicopterRescueDemo,
-  EventsDemo, FallingBuildings, FloatingLanterns
+  EventsDemo, FallingBuildings, FloatingLanterns,
+  
 } from './demos';
 import './MatterJs.css';
 
@@ -16,7 +17,6 @@ export default function MegaPhysicsDemo() {
   const renderRef = useRef(null);
   const mouseConstraintRef = useRef(null);
 
-  // 🔹 PREVIEW REFS (gallery cards)
   const previewRefs = useRef({});
 
   const [activeDemo, setActiveDemo] = useState(null);
@@ -38,6 +38,8 @@ export default function MegaPhysicsDemo() {
 
     const width = sceneRef.current.clientWidth;
     const height = sceneRef.current.clientHeight;
+
+    if (!width || !height) return; // 🔥 FIX: zero size guard
 
     const render = Render.create({
       element: sceneRef.current,
@@ -63,25 +65,38 @@ export default function MegaPhysicsDemo() {
 
     const runner = Runner.create();
     engine.timing.runner = runner;
+
     Runner.run(runner, engine);
     Render.run(render);
 
-    handleSpawn();
+    handleSpawn(); // 🔥 now safe
 
     return () => {
       Render.stop(render);
-      Matter.World.clear(engine.world, false);
+      Matter.World.clear(engine.world);
       Matter.Engine.clear(engine);
       render.canvas.remove();
       render.textures = {};
     };
   }, [activeDemo]);
 
-  /* ================= PREVIEW CANVAS (OPTIMIZED) ================= */
+  /* ================= APPLY GRAVITY CHANGE ================= */
   useEffect(() => {
-    if (activeDemo) return; // viewer open → previews off
+    if (engineRef.current) {
+      engineRef.current.gravity.y = gravity;
+    }
+  }, [gravity]);
 
-    const { Engine, Render, Runner, World, Bodies } = Matter;
+  /* ================= RESPAWN ON COUNT CHANGE ================= */
+  useEffect(() => {
+    if (activeDemo) handleSpawn();
+  }, [spawnCount]);
+
+  /* ================= PREVIEW CANVAS ================= */
+  useEffect(() => {
+    if (activeDemo) return;
+
+    const { Engine, Render, World, Bodies } = Matter;
 
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -109,7 +124,6 @@ export default function MegaPhysicsDemo() {
           });
           item.render = render;
 
-          // 🔹 LIGHT PREVIEW BODIES
           const w = render.options.width;
           const h = render.options.height;
 
@@ -119,16 +133,13 @@ export default function MegaPhysicsDemo() {
             Bodies.circle(w / 2 + 20, 20, 10)
           ]);
 
-          const runner = Runner.create();
-          item.runner = runner;
-
           let last = 0;
           const fps = 10;
 
           const loop = (t) => {
             if (!item.running) return;
             if (t - last > 1000 / fps) {
-              Engine.update(engine, 1000 / fps);
+              Matter.Engine.update(engine, 1000 / fps);
               last = t;
             }
             item.raf = requestAnimationFrame(loop);
@@ -143,7 +154,7 @@ export default function MegaPhysicsDemo() {
           if (item.render) Render.stop(item.render);
           if (item.engine) {
             World.clear(item.engine.world);
-            Engine.clear(item.engine);
+            Matter.Engine.clear(item.engine);
           }
         }
       });
@@ -158,18 +169,18 @@ export default function MegaPhysicsDemo() {
 
   /* ================= HELPERS ================= */
   const handleClear = () => {
-    if (!engineRef.current || !mouseConstraintRef.current) return;
+    if (!engineRef.current) return;
     const engine = engineRef.current;
     const bodies = Matter.Composite.allBodies(engine.world);
-    const constraints = Matter.Composite.allConstraints(engine.world);
     bodies.forEach(b => !b.isStatic && Matter.Composite.remove(engine.world, b));
-    constraints.forEach(c => Matter.Composite.remove(engine.world, c));
   };
 
   const handleSpawn = () => {
     if (!engineRef.current || !renderRef.current) return;
+
     const engine = engineRef.current;
     const render = renderRef.current;
+
     handleClear();
 
     switch (activeDemo) {
@@ -207,7 +218,6 @@ export default function MegaPhysicsDemo() {
 
   /* ================= UI ================= */
 
-  // -------- GALLERY --------
   if (!activeDemo) {
     return (
       <div className="physics-gallery">
@@ -235,8 +245,7 @@ export default function MegaPhysicsDemo() {
                     running: false,
                     raf: null,
                     engine: null,
-                    render: null,
-                    runner: null
+                    render: null
                   };
                 }}
               />
@@ -248,7 +257,6 @@ export default function MegaPhysicsDemo() {
     );
   }
 
-  // -------- VIEWER --------
   return (
     <div className="matter-container">
       <div className="matter-controls">
@@ -260,7 +268,11 @@ export default function MegaPhysicsDemo() {
 
         <label>
           Gravity
-          <input type="range" min="-2" max="3" step="0.1"
+          <input
+            type="range"
+            min="-2"
+            max="3"
+            step="0.1"
             value={gravity}
             onChange={e => setGravity(+e.target.value)}
           />
@@ -268,7 +280,10 @@ export default function MegaPhysicsDemo() {
 
         <label>
           Count
-          <input type="number" min="1" max="60"
+          <input
+            type="number"
+            min="1"
+            max="60"
             value={spawnCount}
             onChange={e => setSpawnCount(+e.target.value)}
           />
