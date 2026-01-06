@@ -7,7 +7,8 @@ import {
   CompoundStackDemo, RopeBridgeDemo, NewtonsCradleDemo,
   ClothDemo, MagnetFieldDemo, HelicopterRescueDemo,
   EventsDemo, FallingBuildings, FloatingLanterns,
-  
+  SandFunnelDemo, GearSystemCrankDemo, AngryBirdsSlingshotDemo,
+  CatapultDemo
 } from './demos';
 import './MatterJs.css';
 
@@ -203,6 +204,10 @@ export default function MegaPhysicsDemo() {
       case 'events': EventsDemo({ engine, render }); break;
       case 'fallings': FallingBuildings({ engine, render }); break;
       case 'lanterns': FloatingLanterns({ engine, render }); break;
+      case 'sand funnel': SandFunnelDemo({ engine, render }); break;
+      case 'gear crank': GearSystemCrankDemo({ engine, render }); break;
+      case 'angry bird': AngryBirdsSlingshotDemo({ engine, render }); break;
+      case 'catapult': CatapultDemo({ engine, render }); break;
       default: break;
     }
   };
@@ -232,7 +237,9 @@ export default function MegaPhysicsDemo() {
             ['compound','Compound'], ['rope','Rope'],
             ['cradle','Cradle'], ['cloth','Cloth'],
             ['magnet','Magnet'], ['fallings','Falling'],
-            ['lanterns','Lanterns']
+            ['lanterns','Lanterns'], ['sand funnel','Sand Funnel'],
+            ['gear crank','Gear Crank'], ['angry bird','Angry Bird'],
+            ['catapult','Catapult']
           ].map(([key, title]) => (
             <div key={key} className="physics-card" onClick={() => setActiveDemo(key)}>
               <canvas

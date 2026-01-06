@@ -1387,6 +1387,602 @@ export function FloatingLanterns({ engine, render, spawnCount = 8 }) {
     return cleanup;
 }
 
+export function SandFunnelDemo({ engine, render, spawnCount = 80 }) {
+    const { Bodies, Body, World, Composite, Events } = Matter;
+
+    // preserve mouse constraint
+    const mouseConstraint = engine.world.constraints.find(
+        c => c.label === "Mouse Constraint"
+    );
+
+    // clear previous dynamic bodies / constraints
+    Composite.allBodies(engine.world).forEach(b => {
+        if (!b.isStatic) World.remove(engine.world, b);
+    });
+    Composite.allConstraints(engine.world).forEach(c => {
+        if (c !== mouseConstraint) World.remove(engine.world, c);
+    });
+
+    // realistic gravity for sand
+    engine.gravity.x = 0;
+    engine.gravity.y = 1.1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    const sandParticles = [];
+
+    /* ---------------- FUNNEL WALLS ---------------- */
+    const wallThickness = 30;
+
+    const leftWall = Bodies.rectangle(
+        w / 2 - 90, h / 2 - 40,
+        wallThickness, h,
+        { isStatic: true, angle: Math.PI / 7 }
+    );
+
+    const rightWall = Bodies.rectangle(
+        w / 2 + 90, h / 2 - 40,
+        wallThickness, h,
+        { isStatic: true, angle: -Math.PI / 7 }
+    );
+
+    const floor = Bodies.rectangle(
+        w / 2, h + 25,
+        w, 50,
+        { isStatic: true }
+    );
+
+    World.add(engine.world, [leftWall, rightWall, floor]);
+
+    /* ---------------- SAND SPAWN ---------------- */
+    for (let i = 0; i < spawnCount; i++) {
+        const r = 2.2 + Math.random() * 1.2;
+
+        const sand = Bodies.circle(
+            w / 2 + (Math.random() - 0.5) * 60,
+            40 + Math.random() * 30,
+            r,
+            {
+                label: "sand",
+                restitution: 0.05,
+                friction: 0.2,
+                frictionAir: 0.06,
+                density: 0.0025,
+                render: { fillStyle: "#f5d08c" }
+            }
+        );
+
+        sand._sand = {
+            radius: r,
+            shade: 210 + Math.random() * 30
+        };
+
+        sand._settled = false; // track if sand has settled
+        sandParticles.push(sand);
+        World.add(engine.world, sand);
+    }
+
+    /* ---------------- SAND HEAP LOOP ---------------- */
+    let settledCount = 0;
+    const SETTLE_LIMIT = spawnCount * 0.6; // sand pile threshold
+
+    const beforeUpdate = () => {
+        for (const s of sandParticles) {
+            if (!s.position) continue;
+
+            const speed = Math.hypot(s.velocity.x, s.velocity.y);
+
+            // --- sand settle at bottom ---
+            if (s.position.y > h - 55 && speed < 0.06 && !s._settled) {
+                s._settled = true;
+                settledCount++;
+            }
+
+            // --- recycle only after enough sand is piled ---
+            if (s._settled && settledCount > SETTLE_LIMIT && Math.random() < 0.03) {
+                s._settled = false;
+                settledCount--;
+
+                Body.setPosition(s, {
+                    x: w / 2 + (Math.random() - 0.5) * 60,
+                    y: -30
+                });
+                Body.setVelocity(s, { x: 0, y: 0 });
+                Body.setAngularVelocity(s, 0);
+            }
+
+            // --- micro jitter for realism ---
+            if (!s._settled) {
+                Body.applyForce(s, s.position, {
+                    x: (Math.random() - 0.5) * 0.00001,
+                    y: 0
+                });
+            }
+
+            // --- limit insane velocity ---
+            if (!s._settled) {
+                const v = s.velocity;
+                const spd = Math.hypot(v.x, v.y);
+                if (spd > 6) {
+                    Body.setVelocity(s, { x: v.x * 0.6, y: v.y * 0.6 });
+                }
+            }
+        }
+    };
+
+    Events.on(engine, "beforeUpdate", beforeUpdate);
+
+    /* ---------------- VISUAL GRAIN HIGHLIGHT ---------------- */
+    const afterRender = () => {
+        const ctx = render.context;
+        if (!ctx) return;
+
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+
+        for (const s of sandParticles) {
+            if (!s.position) continue;
+            const { x, y } = s.position;
+            const r = s._sand.radius;
+
+            const g = ctx.createRadialGradient(x, y, 0, x, y, r * 2.5);
+            g.addColorStop(0, `rgba(255,240,200,0.8)`);
+            g.addColorStop(1, `rgba(255,200,120,0)`);
+
+            ctx.beginPath();
+            ctx.fillStyle = g;
+            ctx.arc(x, y, r * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    };
+
+    Events.on(render, "afterRender", afterRender);
+
+    /* ---------------- CLEANUP ---------------- */
+    const cleanup = () => {
+        Events.off(engine, "beforeUpdate", beforeUpdate);
+        Events.off(render, "afterRender", afterRender);
+        try {
+            Composite.remove(engine.world, sandParticles);
+        } catch (e) { }
+    };
+
+    return cleanup;
+}
+
+export function GearSystemCrankDemo({ engine, render }) {
+    const { Bodies, Body, World, Composite, Constraint, Events } = Matter;
+
+    /* ---------- preserve mouse constraint ---------- */
+    const mouseConstraint = engine.world.constraints.find(
+        c => c.label === "Mouse Constraint"
+    );
+
+    /* ---------- clear previous dynamic stuff ---------- */
+    Composite.allBodies(engine.world).forEach(b => {
+        if (!b.isStatic) World.remove(engine.world, b);
+    });
+    Composite.allConstraints(engine.world).forEach(c => {
+        if (c !== mouseConstraint) World.remove(engine.world, c);
+    });
+
+    engine.gravity.x = 0;
+    engine.gravity.y = 0;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    const gears = [];
+
+    /* ---------- helper: create gear ---------- */
+    const createGear = (x, y, radius, teeth = 14) => {
+        const gear = Bodies.circle(x, y, radius, {
+            friction: 0.02,
+            frictionAir: 0.002,
+            restitution: 0.95,     // 🔥 bounce on walls
+            density: 0.004,
+            inertia: Infinity,
+            render: { fillStyle: "#94a3b8" }
+        });
+
+        gear._gear = { radius, teeth };
+        gears.push(gear);
+        World.add(engine.world, gear);
+        return gear;
+    };
+
+    /* ---------- gears ---------- */
+    const centerY = h / 2;
+
+    const crank = createGear(w / 2 - 220, centerY, 32, 10);
+    const gearA = createGear(w / 2 - 120, centerY, 48, 16);
+    const gearB = createGear(w / 2 + 20, centerY, 72, 24);
+    const gearC = createGear(w / 2 + 180, centerY, 40, 12);
+
+    /* ---------- spacing ---------- */
+    const meshDistance = (g1, g2) =>
+        g1._gear.radius + g2._gear.radius - 2;
+
+    Body.setPosition(gearA, {
+        x: crank.position.x + meshDistance(crank, gearA),
+        y: centerY
+    });
+
+    Body.setPosition(gearB, {
+        x: gearA.position.x + meshDistance(gearA, gearB),
+        y: centerY
+    });
+
+    Body.setPosition(gearC, {
+        x: gearB.position.x + meshDistance(gearB, gearC),
+        y: centerY
+    });
+
+    /* =====================================================
+       🔥 BOUNDARY WALLS (REFLECTIVE GEARBOX)
+       ===================================================== */
+    const t = 40;
+
+    const walls = [
+        Bodies.rectangle(w / 2, -t / 2, w, t, {
+            isStatic: true, restitution: 1
+        }),
+        Bodies.rectangle(w / 2, h + t / 2, w, t, {
+            isStatic: true, restitution: 1
+        }),
+        Bodies.rectangle(-t / 2, h / 2, t, h, {
+            isStatic: true, restitution: 1
+        }),
+        Bodies.rectangle(w + t / 2, h / 2, t, h, {
+            isStatic: true, restitution: 1
+        })
+    ];
+
+    World.add(engine.world, walls);
+
+    /* ---------- motor + gear ratio ---------- */
+    const MOTOR_SPEED = 0.035;
+
+    const beforeUpdate = () => {
+        Body.setAngularVelocity(crank, MOTOR_SPEED);
+
+        for (let i = 0; i < gears.length - 1; i++) {
+            const g1 = gears[i];
+            const g2 = gears[i + 1];
+
+            const ratio = g1._gear.radius / g2._gear.radius;
+            Body.setAngularVelocity(g2, -g1.angularVelocity * ratio);
+        }
+    };
+
+    Events.on(engine, "beforeUpdate", beforeUpdate);
+
+    /* ---------- draw teeth ---------- */
+    const afterRender = () => {
+        const ctx = render.context;
+        if (!ctx) return;
+
+        ctx.save();
+        gears.forEach(g => {
+            const r = g._gear.radius;
+            const teeth = g._gear.teeth;
+
+            ctx.translate(g.position.x, g.position.y);
+            ctx.rotate(g.angle);
+
+            ctx.strokeStyle = "rgba(255,255,255,0.35)";
+            ctx.lineWidth = 2;
+
+            for (let i = 0; i < teeth; i++) {
+                const a = (i / teeth) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+                ctx.lineTo(Math.cos(a) * (r + 6), Math.sin(a) * (r + 6));
+                ctx.stroke();
+            }
+            ctx.resetTransform();
+        });
+        ctx.restore();
+    };
+
+    Events.on(render, "afterRender", afterRender);
+
+    /* ---------- cleanup ---------- */
+    const cleanup = () => {
+        Events.off(engine, "beforeUpdate", beforeUpdate);
+        Events.off(render, "afterRender", afterRender);
+        try {
+            Composite.remove(engine.world, gears);
+            Composite.remove(engine.world, walls);
+        } catch (e) { }
+    };
+
+    return cleanup;
+}
 
 
+export function AngryBirdsSlingshotDemo({ engine, render }) {
+    const { Bodies, Body, World, Composite, Constraint, Events, Mouse, MouseConstraint } = Matter;
 
+    // Clear world
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 0.9;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    const anchor = { x: 160, y: h - 120 };
+    const birds = [];
+    let currentBird = 0;
+    let sling = null;
+
+    // Ground
+    const ground = Bodies.rectangle(w / 2, h + 30, w, 60, {
+        isStatic: true,
+        render: { fillStyle: "#334155" }
+    });
+
+    // Slingshot posts
+    const postLeft = Bodies.rectangle(anchor.x - 12, anchor.y + 40, 14, 90, {
+        isStatic: true,
+        render: { fillStyle: "#7c2d12" }
+    });
+    const postRight = Bodies.rectangle(anchor.x + 12, anchor.y + 40, 14, 90, {
+        isStatic: true,
+        render: { fillStyle: "#7c2d12" }
+    });
+
+    World.add(engine.world, [ground, postLeft, postRight]);
+
+    // Birds
+    for (let i = 0; i < 3; i++) {
+        const bird = Bodies.circle(anchor.x, anchor.y, 14, {
+            density: 0.006,     // 🔥 was 0.004
+            restitution: 0.4,
+            friction: 0.6,
+            frictionAir: 0.0005,
+            label: "bird",
+            render: { fillStyle: "#dc2626" }
+        });
+
+        birds.push(bird);
+        World.add(engine.world, bird);
+    }
+
+    // Blocks
+    const blocks = [];
+    const startX = w - 260, startY = h - 80;
+    for (let y = 0; y < 5; y++) {
+        for (let x = 0; x < 3; x++) {
+            blocks.push(
+                Bodies.rectangle(startX + x * 36, startY - y * 34, 32, 28, {
+                    density: 0.0015,
+                    restitution: 0.1,
+                    friction: 0.8,
+                    label: "block",
+                    render: { fillStyle: "#fbbf24" }
+                })
+            );
+        }
+    }
+    World.add(engine.world, blocks);
+
+    // Sling
+    const createSling = () => {
+        if (sling) World.remove(engine.world, sling);
+        sling = Constraint.create({
+            pointA: anchor,
+            bodyB: birds[currentBird],
+            stiffness: 0.035,   // 🔥 increase
+            damping: 0.02,
+            length: 0
+        });
+
+        World.add(engine.world, sling);
+    };
+    createSling();
+
+    // Mouse
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.08,
+            render: { visible: false }
+        }
+    });
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // Release detection
+    Events.on(mouseConstraint, "enddrag", (e) => {
+        if (sling) {
+            World.remove(engine.world, sling);
+            sling = null;
+        }
+
+        const bird = birds[currentBird];
+        Body.setAngularVelocity(bird, 0);
+
+        setTimeout(() => {
+            currentBird++;
+            if (currentBird < birds.length) createSling();
+        }, 600);
+    });
+
+
+    // Rubber band render
+    Events.on(render, "afterRender", () => {
+        const ctx = render.context;
+        const bird = birds[currentBird];
+        if (!bird) return;
+
+        ctx.save();
+        ctx.strokeStyle = "#78350f";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(anchor.x - 10, anchor.y);
+        ctx.lineTo(bird.position.x, bird.position.y);
+        ctx.lineTo(anchor.x + 10, anchor.y);
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    return () => {
+        World.remove(engine.world, mouseConstraint);
+    };
+}
+
+export function CatapultDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Constraint,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
+
+    // Clear previous
+    Composite.allBodies(engine.world).forEach(b => {
+        if (!b.isStatic) World.remove(engine.world, b);
+    });
+    Composite.allConstraints(engine.world).forEach(c =>
+        World.remove(engine.world, c)
+    );
+
+    engine.gravity.x = 0;
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    const anchor = { x: 130, y: h - 120 };
+    let stone = null;
+    let sling = null;
+
+    // ================= GROUND =================
+    const ground = Bodies.rectangle(w / 2, h + 20, w, 60, {
+        isStatic: true,
+        render: { fillStyle: "#334155" }
+    });
+    World.add(engine.world, ground);
+
+    // ================= CATAPULT BASE =================
+    const base = Bodies.rectangle(anchor.x, anchor.y + 40, 110, 20, {
+        isStatic: true,
+        render: { fillStyle: "#7c2d12" }
+    });
+    World.add(engine.world, base);
+
+    // ================= STONE =================
+    stone = Bodies.circle(anchor.x, anchor.y, 16, {
+        density: 0.006,           // 🔥 heavier = more momentum
+        restitution: 0.4,
+        friction: 0.6,
+        frictionAir: 0.0005,
+        label: "stone",
+        render: { fillStyle: "#555" }
+    });
+    World.add(engine.world, stone);
+
+    // ================= SLING =================
+    const createSling = () => {
+        if (sling) World.remove(engine.world, sling);
+        sling = Constraint.create({
+            pointA: anchor,
+            bodyB: stone,
+            stiffness: 0.1,         // 🔥 BIG POWER BOOST
+            damping: 0.02,
+            length: 0
+        });
+        World.add(engine.world, sling);
+    };
+    createSling();
+
+    // ================= BLOCK TOWER =================
+    const blocks = [];
+    const rows = 6;            // 🔥 more height
+    const cols = 6;            // 🔥 more width
+    const startX = w - 320;
+    const startY = h - 40;
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            const block = Bodies.rectangle(
+                startX + x * 38,
+                startY - y * 30,
+                34,
+                26,
+                {
+                    density: 0.0015,    // 🔥 lighter blocks = easy collapse
+                    restitution: 0.1,
+                    friction: 0.8,
+                    label: "block",
+                    render: { fillStyle: "#fbbf24" }
+                }
+            );
+            blocks.push(block);
+        }
+    }
+    World.add(engine.world, blocks);
+
+    // ================= MOUSE =================
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.05,
+            render: { visible: false }
+        }
+    });
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // ================= RELEASE =================
+    Events.on(mouseConstraint, "enddrag", e => {
+        if (e.body === stone && sling) {
+            setTimeout(() => {
+                World.remove(engine.world, sling);
+                sling = null;
+            }, 30); // 🔥 CRITICAL DELAY
+        }
+    });
+
+
+    // ================= RUBBER BAND =================
+    const afterRender = () => {
+        if (!stone || !sling) return;
+        const ctx = render.context;
+
+        ctx.save();
+        ctx.strokeStyle = "#78350f";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(anchor.x, anchor.y);
+        ctx.lineTo(stone.position.x, stone.position.y);
+        ctx.stroke();
+        ctx.restore();
+    };
+    Events.on(render, "afterRender", afterRender);
+
+    // ================= CLEANUP =================
+    const cleanup = () => {
+        Events.off(render, "afterRender", afterRender);
+        try {
+            Composite.remove(engine.world, [
+                stone,
+                ...blocks,
+                ground,
+                base
+            ]);
+        } catch (e) { }
+    };
+
+    return cleanup;
+}
