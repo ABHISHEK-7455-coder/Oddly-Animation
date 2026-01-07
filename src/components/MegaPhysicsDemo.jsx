@@ -7,8 +7,10 @@ import {
   CompoundStackDemo, RopeBridgeDemo, NewtonsCradleDemo,
   ClothDemo, MagnetFieldDemo, HelicopterRescueDemo,
   EventsDemo, FallingBuildings, FloatingLanterns,
-  SandFunnelDemo, GearSystemCrankDemo, AngryBirdsSlingshotDemo,
-  CatapultDemo
+  SandFunnelDemo, GearSystemCrankDemo,
+  // AngryBirdsSlingshotDemo,
+  CatapultDemo, JengaPhysicsDemo, SharedPhysicsPlaygroundDemo,
+  BridgeStressTestDemo
 } from './demos';
 import './MatterJs.css';
 
@@ -206,8 +208,11 @@ export default function MegaPhysicsDemo() {
       case 'lanterns': FloatingLanterns({ engine, render }); break;
       case 'sand funnel': SandFunnelDemo({ engine, render }); break;
       case 'gear crank': GearSystemCrankDemo({ engine, render }); break;
-      case 'angry bird': AngryBirdsSlingshotDemo({ engine, render }); break;
+      // case 'angry bird': AngryBirdsSlingshotDemo({ engine, render }); break;
       case 'catapult': CatapultDemo({ engine, render }); break;
+      case 'jenga physics': JengaPhysicsDemo({ engine, render }); break;
+      case 'shared playground': SharedPhysicsPlaygroundDemo({ engine, render }); break;
+      case 'bridge stress': BridgeStressTestDemo({ engine, render }); break;
       default: break;
     }
   };
@@ -231,15 +236,18 @@ export default function MegaPhysicsDemo() {
 
         <div className="physics-grid">
           {[
-            ['mixed','Mixed'], ['chains','Chains'], ['avalanche','Avalanche'],
-            ['constraints','Constraints'], ['double','Pendulum'],
-            ['wreckingball','Wrecking Ball'], ['timescale','Time Scale'],
-            ['compound','Compound'], ['rope','Rope'],
-            ['cradle','Cradle'], ['cloth','Cloth'],
-            ['magnet','Magnet'], ['fallings','Falling'],
-            ['lanterns','Lanterns'], ['sand funnel','Sand Funnel'],
-            ['gear crank','Gear Crank'], ['angry bird','Angry Bird'],
-            ['catapult','Catapult']
+            ['mixed', 'Mixed'], ['chains', 'Chains'], ['avalanche', 'Avalanche'],
+            ['constraints', 'Constraints'], ['double', 'Pendulum'],
+            ['wreckingball', 'Wrecking Ball'], ['timescale', 'Time Scale'],
+            ['compound', 'Compound'], ['rope', 'Rope'],
+            ['cradle', 'Cradle'], ['cloth', 'Cloth'],
+            ['magnet', 'Magnet'], ['fallings', 'Falling'],
+            ['lanterns', 'Lanterns'], ['sand funnel', 'Sand Funnel'],
+            ['gear crank', 'Gear Crank'],
+            // ['angry bird','Angry Bird'],
+            ['catapult', 'Catapult'],
+            ['shared playground', 'Shared Playground'],
+            ['jenga physics', 'Jenga Physics'], ['bridge stress', 'Bridge Stress']
           ].map(([key, title]) => (
             <div key={key} className="physics-card" onClick={() => setActiveDemo(key)}>
               <canvas

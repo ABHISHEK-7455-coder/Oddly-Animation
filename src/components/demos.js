@@ -1848,7 +1848,7 @@ export function CatapultDemo({ engine, render }) {
         MouseConstraint
     } = Matter;
 
-    // Clear previous
+    // ========= RESET =========
     Composite.allBodies(engine.world).forEach(b => {
         if (!b.isStatic) World.remove(engine.world, b);
     });
@@ -1862,53 +1862,65 @@ export function CatapultDemo({ engine, render }) {
     const w = render.options.width;
     const h = render.options.height;
 
+    // ========= CONFIG =========
     const anchor = { x: 130, y: h - 120 };
-    let stone = null;
+    const TOTAL_BALLS = 3;
+
+    let balls = [];
+    let currentBallIndex = 0;
+    let currentBall = null;
     let sling = null;
 
-    // ================= GROUND =================
+    // ========= GROUND =========
     const ground = Bodies.rectangle(w / 2, h + 20, w, 60, {
         isStatic: true,
         render: { fillStyle: "#334155" }
     });
     World.add(engine.world, ground);
 
-    // ================= CATAPULT BASE =================
-    const base = Bodies.rectangle(anchor.x, anchor.y + 40, 110, 20, {
+    // ========= BASE =========
+    const base = Bodies.rectangle(anchor.x, anchor.y + 40, 80, 20, {
         isStatic: true,
         render: { fillStyle: "#7c2d12" }
     });
     World.add(engine.world, base);
 
-    // ================= STONE =================
-    stone = Bodies.circle(anchor.x, anchor.y, 16, {
-        density: 0.006,           // 🔥 heavier = more momentum
-        restitution: 0.4,
-        friction: 0.6,
-        frictionAir: 0.0005,
-        label: "stone",
-        render: { fillStyle: "#555" }
-    });
-    World.add(engine.world, stone);
+    // ========= CREATE BALL =========
+    const createBall = () => {
+        const ball = Bodies.circle(anchor.x, anchor.y, 16, {
+            density: 0.007,
+            restitution: 0.4,
+            friction: 0.6,
+            frictionAir: 0.0005,
+            label: "stone",
+            render: { fillStyle: "#555" }
+        });
+        balls.push(ball);
+        World.add(engine.world, ball);
+        return ball;
+    };
 
-    // ================= SLING =================
+    // ========= CREATE SLING =========
     const createSling = () => {
         if (sling) World.remove(engine.world, sling);
         sling = Constraint.create({
             pointA: anchor,
-            bodyB: stone,
-            stiffness: 0.1,         // 🔥 BIG POWER BOOST
+            bodyB: currentBall,
+            stiffness: 0.1,   // tuned power
             damping: 0.02,
             length: 0
         });
         World.add(engine.world, sling);
     };
+
+    // ========= INIT FIRST BALL =========
+    currentBall = createBall();
     createSling();
 
-    // ================= BLOCK TOWER =================
+    // ========= BLOCK TOWER =========
     const blocks = [];
-    const rows = 6;            // 🔥 more height
-    const cols = 6;            // 🔥 more width
+    const rows = 10;
+    const cols = 4;
     const startX = w - 320;
     const startY = h - 40;
 
@@ -1920,7 +1932,7 @@ export function CatapultDemo({ engine, render }) {
                 34,
                 26,
                 {
-                    density: 0.0015,    // 🔥 lighter blocks = easy collapse
+                    density: 0.0015,
                     restitution: 0.1,
                     friction: 0.8,
                     label: "block",
@@ -1932,51 +1944,61 @@ export function CatapultDemo({ engine, render }) {
     }
     World.add(engine.world, blocks);
 
-    // ================= MOUSE =================
+    // ========= MOUSE =========
     const mouse = Mouse.create(render.canvas);
     const mouseConstraint = MouseConstraint.create(engine, {
         mouse,
         constraint: {
-            stiffness: 0.05,
+            stiffness: 2,
             render: { visible: false }
         }
     });
     World.add(engine.world, mouseConstraint);
     render.mouse = mouse;
 
-    // ================= RELEASE =================
+    // ========= RELEASE LOGIC =========
     Events.on(mouseConstraint, "enddrag", e => {
-        if (e.body === stone && sling) {
+        if (e.body === currentBall && sling) {
+            // allow elastic force to apply
             setTimeout(() => {
                 World.remove(engine.world, sling);
                 sling = null;
-            }, 30); // 🔥 CRITICAL DELAY
+            }, 30);
+
+            // next ball
+            setTimeout(() => {
+                currentBallIndex++;
+
+                if (currentBallIndex < TOTAL_BALLS) {
+                    currentBall = createBall();
+                    createSling();
+                }
+            }, 700);
         }
     });
 
-
-    // ================= RUBBER BAND =================
+    // ========= RUBBER BAND =========
     const afterRender = () => {
-        if (!stone || !sling) return;
-        const ctx = render.context;
+        if (!currentBall || !sling) return;
 
+        const ctx = render.context;
         ctx.save();
         ctx.strokeStyle = "#78350f";
         ctx.lineWidth = 6;
         ctx.beginPath();
         ctx.moveTo(anchor.x, anchor.y);
-        ctx.lineTo(stone.position.x, stone.position.y);
+        ctx.lineTo(currentBall.position.x, currentBall.position.y);
         ctx.stroke();
         ctx.restore();
     };
     Events.on(render, "afterRender", afterRender);
 
-    // ================= CLEANUP =================
+    // ========= CLEANUP =========
     const cleanup = () => {
         Events.off(render, "afterRender", afterRender);
         try {
             Composite.remove(engine.world, [
-                stone,
+                ...balls,
                 ...blocks,
                 ground,
                 base
@@ -1985,4 +2007,500 @@ export function CatapultDemo({ engine, render }) {
     };
 
     return cleanup;
+}
+
+export function JengaPhysicsDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
+
+    // ================= RESET =================
+    Composite.allBodies(engine.world).forEach(b => {
+        if (!b.isStatic) World.remove(engine.world, b);
+    });
+    Composite.allConstraints(engine.world).forEach(c =>
+        World.remove(engine.world, c)
+    );
+
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ================= GROUND =================
+    const ground = Bodies.rectangle(w / 2, h + 30, w, 60, {
+        isStatic: true,
+        render: { fillStyle: "#1f2933" }
+    });
+    World.add(engine.world, ground);
+
+    // ================= JENGA TOWER =================
+    const blocks = [];
+    const levels = 16;
+    const blockL = 70;
+    const blockW = 22;
+    const blockH = 16;
+
+    const startX = w / 2;
+    const startY = h - 40;
+
+    for (let i = 0; i < levels; i++) {
+        const isHorizontal = i % 2 === 0;
+
+        for (let j = 0; j < 3; j++) {
+            const x = isHorizontal
+                ? startX + (j - 1) * blockW
+                : startX;
+
+            const y = startY - i * blockH;
+
+            const block = Bodies.rectangle(
+                x,
+                y,
+                isHorizontal ? blockL : blockW,
+                isHorizontal ? blockW : blockL,
+                {
+                    density: 0.0025,
+                    friction: 0.9,
+                    restitution: 0.02,
+                    label: "jenga",
+                    render: { fillStyle: "#d97706" }
+                }
+            );
+
+            blocks.push(block);
+        }
+    }
+    World.add(engine.world, blocks);
+
+    // ================= MOUSE =================
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.08,
+            render: { visible: false }
+        }
+    });
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // ================= HIGHLIGHT ACTIVE BLOCK =================
+    let hovered = null;
+
+    Events.on(mouseConstraint, "mousemove", e => {
+        hovered = e.body;
+    });
+
+    const afterRender = () => {
+        if (!hovered || hovered.label !== "jenga") return;
+        const ctx = render.context;
+        ctx.save();
+        ctx.strokeStyle = "#22c55e";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(
+            hovered.position.x - hovered.bounds.max.x + hovered.position.x,
+            hovered.position.y - hovered.bounds.max.y + hovered.position.y,
+            hovered.bounds.max.x - hovered.bounds.min.x,
+            hovered.bounds.max.y - hovered.bounds.min.y
+        );
+        ctx.restore();
+    };
+
+    Events.on(render, "afterRender", afterRender);
+
+    // ================= CLEANUP =================
+    const cleanup = () => {
+        Events.off(render, "afterRender", afterRender);
+        try {
+            Composite.remove(engine.world, [...blocks, ground]);
+        } catch (e) { }
+    };
+
+    return cleanup;
+}
+
+export function SharedPhysicsPlaygroundDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Constraint,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
+
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    const cleanups = [];
+
+    // ==================================================
+    // 🌍 BASE WORLD
+    // ==================================================
+    const ground = Bodies.rectangle(w / 2, h + 30, w, 60, {
+        isStatic: true,
+        render: { fillStyle: "#1f2937" }
+    });
+    World.add(engine.world, ground);
+    cleanups.push(() => World.remove(engine.world, ground));
+
+    // ==================================================
+    // 🧱 JENGA (CENTER)
+    // ==================================================
+    const jengaBlocks = [];
+    const levels = 14;
+    const blockL = 70;
+    const blockW = 22;
+    const blockH = 16;
+    const centerX = w / 2;
+
+    for (let i = 0; i < levels; i++) {
+        const horizontal = i % 2 === 0;
+
+        for (let j = 0; j < 3; j++) {
+            const block = Bodies.rectangle(
+                horizontal
+                    ? centerX + (j - 1) * blockW
+                    : centerX,
+                h - 50 - i * blockH,
+                horizontal ? blockL : blockW,
+                horizontal ? blockW : blockL,
+                {
+                    density: 0.0025,
+                    friction: 0.9,
+                    restitution: 0.02,
+                    label: "jenga",
+                    render: { fillStyle: "#d97706" }
+                }
+            );
+            jengaBlocks.push(block);
+        }
+    }
+    World.add(engine.world, jengaBlocks);
+    cleanups.push(() =>
+        jengaBlocks.forEach(b => World.remove(engine.world, b))
+    );
+
+    // ==================================================
+    // 🏹 CATAPULT (LEFT)
+    // ==================================================
+    const catapultAnchor = { x: 160, y: h - 120 };
+
+    const catapultBall = Bodies.circle(
+        catapultAnchor.x,
+        catapultAnchor.y,
+        18,
+        {
+            density: 0.01,
+            restitution: 0.4,
+            frictionAir: 0.0005,
+            label: "catapultBall",
+            render: { fillStyle: "#ef4444" }
+        }
+    );
+
+    const sling = Constraint.create({
+        pointA: catapultAnchor,
+        bodyB: catapultBall,
+        stiffness: 0.08,
+        damping: 0.1
+    });
+
+    World.add(engine.world, [catapultBall, sling]);
+
+    let catapultDragging = false;
+
+    // ==================================================
+    // 💣 CANNON (RIGHT)
+    // ==================================================
+    const cannon = { x: w - 160, y: h - 80 };
+    let cannonBall = null;
+    let cannonDragging = false;
+
+    const createCannonBall = () => {
+        cannonBall = Bodies.circle(cannon.x, cannon.y, 16, {
+            density: 0.02,
+            restitution: 0.2,
+            frictionAir: 0.0003,
+            label: "cannonBall",
+            render: { fillStyle: "#475569" }
+        });
+        World.add(engine.world, cannonBall);
+    };
+
+    createCannonBall();
+
+    // ==================================================
+    // 🖱️ MOUSE (SHARED)
+    // ==================================================
+    const mouse = Mouse.create(render.canvas);
+    render.mouse = mouse;
+
+    Events.on(mouse, "mousedown", e => {
+        const p = e.mouse.position;
+
+        if (
+            Matter.Vector.magnitude(
+                Matter.Vector.sub(p, catapultBall.position)
+            ) < 25
+        ) {
+            catapultDragging = true;
+        }
+
+        if (
+            cannonBall &&
+            Matter.Vector.magnitude(
+                Matter.Vector.sub(p, cannon)
+            ) < 40
+        ) {
+            cannonDragging = true;
+        }
+    });
+
+    Events.on(mouse, "mousemove", e => {
+        if (catapultDragging) {
+            Body.setPosition(catapultBall, e.mouse.position);
+        }
+        if (cannonDragging && cannonBall) {
+            Body.setPosition(cannonBall, e.mouse.position);
+        }
+    });
+
+    Events.on(mouse, "mouseup", () => {
+        // CATAPULT RELEASE
+        if (catapultDragging) {
+            catapultDragging = false;
+            World.remove(engine.world, sling);
+
+            const dx = catapultAnchor.x - catapultBall.position.x;
+            const dy = catapultAnchor.y - catapultBall.position.y;
+
+            Body.setVelocity(catapultBall, {
+                x: dx * 0.35,
+                y: dy * 0.35
+            });
+        }
+
+        // CANNON FIRE
+        if (cannonDragging && cannonBall) {
+            cannonDragging = false;
+
+            const dx = cannon.x - cannonBall.position.x;
+            const dy = cannon.y - cannonBall.position.y;
+
+            Body.setVelocity(cannonBall, {
+                x: dx * 0.45,
+                y: dy * 0.45
+            });
+
+            setTimeout(createCannonBall, 1200);
+            cannonBall = null;
+        }
+    });
+
+    // ==================================================
+    // 🎨 VISUAL BANDS
+    // ==================================================
+    const afterRender = () => {
+        const ctx = render.context;
+        ctx.save();
+
+        // catapult band
+        if (catapultDragging) {
+            ctx.strokeStyle = "#7c2d12";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(catapultAnchor.x, catapultAnchor.y);
+            ctx.lineTo(catapultBall.position.x, catapultBall.position.y);
+            ctx.stroke();
+        }
+
+        // cannon aim
+        if (cannonDragging && cannonBall) {
+            ctx.strokeStyle = "#dc2626";
+            ctx.beginPath();
+            ctx.moveTo(cannon.x, cannon.y);
+            ctx.lineTo(cannonBall.position.x, cannonBall.position.y);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    };
+    Events.on(render, "afterRender", afterRender);
+    cleanups.push(() =>
+        Events.off(render, "afterRender", afterRender)
+    );
+
+    // ==================================================
+    // 🧹 CLEANUP
+    // ==================================================
+    return () => {
+        cleanups.forEach(fn => fn && fn());
+    };
+}
+
+export function BridgeStressTestDemo({ engine, render }) {
+  const {
+    Bodies,
+    Body,
+    World,
+    Composite,
+    Constraint,
+    Events,
+    Mouse,
+    MouseConstraint
+  } = Matter;
+
+  Composite.clear(engine.world, false);
+  engine.gravity.y = 1;
+
+  const w = render.options.width;
+  const h = render.options.height;
+
+  // ================= GROUND =================
+  const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
+    isStatic: true,
+    render: { fillStyle: "#1f2937" }
+  });
+  World.add(engine.world, ground);
+
+  // ================= PILLARS =================
+  const leftPillar = Bodies.rectangle(200, h - 140, 50, 260, {
+    isStatic: true,
+    render: { fillStyle: "#475569" }
+  });
+
+  const rightPillar = Bodies.rectangle(w - 200, h - 140, 50, 260, {
+    isStatic: true,
+    render: { fillStyle: "#475569" }
+  });
+
+  World.add(engine.world, [leftPillar, rightPillar]);
+
+  // ================= BRIDGE =================
+  const planks = [];
+  const ropes = [];
+
+  const plankCount = 12;
+  const plankW = 60;
+  const plankH = 16;
+  const bridgeY = h - 260;
+
+  const startX = leftPillar.position.x + 70;
+  const endX = rightPillar.position.x - 70;
+  const gap = (endX - startX) / (plankCount - 1);
+
+  for (let i = 0; i < plankCount; i++) {
+    const plank = Bodies.rectangle(
+      startX + i * gap,
+      bridgeY,
+      plankW,
+      plankH,
+      {
+        isStatic: true,          // 🔒 IMPORTANT
+        density: 0.004,
+        friction: 0.9,
+        restitution: 0,
+        label: "plank",
+        render: { fillStyle: "#d97706" }
+      }
+    );
+    planks.push(plank);
+  }
+
+  // plank-to-plank ropes
+  for (let i = 1; i < planks.length; i++) {
+    ropes.push(
+      Constraint.create({
+        bodyA: planks[i - 1],
+        bodyB: planks[i],
+        stiffness: 0.95,
+        length: gap
+      })
+    );
+  }
+
+  // anchor to pillars
+  ropes.push(
+    Constraint.create({
+      bodyA: leftPillar,
+      bodyB: planks[0],
+      stiffness: 0.95,
+      length: 40
+    }),
+    Constraint.create({
+      bodyA: rightPillar,
+      bodyB: planks[planks.length - 1],
+      stiffness: 0.95,
+      length: 40
+    })
+  );
+
+  World.add(engine.world, [...planks, ...ropes]);
+
+  // 🔓 UNLOCK bridge after settle
+  setTimeout(() => {
+    planks.forEach(p => Body.setStatic(p, false));
+  }, 500);
+
+  // ================= LOAD DROP =================
+  const spawnLoad = x => {
+    const load = Bodies.rectangle(x, -20, 40, 30, {
+      density: 0.02,
+      friction: 0.8,
+      restitution: 0.1,
+      label: "load",
+      render: { fillStyle: "#ef4444" }
+    });
+    World.add(engine.world, load);
+  };
+
+  // ================= MOUSE =================
+  const mouse = Mouse.create(render.canvas);
+  const mouseConstraint = MouseConstraint.create(engine, {
+    mouse,
+    constraint: { stiffness: 0.2, render: { visible: false } }
+  });
+  World.add(engine.world, mouseConstraint);
+  render.mouse = mouse;
+
+  Events.on(mouseConstraint, "mousedown", e => {
+    spawnLoad(e.mouse.position.x);
+  });
+
+  // ================= STRESS BREAK =================
+  const breakThreshold = 1.35;
+
+  const stressCheck = () => {
+    ropes.forEach(r => {
+      if (!r.bodyA || !r.bodyB) return;
+
+      const dx = r.bodyA.position.x - r.bodyB.position.x;
+      const dy = r.bodyA.position.y - r.bodyB.position.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > r.length * breakThreshold) {
+        World.remove(engine.world, r);
+      }
+    });
+  };
+
+  Events.on(engine, "afterUpdate", stressCheck);
+
+  // ================= CLEANUP =================
+  return () => {
+    Events.off(engine, "afterUpdate", stressCheck);
+    Composite.clear(engine.world, false);
+  };
 }
