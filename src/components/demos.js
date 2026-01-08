@@ -2351,156 +2351,286 @@ export function SharedPhysicsPlaygroundDemo({ engine, render }) {
 }
 
 export function BridgeStressTestDemo({ engine, render }) {
-  const {
-    Bodies,
-    Body,
-    World,
-    Composite,
-    Constraint,
-    Events,
-    Mouse,
-    MouseConstraint
-  } = Matter;
+    const { Bodies, World, Composite, Constraint, Events, Mouse, MouseConstraint } = Matter;
 
-  Composite.clear(engine.world, false);
-  engine.gravity.y = 1;
-
-  const w = render.options.width;
-  const h = render.options.height;
-
-  // ================= GROUND =================
-  const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
-    isStatic: true,
-    render: { fillStyle: "#1f2937" }
-  });
-  World.add(engine.world, ground);
-
-  // ================= PILLARS =================
-  const leftPillar = Bodies.rectangle(200, h - 140, 50, 260, {
-    isStatic: true,
-    render: { fillStyle: "#475569" }
-  });
-
-  const rightPillar = Bodies.rectangle(w - 200, h - 140, 50, 260, {
-    isStatic: true,
-    render: { fillStyle: "#475569" }
-  });
-
-  World.add(engine.world, [leftPillar, rightPillar]);
-
-  // ================= BRIDGE =================
-  const planks = [];
-  const ropes = [];
-
-  const plankCount = 12;
-  const plankW = 60;
-  const plankH = 16;
-  const bridgeY = h - 260;
-
-  const startX = leftPillar.position.x + 70;
-  const endX = rightPillar.position.x - 70;
-  const gap = (endX - startX) / (plankCount - 1);
-
-  for (let i = 0; i < plankCount; i++) {
-    const plank = Bodies.rectangle(
-      startX + i * gap,
-      bridgeY,
-      plankW,
-      plankH,
-      {
-        isStatic: true,          // 🔒 IMPORTANT
-        density: 0.004,
-        friction: 0.9,
-        restitution: 0,
-        label: "plank",
-        render: { fillStyle: "#d97706" }
-      }
-    );
-    planks.push(plank);
-  }
-
-  // plank-to-plank ropes
-  for (let i = 1; i < planks.length; i++) {
-    ropes.push(
-      Constraint.create({
-        bodyA: planks[i - 1],
-        bodyB: planks[i],
-        stiffness: 0.95,
-        length: gap
-      })
-    );
-  }
-
-  // anchor to pillars
-  ropes.push(
-    Constraint.create({
-      bodyA: leftPillar,
-      bodyB: planks[0],
-      stiffness: 0.95,
-      length: 40
-    }),
-    Constraint.create({
-      bodyA: rightPillar,
-      bodyB: planks[planks.length - 1],
-      stiffness: 0.95,
-      length: 40
-    })
-  );
-
-  World.add(engine.world, [...planks, ...ropes]);
-
-  // 🔓 UNLOCK bridge after settle
-  setTimeout(() => {
-    planks.forEach(p => Body.setStatic(p, false));
-  }, 500);
-
-  // ================= LOAD DROP =================
-  const spawnLoad = x => {
-    const load = Bodies.rectangle(x, -20, 40, 30, {
-      density: 0.02,
-      friction: 0.8,
-      restitution: 0.1,
-      label: "load",
-      render: { fillStyle: "#ef4444" }
-    });
-    World.add(engine.world, load);
-  };
-
-  // ================= MOUSE =================
-  const mouse = Mouse.create(render.canvas);
-  const mouseConstraint = MouseConstraint.create(engine, {
-    mouse,
-    constraint: { stiffness: 0.2, render: { visible: false } }
-  });
-  World.add(engine.world, mouseConstraint);
-  render.mouse = mouse;
-
-  Events.on(mouseConstraint, "mousedown", e => {
-    spawnLoad(e.mouse.position.x);
-  });
-
-  // ================= STRESS BREAK =================
-  const breakThreshold = 1.35;
-
-  const stressCheck = () => {
-    ropes.forEach(r => {
-      if (!r.bodyA || !r.bodyB) return;
-
-      const dx = r.bodyA.position.x - r.bodyB.position.x;
-      const dy = r.bodyA.position.y - r.bodyB.position.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist > r.length * breakThreshold) {
-        World.remove(engine.world, r);
-      }
-    });
-  };
-
-  Events.on(engine, "afterUpdate", stressCheck);
-
-  // ================= CLEANUP =================
-  return () => {
-    Events.off(engine, "afterUpdate", stressCheck);
     Composite.clear(engine.world, false);
-  };
+    engine.gravity.y = 0;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ===== GROUND =====
+    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, { isStatic: true });
+    World.add(engine.world, ground);
+
+    // ===== PILLARS =====
+    const left = Bodies.rectangle(200, h - 140, 50, 260, { isStatic: true });
+    const right = Bodies.rectangle(w - 200, h - 140, 50, 260, { isStatic: true });
+    World.add(engine.world, [left, right]);
+
+    // ===== BRIDGE =====
+    const planks = [];
+    const constraints = [];
+
+    const COUNT = 14;
+    const PLANK_W = 56;
+    const PLANK_H = 14;
+    const Y = h - 260;
+
+    const startX = left.position.x + 60;
+    const endX = right.position.x - 60;
+    const GAP = (endX - startX) / (COUNT - 1);
+
+    for (let i = 0; i < COUNT; i++) {
+        const plank = Bodies.rectangle(startX + i * GAP, Y, PLANK_W, PLANK_H, {
+            density: 0.002,
+            friction: 0.8,
+            render: { fillStyle: "#22c55e" }
+        });
+        planks.push(plank);
+    }
+
+    for (let i = 1; i < planks.length; i++) {
+        constraints.push(
+            Constraint.create({
+                bodyA: planks[i - 1],
+                bodyB: planks[i],
+                stiffness: 0.8,
+                length: GAP - 6
+            })
+        );
+    }
+
+    constraints.push(
+        Constraint.create({ bodyA: left, bodyB: planks[0], stiffness: 0.8, length: 30 }),
+        Constraint.create({ bodyA: right, bodyB: planks[planks.length - 1], stiffness: 0.8, length: 30 })
+    );
+
+    World.add(engine.world, [...planks, ...constraints]);
+
+    setTimeout(() => (engine.gravity.y = 1), 1000);
+
+    // ===== LOAD SYSTEM =====
+    let loadCount = 0;
+    const BREAK_AT = 10;
+
+    const updateBridgeColor = () => {
+        let color = "#22c55e";
+        if (loadCount >= 6 && loadCount <= 7) color = "#eab308";
+        if (loadCount >= 8 && loadCount <= 9) color = "#f97316";
+        if (loadCount >= 10) color = "#dc2626";
+        planks.forEach(p => (p.render.fillStyle = color));
+    };
+
+    const spawnLoad = () => {
+        if (loadCount >= BREAK_AT) return;
+
+        const load = Bodies.rectangle(
+            w / 2 + (Math.random() - 0.5) * 80,
+            -40,
+            50,
+            40,
+            {
+                density: 0.03,
+                friction: 0.9,
+                label: "load",
+                render: { fillStyle: "#475569" }
+            }
+        );
+
+        World.add(engine.world, load);
+        loadCount++;
+        updateBridgeColor();
+    };
+
+    const interval = setInterval(spawnLoad, 1200);
+
+    // ===== LOAD REMOVE (USER INTERACTION) =====
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: { stiffness: 0.2, render: { visible: false } }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    Events.on(mouseConstraint, "mousedown", e => {
+        const bodies = Composite.allBodies(engine.world);
+        const clicked = Matter.Query.point(bodies, e.mouse.position);
+
+        clicked.forEach(b => {
+            if (b.label === "load") {
+                World.remove(engine.world, b);
+                loadCount = Math.max(0, loadCount - 1);
+                updateBridgeColor();
+            }
+        });
+    });
+
+    // ===== BREAK ONLY AT 10 LOADS =====
+    const breaker = () => {
+        if (loadCount < BREAK_AT) return;
+
+        constraints.forEach(c => World.remove(engine.world, c));
+        Events.off(engine, "afterUpdate", breaker);
+    };
+
+    Events.on(engine, "afterUpdate", breaker);
+
+    // ===== CLEANUP =====
+    return () => {
+        clearInterval(interval);
+        Events.off(engine, "afterUpdate", breaker);
+        Composite.clear(engine.world, false);
+    };
+}
+
+export function VehicleSuspensionDemo({ engine, render }) {
+    const { Bodies, Body, World, Composite, Constraint, Events } = Matter;
+
+    // ===== RESET =====
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ================== TERRAIN ==================
+    const groundBlocks = [];
+    const blockWidth = 180;
+    let lastX = 0;
+
+    // Smooth, climbable bump generator
+    const createBlock = (x) => {
+        const type = Math.random();
+        let height = 35;
+        let yOffset = 0;
+
+        if (type < 0.6) height = 35; // flat
+        else { 
+            height = 45 + Math.random() * 5; // gentle bump 45–50px
+            yOffset = height / 4;
+        }
+
+        const block = Bodies.rectangle(
+            x,
+            h - height / 2 - yOffset,
+            blockWidth,
+            height,
+            { isStatic: true, friction: 1, render: { fillStyle: "#334155" } }
+        );
+
+        groundBlocks.push(block);
+        World.add(engine.world, block);
+    };
+
+    // initial terrain
+    while (lastX < w * 2) {
+        createBlock(lastX);
+        lastX += blockWidth;
+    }
+
+    // ================== CAR ==================
+    const chassis = Bodies.rectangle(300, h - 260, 140, 32, {
+        density: 0.006,
+        friction: 0.6,
+        inertia: Infinity,
+        render: { fillStyle: "#0ea5e9" }
+    });
+
+    const wheelRadius = 22;
+    const wheelOffsetX = 50;
+    const wheelOffsetY = 30;
+
+    const wheelLeft = Bodies.circle(
+        chassis.position.x - wheelOffsetX,
+        chassis.position.y + wheelOffsetY,
+        wheelRadius,
+        { friction: 2, frictionStatic: 1.8, density: 0.0035 }
+    );
+
+    const wheelRight = Bodies.circle(
+        chassis.position.x + wheelOffsetX,
+        chassis.position.y + wheelOffsetY,
+        wheelRadius,
+        { friction: 2, frictionStatic: 1.8, density: 0.0035 }
+    );
+
+    // ================== SUSPENSION ==================
+    const suspension = { 
+        stiffness: 0.75, // softer for smooth bump feel
+        damping: 0.25, 
+        length: wheelOffsetY + 6 // slightly longer travel
+    };
+
+    const springLeft = Constraint.create({
+        bodyA: chassis,
+        pointA: { x: -wheelOffsetX, y: 16 },
+        bodyB: wheelLeft,
+        ...suspension
+    });
+
+    const springRight = Constraint.create({
+        bodyA: chassis,
+        pointA: { x: wheelOffsetX, y: 16 },
+        bodyB: wheelRight,
+        ...suspension
+    });
+
+    World.add(engine.world, [chassis, wheelLeft, wheelRight, springLeft, springRight]);
+
+    // ================== CONTROLS ==================
+    const keys = { left: false, right: false };
+    const down = e => { if (e.key === "ArrowRight") keys.right = true; if (e.key === "ArrowLeft") keys.left = true; };
+    const up = e => { if (e.key === "ArrowRight") keys.right = false; if (e.key === "ArrowLeft") keys.left = false; };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+
+    // ================== ENGINE LOOP ==================
+    const roadSpeed = 3; // road movement speed when user presses keys
+
+    Events.on(engine, "beforeUpdate", () => {
+        const driveForce = 0.020;
+
+        let userMoving = false;
+
+        // DRIVE
+        if (keys.right) {
+            Body.applyForce(wheelLeft, wheelLeft.position, { x: driveForce, y: 0 });
+            Body.applyForce(wheelRight, wheelRight.position, { x: driveForce, y: 0 });
+            userMoving = true;
+        }
+        if (keys.left) {
+            Body.applyForce(wheelLeft, wheelLeft.position, { x: -driveForce, y: 0 });
+            Body.applyForce(wheelRight, wheelRight.position, { x: -driveForce, y: 0 });
+            userMoving = true;
+        }
+
+        // ================== MOVE ROAD IF USER MOVES ==================
+        if (userMoving) {
+            const dir = keys.right ? -1 : 1; // left/right scroll
+            for (let block of groundBlocks) {
+                Body.translate(block, { x: roadSpeed * dir, y: 0 });
+            }
+
+            // add new blocks ahead
+            while (lastX < chassis.position.x + w * 1.5) {
+                createBlock(lastX);
+                lastX += blockWidth;
+            }
+
+            // remove old blocks behind
+            while (groundBlocks.length && groundBlocks[0].position.x < -blockWidth * 2) {
+                World.remove(engine.world, groundBlocks.shift());
+            }
+        }
+    });
+
+    // ================== CLEANUP ==================
+    return () => {
+        window.removeEventListener("keydown", down);
+        window.removeEventListener("keyup", up);
+        Composite.clear(engine.world, false);
+    };
 }
