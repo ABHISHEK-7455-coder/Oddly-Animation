@@ -274,3 +274,28 @@
 //         </div>
 //     );
 // }
+
+// ===== INVISIBLE SIDE RAILS (ANTI-SLIP) =====
+const railLeft = Bodies.rectangle(
+    w / 2 - 120,
+    Y - 12,
+    endX - startX,
+    6,
+    {
+        isStatic: true,
+        render: { visible: false }
+    }
+);
+
+const railRight = Bodies.rectangle(
+    w / 2 + 120,
+    Y - 12,
+    endX - startX,
+    6,
+    {
+        isStatic: true,
+        render: { visible: false }
+    }
+);
+
+World.add(engine.world, [railLeft, railRight]);

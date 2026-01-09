@@ -2351,7 +2351,16 @@ export function SharedPhysicsPlaygroundDemo({ engine, render }) {
 }
 
 export function BridgeStressTestDemo({ engine, render }) {
-    const { Bodies, World, Composite, Constraint, Events, Mouse, MouseConstraint } = Matter;
+    const {
+        Bodies,
+        Body, // ✅ FIX
+        World,
+        Composite,
+        Constraint,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
 
     Composite.clear(engine.world, false);
     engine.gravity.y = 0;
@@ -2360,7 +2369,10 @@ export function BridgeStressTestDemo({ engine, render }) {
     const h = render.options.height;
 
     // ===== GROUND =====
-    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, { isStatic: true });
+    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
+        isStatic: true,
+        friction: 1
+    });
     World.add(engine.world, ground);
 
     // ===== PILLARS =====
@@ -2383,8 +2395,10 @@ export function BridgeStressTestDemo({ engine, render }) {
 
     for (let i = 0; i < COUNT; i++) {
         const plank = Bodies.rectangle(startX + i * GAP, Y, PLANK_W, PLANK_H, {
-            density: 0.002,
-            friction: 0.8,
+            isStatic: true,
+            friction: 0.9,
+            frictionStatic: 1.5,
+            restitution: 0,
             render: { fillStyle: "#22c55e" }
         });
         planks.push(plank);
@@ -2395,15 +2409,15 @@ export function BridgeStressTestDemo({ engine, render }) {
             Constraint.create({
                 bodyA: planks[i - 1],
                 bodyB: planks[i],
-                stiffness: 0.8,
-                length: GAP - 6
+                stiffness: 1,
+                length: GAP
             })
         );
     }
 
     constraints.push(
-        Constraint.create({ bodyA: left, bodyB: planks[0], stiffness: 0.8, length: 30 }),
-        Constraint.create({ bodyA: right, bodyB: planks[planks.length - 1], stiffness: 0.8, length: 30 })
+        Constraint.create({ bodyA: left, bodyB: planks[0], stiffness: 0.95, length: 30 }),
+        Constraint.create({ bodyA: right, bodyB: planks[planks.length - 1], stiffness: 0.95, length: 30 })
     );
 
     World.add(engine.world, [...planks, ...constraints]);
@@ -2422,6 +2436,16 @@ export function BridgeStressTestDemo({ engine, render }) {
         planks.forEach(p => (p.render.fillStyle = color));
     };
 
+    const breakBridge = () => {
+        planks.forEach(p => {
+            Body.setStatic(p, false); // ✅ NOW WORKS
+            p.friction = 0.6;
+            p.frictionStatic = 0.4;
+        });
+
+        constraints.forEach(c => World.remove(engine.world, c));
+    };
+
     const spawnLoad = () => {
         if (loadCount >= BREAK_AT) return;
 
@@ -2433,19 +2457,26 @@ export function BridgeStressTestDemo({ engine, render }) {
             {
                 density: 0.03,
                 friction: 0.9,
+                frictionStatic: 1.4,
+                restitution: 0,
                 label: "load",
                 render: { fillStyle: "#475569" }
             }
         );
 
         World.add(engine.world, load);
+
         loadCount++;
         updateBridgeColor();
+
+        if (loadCount === BREAK_AT) {
+            breakBridge(); // 💥 COLLAPSE
+        }
     };
 
     const interval = setInterval(spawnLoad, 1200);
 
-    // ===== LOAD REMOVE (USER INTERACTION) =====
+    // ===== LOAD REMOVE =====
     const mouse = Mouse.create(render.canvas);
     const mouseConstraint = MouseConstraint.create(engine, {
         mouse,
@@ -2468,20 +2499,9 @@ export function BridgeStressTestDemo({ engine, render }) {
         });
     });
 
-    // ===== BREAK ONLY AT 10 LOADS =====
-    const breaker = () => {
-        if (loadCount < BREAK_AT) return;
-
-        constraints.forEach(c => World.remove(engine.world, c));
-        Events.off(engine, "afterUpdate", breaker);
-    };
-
-    Events.on(engine, "afterUpdate", breaker);
-
     // ===== CLEANUP =====
     return () => {
         clearInterval(interval);
-        Events.off(engine, "afterUpdate", breaker);
         Composite.clear(engine.world, false);
     };
 }
@@ -2508,7 +2528,7 @@ export function VehicleSuspensionDemo({ engine, render }) {
         let yOffset = 0;
 
         if (type < 0.6) height = 35; // flat
-        else { 
+        else {
             height = 45 + Math.random() * 5; // gentle bump 45–50px
             yOffset = height / 4;
         }
@@ -2558,9 +2578,9 @@ export function VehicleSuspensionDemo({ engine, render }) {
     );
 
     // ================== SUSPENSION ==================
-    const suspension = { 
+    const suspension = {
         stiffness: 0.75, // softer for smooth bump feel
-        damping: 0.25, 
+        damping: 0.25,
         length: wheelOffsetY + 6 // slightly longer travel
     };
 
@@ -2591,7 +2611,7 @@ export function VehicleSuspensionDemo({ engine, render }) {
     const roadSpeed = 3; // road movement speed when user presses keys
 
     Events.on(engine, "beforeUpdate", () => {
-        const driveForce = 0.020;
+        const driveForce = 0.015;
 
         let userMoving = false;
 
@@ -2631,6 +2651,444 @@ export function VehicleSuspensionDemo({ engine, render }) {
     return () => {
         window.removeEventListener("keydown", down);
         window.removeEventListener("keyup", up);
+        Composite.clear(engine.world, false);
+    };
+}
+
+export function MagneticFieldPhysicsDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
+
+    // ===== RESET =====
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 0;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ===== MODE =====
+    let isAttract = true; // 🔁 toggle mode
+
+    // ===== MAGNETS =====
+    const magnetLeft = Bodies.circle(w / 2 - 150, h / 2, 30, {
+        label: "magnet",
+        inertia: Infinity,        // ❄ no rotation
+        mass: 50,                 // 🔥 heavy magnet
+        frictionAir: 0.05,
+        render: { fillStyle: "#2563eb" }
+    });
+
+    const magnetRight = Bodies.circle(w / 2 + 150, h / 2, 30, {
+        label: "magnet",
+        inertia: Infinity,
+        mass: 50,
+        frictionAir: 0.05,
+        render: { fillStyle: "#dc2626" }
+    });
+
+    World.add(engine.world, [magnetLeft, magnetRight]);
+
+    // ===== IRON PARTICLES =====
+    const particles = [];
+    const COUNT = 200;
+
+    for (let i = 0; i < COUNT; i++) {
+        const p = Bodies.circle(
+            Math.random() * w,
+            Math.random() * h,
+            4,
+            {
+                frictionAir: 0.03,
+                restitution: 0.2,
+                label: "iron",
+                render: { fillStyle: "#e5e7eb" }
+            }
+        );
+        particles.push(p);
+    }
+
+    World.add(engine.world, particles);
+
+    // ===== MAGNETIC FORCE =====
+    const MAGNET_STRENGTH = 0.00018;
+
+    Events.on(engine, "beforeUpdate", () => {
+        particles.forEach(p => {
+            [magnetLeft, magnetRight].forEach(m => {
+                const dx = m.position.x - p.position.x;
+                const dy = m.position.y - p.position.y;
+                const distSq = dx * dx + dy * dy + 80;
+
+                let direction = 1;
+
+                // 🔁 repel / attract logic
+                if (!isAttract) direction = -1;
+
+                const force = direction * MAGNET_STRENGTH / distSq;
+
+                Body.applyForce(p, p.position, {
+                    x: dx * force,
+                    y: dy * force
+                });
+            });
+        });
+    });
+
+    // ===== DRAG MAGNETS =====
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.9,
+            damping: 0.1,
+            render: { visible: false }
+        }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // ===== TOGGLE MODE (SPACE KEY) =====
+    const toggleMode = e => {
+        if (e.code === "Space") {
+            isAttract = !isAttract;
+
+            magnetLeft.render.fillStyle = isAttract ? "#2563eb" : "#7c3aed";
+            magnetRight.render.fillStyle = isAttract ? "#dc2626" : "#7c3aed";
+        }
+    };
+
+    window.addEventListener("keydown", toggleMode);
+
+    // ===== BOUNDS =====
+    const walls = [
+        Bodies.rectangle(w / 2, -20, w, 40, { isStatic: true }),
+        Bodies.rectangle(w / 2, h + 20, w, 40, { isStatic: true }),
+        Bodies.rectangle(-20, h / 2, 40, h, { isStatic: true }),
+        Bodies.rectangle(w + 20, h / 2, 40, h, { isStatic: true })
+    ];
+    World.add(engine.world, walls);
+
+    // ===== CLEANUP =====
+    return () => {
+        window.removeEventListener("keydown", toggleMode);
+        Events.off(engine, "beforeUpdate");
+        Composite.clear(engine.world, false);
+    };
+}
+
+export function ClothWindZoneDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Constraint,
+        Composites,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
+
+    // ===== RESET =====
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ===== GROUND =====
+    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
+        isStatic: true,
+        friction: 1
+    });
+    World.add(engine.world, ground);
+
+    // ===== CLOTH (SOFT BODY GRID) =====
+    const cloth = Composites.softBody(
+        w / 2 - 200,
+        80,
+        18,       // columns
+        12,       // rows
+        6,
+        6,
+        false,
+        10,
+        {
+            friction: 0.1,
+            frictionAir: 0.02,
+            restitution: 0.2,
+            render: { fillStyle: "#38bdf8" }
+        },
+        {
+            stiffness: 0.9,
+            render: { visible: false }
+        }
+    );
+
+    // pin top row (fixed cloth)
+    cloth.bodies.forEach((b, i) => {
+        if (i < 18) Body.setStatic(b, true);
+    });
+
+    World.add(engine.world, cloth);
+
+    // ===== OBSTACLES =====
+    const ball = Bodies.circle(w / 2 + 200, h / 2, 40, {
+        restitution: 0.8,
+        render: { fillStyle: "#f97316" }
+    });
+    World.add(engine.world, ball);
+
+    // ===== WIND ZONES =====
+    const windZones = [
+        {
+            x: w * 0.2,
+            width: w * 0.3,
+            force: 0.00035   // left → right
+        },
+        {
+            x: w * 0.55,
+            width: w * 0.35,
+            force: -0.00025  // right → left
+        }
+    ];
+
+    // ===== WIND LOGIC =====
+    Events.on(engine, "beforeUpdate", () => {
+        cloth.bodies.forEach((b, i) => {
+            if (b.isStatic) return;
+
+            windZones.forEach(zone => {
+                if (
+                    b.position.x > zone.x &&
+                    b.position.x < zone.x + zone.width
+                ) {
+                    const wave =
+                        Math.sin(engine.timing.timestamp * 0.005 + i) * 0.5;
+
+                    Body.applyForce(b, b.position, {
+                        x: zone.force * (1 + wave),
+                        y: 0
+                    });
+                }
+            });
+        });
+    });
+
+    // ===== MOUSE DRAG =====
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.15,
+            render: { visible: false }
+        }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // ===== CLEANUP =====
+    return () => {
+        Composite.clear(engine.world, false);
+    };
+}
+
+export function GlassShatterDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
+
+    // ===== RESET =====
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ===== GROUND =====
+    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
+        isStatic: true,
+        friction: 1
+    });
+    World.add(engine.world, ground);
+
+    // ===== GLASS PANEL =====
+    const glassX = w / 2;
+    const glassY = h / 2;
+    const glassW = 420;
+    const glassH = 220;
+
+    let glassIntact = true;
+
+    const glass = Bodies.rectangle(glassX, glassY, glassW, glassH, {
+        isStatic: true,
+        label: "glass",
+        restitution: 0.02,
+        friction: 0.9,
+        render: {
+            fillStyle: "rgba(180,220,255,0.35)",
+            strokeStyle: "#93c5fd",
+            lineWidth: 2
+        }
+    });
+
+    World.add(engine.world, glass);
+
+    // ===== THROW OBJECT =====
+    const spawnBall = () => {
+        const ball = Bodies.circle(
+            120,
+            h - 120,
+            26,
+            {
+                label: "ball",
+                density: 0.04,
+                restitution: 0.2,
+                friction: 0.6,
+                render: { fillStyle: "#475569" }
+            }
+        );
+
+        Body.setVelocity(ball, { x: 18, y: -6 });
+        World.add(engine.world, ball);
+    };
+
+    // ===== SHATTER GLASS =====
+    const shatterGlass = (impactPoint, impactVelocity) => {
+        if (!glassIntact) return;
+        glassIntact = false;
+
+        World.remove(engine.world, glass);
+
+        const shards = [];
+        const SHARD_COUNT = 70;
+
+        for (let i = 0; i < SHARD_COUNT; i++) {
+            const cx = glassX - glassW / 2 + Math.random() * glassW;
+            const cy = glassY - glassH / 2 + Math.random() * glassH;
+
+            const dx = cx - impactPoint.x;
+            const dy = cy - impactPoint.y;
+            const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+
+            const size = Math.max(7, Math.min(22, dist * 0.12));
+
+            const sides = 3 + Math.floor(Math.random() * 4);
+            const verts = [];
+
+            for (let a = 0; a < sides; a++) {
+                const angle =
+                    (Math.PI * 2 * a) / sides +
+                    Math.random() * 0.5;
+
+                verts.push({
+                    x: cx + Math.cos(angle) * size * (0.6 + Math.random() * 0.4),
+                    y: cy + Math.sin(angle) * size * (0.6 + Math.random() * 0.4)
+                });
+            }
+
+            const shard = Bodies.fromVertices(
+                cx,
+                cy,
+                verts,
+                {
+                    restitution: 0.03,
+                    friction: 0.8,
+                    frictionAir: 0.08,   // 🔑 blast killer
+                    density: 0.0025,
+                    render: {
+                        fillStyle: "rgba(200,230,255,0.55)",
+                        strokeStyle: "#bfdbfe",
+                        lineWidth: 1
+                    }
+                },
+                true
+            );
+
+            // ===== VERY SUBTLE IMPULSE =====
+            const distanceFactor = Math.min(dist / 180, 1);
+            const forceMag =
+                impactVelocity * 0.00008 * (1 - distanceFactor);
+
+            Body.applyForce(shard, shard.position, {
+                x: (dx / dist) * forceMag,
+                y: (dy / dist) * forceMag
+            });
+
+            shards.push(shard);
+        }
+
+        World.add(engine.world, shards);
+    };
+
+    // ===== COLLISION DETECTION =====
+    Events.on(engine, "collisionStart", event => {
+        if (!glassIntact) return;
+
+        event.pairs.forEach(pair => {
+            const { bodyA, bodyB } = pair;
+
+            const glassBody =
+                bodyA.label === "glass"
+                    ? bodyA
+                    : bodyB.label === "glass"
+                    ? bodyB
+                    : null;
+
+            const other =
+                glassBody === bodyA ? bodyB : bodyA;
+
+            if (!glassBody || !other) return;
+
+            const speed = other.speed;
+
+            if (speed > 6) {
+                glass.render.fillStyle = "rgba(253,224,71,0.45)";
+            }
+            if (speed > 9) {
+                glass.render.fillStyle = "rgba(249,115,22,0.5)";
+            }
+
+            if (speed > 11) {
+                shatterGlass(pair.collision.supports[0], speed);
+            }
+        });
+    });
+
+    // ===== MOUSE =====
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.2,
+            render: { visible: false }
+        }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    Events.on(mouseConstraint, "mousedown", () => {
+        if (glassIntact) spawnBall();
+    });
+
+    // ===== CLEANUP =====
+    return () => {
         Composite.clear(engine.world, false);
     };
 }
