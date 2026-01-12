@@ -2791,112 +2791,132 @@ export function ClothWindZoneDemo({ engine, render }) {
         World,
         Composite,
         Constraint,
-        Composites,
         Events,
         Mouse,
-        MouseConstraint
+        MouseConstraint,
+        Query
     } = Matter;
 
-    // ===== RESET =====
     Composite.clear(engine.world, false);
     engine.gravity.y = 1;
 
     const w = render.options.width;
     const h = render.options.height;
+    const ctx = render.context;
 
-    // ===== GROUND =====
-    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
-        isStatic: true,
-        friction: 1
-    });
-    World.add(engine.world, ground);
+    // ===== GRID CONFIG =====
+    const COLS = 22;
+    const ROWS = 14;
+    const GAP = 26;
+    const START_X = w / 2 - (COLS * GAP) / 2;
+    const START_Y = 80;
 
-    // ===== CLOTH (SOFT BODY GRID) =====
-    const cloth = Composites.softBody(
-        w / 2 - 200,
-        80,
-        18,       // columns
-        12,       // rows
-        6,
-        6,
-        false,
-        10,
-        {
-            friction: 0.1,
-            frictionAir: 0.02,
-            restitution: 0.2,
-            render: { fillStyle: "#38bdf8" }
-        },
-        {
-            stiffness: 0.9,
-            render: { visible: false }
-        }
-    );
+    const nodes = [];
+    const links = [];
 
-    // pin top row (fixed cloth)
-    cloth.bodies.forEach((b, i) => {
-        if (i < 18) Body.setStatic(b, true);
-    });
-
-    World.add(engine.world, cloth);
-
-    // ===== OBSTACLES =====
-    const ball = Bodies.circle(w / 2 + 200, h / 2, 40, {
-        restitution: 0.8,
-        render: { fillStyle: "#f97316" }
-    });
-    World.add(engine.world, ball);
-
-    // ===== WIND ZONES =====
-    const windZones = [
-        {
-            x: w * 0.2,
-            width: w * 0.3,
-            force: 0.00035   // left → right
-        },
-        {
-            x: w * 0.55,
-            width: w * 0.35,
-            force: -0.00025  // right → left
-        }
-    ];
-
-    // ===== WIND LOGIC =====
-    Events.on(engine, "beforeUpdate", () => {
-        cloth.bodies.forEach((b, i) => {
-            if (b.isStatic) return;
-
-            windZones.forEach(zone => {
-                if (
-                    b.position.x > zone.x &&
-                    b.position.x < zone.x + zone.width
-                ) {
-                    const wave =
-                        Math.sin(engine.timing.timestamp * 0.005 + i) * 0.5;
-
-                    Body.applyForce(b, b.position, {
-                        x: zone.force * (1 + wave),
-                        y: 0
-                    });
+    // ===== CREATE NODES =====
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            const node = Bodies.circle(
+                START_X + x * GAP,
+                START_Y + y * GAP,
+                2,
+                {
+                    frictionAir: 0.01,
+                    density: 0.001,
+                    inertia: Infinity,
+                    render: { visible: false }
                 }
-            });
-        });
+            );
+
+            if (y === 0) Body.setStatic(node, true);
+            nodes.push(node);
+        }
+    }
+
+    // ===== PHYSICS LINKS (INVISIBLE) =====
+    const id = (x, y) => y * COLS + x;
+
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            if (x < COLS - 1)
+                links.push(
+                    Constraint.create({
+                        bodyA: nodes[id(x, y)],
+                        bodyB: nodes[id(x + 1, y)],
+                        length: GAP,
+                        stiffness: 0.9,
+                        render: { visible: false }
+                    })
+                );
+
+            if (y < ROWS - 1)
+                links.push(
+                    Constraint.create({
+                        bodyA: nodes[id(x, y)],
+                        bodyB: nodes[id(x, y + 1)],
+                        length: GAP,
+                        stiffness: 0.9,
+                        render: { visible: false }
+                    })
+                );
+        }
+    }
+
+    World.add(engine.world, [...nodes, ...links]);
+
+    // ===== CUSTOM STRAIGHT RENDER =====
+    Events.on(render, "afterRender", () => {
+        ctx.beginPath();
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1;
+
+        for (let y = 0; y < ROWS; y++) {
+            for (let x = 0; x < COLS; x++) {
+                const a = nodes[id(x, y)];
+
+                if (x < COLS - 1) {
+                    const b = nodes[id(x + 1, y)];
+                    ctx.moveTo(a.position.x, a.position.y);
+                    ctx.lineTo(b.position.x, b.position.y);
+                }
+
+                if (y < ROWS - 1) {
+                    const b = nodes[id(x, y + 1)];
+                    ctx.moveTo(a.position.x, a.position.y);
+                    ctx.lineTo(b.position.x, b.position.y);
+                }
+            }
+        }
+
+        ctx.stroke();
     });
 
-    // ===== MOUSE DRAG =====
+    // ===== MOUSE INTERACTION (REAL FLOW) =====
     const mouse = Mouse.create(render.canvas);
     const mouseConstraint = MouseConstraint.create(engine, {
         mouse,
-        constraint: {
-            stiffness: 0.15,
-            render: { visible: false }
-        }
+        constraint: { render: { visible: false } }
     });
 
     World.add(engine.world, mouseConstraint);
     render.mouse = mouse;
 
-    // ===== CLEANUP =====
+    Events.on(mouseConstraint, "mousemove", e => {
+        if (!mouseConstraint.body) return;
+
+        const pos = e.mouse.position;
+        const near = Query.point(nodes, pos);
+
+        near.forEach(n => {
+            if (n.isStatic) return;
+            Body.applyForce(n, n.position, {
+                x: (pos.x - n.position.x) * 0.00001,
+                y: (pos.y - n.position.y) * 0.00001
+            });
+        });
+    });
+
     return () => {
         Composite.clear(engine.world, false);
     };
@@ -3089,6 +3109,287 @@ export function GlassShatterDemo({ engine, render }) {
 
     // ===== CLEANUP =====
     return () => {
+        Composite.clear(engine.world, false);
+    };
+}
+
+export function WindTunnelLabDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Events,
+        Mouse,
+        MouseConstraint
+    } = Matter;
+
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 0;
+
+    const w = render.options.width;
+    const h = render.options.height;
+    const ctx = render.context;
+
+    // ===== BOUNDARY =====
+    World.add(engine.world, [
+        Bodies.rectangle(w / 2, -30, w, 60, { isStatic: true }),
+        Bodies.rectangle(w / 2, h + 30, w, 60, { isStatic: true }),
+        Bodies.rectangle(-30, h / 2, 60, h, { isStatic: true }),
+        Bodies.rectangle(w + 30, h / 2, 60, h, { isStatic: true })
+    ]);
+
+    // ===== OBJECTS =====
+    const paper = Bodies.rectangle(200, 200, 80, 40, {
+        density: 0.0004,
+        frictionAir: 0.02,
+        render: { fillStyle: "#f8fafc" }
+    });
+
+    const block = Bodies.rectangle(200, 340, 40, 40, {
+        density: 0.004,
+        frictionAir: 0.01,
+        render: { fillStyle: "#475569" }
+    });
+
+    World.add(engine.world, [paper, block]);
+
+    // ===== ZONES =====
+    const windOn = { value: false };
+
+    const laminar = { x: 320, y: 80, w: 360, h: 420 };
+    const turbulent = { x: 720, y: 80, w: 360, h: 420 };
+
+    let t = 0;
+
+    Events.on(engine, "beforeUpdate", () => {
+        if (!windOn.value) return;
+        t += 0.02;
+
+        [paper, block].forEach(b => {
+            const area = b.bounds.max.x - b.bounds.min.x;
+
+            // Laminar = straight push
+            if (
+                b.position.x > laminar.x &&
+                b.position.x < laminar.x + laminar.w
+            ) {
+                Body.applyForce(b, b.position, {
+                    x: 0.00004 * area,
+                    y: 0
+                });
+            }
+
+            // Turbulent = shake
+            if (
+                b.position.x > turbulent.x &&
+                b.position.x < turbulent.x + turbulent.w
+            ) {
+                Body.applyForce(b, b.position, {
+                    x: 0.00003 * area,
+                    y: Math.sin(t + b.position.y * 0.05) * 0.00002
+                });
+            }
+        });
+    });
+
+    // ===== VISUAL GUIDE =====
+    Events.on(render, "afterRender", () => {
+        ctx.save();
+
+        // Laminar box
+        ctx.strokeStyle = "rgba(59,130,246,0.8)";
+        ctx.strokeRect(laminar.x, laminar.y, laminar.w, laminar.h);
+        ctx.fillStyle = "#3b82f6";
+        ctx.fillText("LAMINAR WIND →", laminar.x + 10, laminar.y - 10);
+
+        // Turbulent box
+        ctx.strokeStyle = "rgba(239,68,68,0.8)";
+        ctx.strokeRect(turbulent.x, turbulent.y, turbulent.w, turbulent.h);
+        ctx.fillStyle = "#ef4444";
+        ctx.fillText("TURBULENT WIND", turbulent.x + 10, turbulent.y - 10);
+
+        // Status
+        ctx.fillStyle = windOn.value ? "#22c55e" : "#f87171";
+        ctx.fillText(
+            windOn.value ? "WIND: ON (double-click to stop)" : "WIND: OFF (double-click to start)",
+            20,
+            30
+        );
+
+        ctx.restore();
+    });
+
+    // ===== MOUSE =====
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: { render: { visible: false } }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    render.canvas.addEventListener("dblclick", () => {
+        windOn.value = !windOn.value;
+    });
+
+    return () => Composite.clear(engine.world, false);
+}
+
+export function CannonDefenseDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Constraint,
+        Events,
+        Mouse,
+        MouseConstraint,
+        Vector
+    } = Matter;
+
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ================= GROUND =================
+    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
+        isStatic: true,
+        friction: 1
+    });
+    World.add(engine.world, ground);
+
+    // ================= CANNON BASE =================
+    const cannonBase = Bodies.rectangle(140, h - 80, 120, 60, {
+        isStatic: true,
+        render: { fillStyle: "#1e293b" }
+    });
+
+    // ================= CANNON BARREL =================
+    const cannonBarrel = Bodies.rectangle(190, h - 110, 140, 24, {
+        isStatic: true,
+        render: { fillStyle: "#334155" }
+    });
+
+    World.add(engine.world, [cannonBase, cannonBarrel]);
+
+    // ================= DRAG AIM SYSTEM =================
+    let isDragging = false;
+    let dragStart = null;
+    let currentPower = 8;
+    const MAX_POWER = 0.9; // 🔥 SIEGE LEVEL
+
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: { stiffness: 0.1, render: { visible: false } }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    Events.on(mouseConstraint, "mousedown", e => {
+        isDragging = true;
+        dragStart = { ...e.mouse.position };
+    });
+
+    Events.on(mouseConstraint, "mousemove", e => {
+        if (!isDragging) return;
+
+        const dx = dragStart.x - e.mouse.position.x;
+        const dy = dragStart.y - e.mouse.position.y;
+
+        const angle = Math.atan2(dy, dx);
+        Body.setAngle(cannonBarrel, angle);
+
+        const dist = Math.min(120, Vector.magnitude({ x: dx, y: dy }));
+        currentPower = (dist / 120) * MAX_POWER;
+    });
+
+    Events.on(mouseConstraint, "mouseup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        // ===== FIRE =====
+        const angle = cannonBarrel.angle;
+        const ball = Bodies.circle(
+    cannonBarrel.position.x + Math.cos(angle) * 90,
+    cannonBarrel.position.y + Math.sin(angle) * 90,
+    20,
+    {
+        density: 0.01,        // 🔥 HEAVIER BALL
+        friction: 0.9,
+        restitution: 0.02,
+        frictionAir: 0.015,
+        label: "ball",
+        render: { fillStyle: "#020617" }
+    }
+);
+
+
+        World.add(engine.world, ball);
+
+        Body.applyForce(ball, ball.position, {
+            x: Math.cos(angle) * currentPower,
+            y: Math.sin(angle) * currentPower
+        });
+
+        currentPower = 0;
+    });
+
+    // ================= ENEMY SYSTEM =================
+    let gameOver = false;
+
+    const spawnEnemy = () => {
+    if (gameOver) return;
+
+    const enemy = Bodies.rectangle(
+        cannonBase.position.x + 380,   // 👈 cannon ke SAMNE
+        h - 120,
+        50,
+        50,
+        {
+            density: 0.03,
+            friction: 0.9,
+            restitution: 0.05,
+            label: "enemy",
+            render: { fillStyle: "#7c2d12" }
+        }
+    );
+
+    // 👇 slow but deadly approach
+    Body.setVelocity(enemy, { x: -1.6, y: 0 });
+
+    World.add(engine.world, enemy);
+};
+
+
+    const enemyInterval = setInterval(spawnEnemy, 1600);
+
+    // ================= COLLISION (GAME OVER) =================
+    Events.on(engine, "collisionStart", e => {
+        e.pairs.forEach(p => {
+            const a = p.bodyA;
+            const b = p.bodyB;
+
+            if (
+                (a.label === "enemy" && b === cannonBase) ||
+                (b.label === "enemy" && a === cannonBase)
+            ) {
+                gameOver = true;
+                engine.timing.timeScale = 0.3; // slow-mo death
+                clearInterval(enemyInterval);
+            }
+        });
+    });
+
+    // ================= CLEANUP =================
+    return () => {
+        clearInterval(enemyInterval);
         Composite.clear(engine.world, false);
     };
 }
