@@ -3067,8 +3067,8 @@ export function GlassShatterDemo({ engine, render }) {
                 bodyA.label === "glass"
                     ? bodyA
                     : bodyB.label === "glass"
-                    ? bodyB
-                    : null;
+                        ? bodyB
+                        : null;
 
             const other =
                 glassBody === bodyA ? bodyB : bodyA;
@@ -3317,18 +3317,19 @@ export function CannonDefenseDemo({ engine, render }) {
         // ===== FIRE =====
         const angle = cannonBarrel.angle;
         const ball = Bodies.circle(
-    cannonBarrel.position.x + Math.cos(angle) * 90,
-    cannonBarrel.position.y + Math.sin(angle) * 90,
-    20,
-    {
-        density: 0.01,        // 🔥 HEAVIER BALL
-        friction: 0.9,
-        restitution: 0.02,
-        frictionAir: 0.015,
-        label: "ball",
-        render: { fillStyle: "#020617" }
-    }
-);
+            cannonBarrel.position.x + Math.cos(angle) * 90,
+            cannonBarrel.position.y + Math.sin(angle) * 90,
+            20,
+            {
+                density: 0.09,        // 🔥 HEAVIER BALL
+                friction: 0.9,
+                restitution: 0.02,
+                frictionAir: 0.015,
+                label: "ball",
+                render: { fillStyle: "#020617" }
+            }
+        );
+
 
 
         World.add(engine.world, ball);
@@ -3338,54 +3339,64 @@ export function CannonDefenseDemo({ engine, render }) {
             y: Math.sin(angle) * currentPower
         });
 
-        currentPower = 0;
+        // currentPower = 0;
     });
 
     // ================= ENEMY SYSTEM =================
     let gameOver = false;
 
     const spawnEnemy = () => {
-    if (gameOver) return;
+        if (gameOver) return;
 
-    const enemy = Bodies.rectangle(
-        cannonBase.position.x + 380,   // 👈 cannon ke SAMNE
-        h - 120,
-        50,
-        50,
-        {
-            density: 0.03,
-            friction: 0.9,
-            restitution: 0.05,
-            label: "enemy",
-            render: { fillStyle: "#7c2d12" }
-        }
-    );
+        const enemy = Bodies.rectangle(
+            cannonBase.position.x + 380,   // 👈 cannon ke SAMNE
+            h - 120,
+            50,
+            50,
+            {
+                density: 0.03,
+                friction: 0.9,
+                restitution: 0.05,
+                label: "enemy",
+                render: { fillStyle: "#7c2d12" }
+            }
+        );
 
-    // 👇 slow but deadly approach
-    Body.setVelocity(enemy, { x: -1.6, y: 0 });
+        // 👇 slow but deadly approach
+        Body.setVelocity(enemy, { x: -1.6, y: 0 });
 
-    World.add(engine.world, enemy);
-};
-
+        World.add(engine.world, enemy);
+    };
 
     const enemyInterval = setInterval(spawnEnemy, 1600);
 
     // ================= COLLISION (GAME OVER) =================
     Events.on(engine, "collisionStart", e => {
-        e.pairs.forEach(p => {
-            const a = p.bodyA;
-            const b = p.bodyB;
+        e.pairs.forEach(pair => {
+            const { bodyA, bodyB } = pair;
 
-            if (
-                (a.label === "enemy" && b === cannonBase) ||
-                (b.label === "enemy" && a === cannonBase)
-            ) {
-                gameOver = true;
-                engine.timing.timeScale = 0.3; // slow-mo death
-                clearInterval(enemyInterval);
+            const ball =
+                bodyA.label === "ball" ? bodyA :
+                    bodyB.label === "ball" ? bodyB : null;
+
+            const enemy =
+                bodyA.label === "enemy" ? bodyA :
+                    bodyB.label === "enemy" ? bodyB : null;
+
+            if (!ball || !enemy) return;
+
+            const speed = Matter.Vector.magnitude(ball.velocity);
+
+            if (speed > 6) {
+                // 💥 destroy enemy
+                World.remove(engine.world, enemy);
+
+                // 💣 destroy cannon ball also
+                World.remove(engine.world, ball);
             }
         });
     });
+
 
     // ================= CLEANUP =================
     return () => {
@@ -3393,3 +3404,280 @@ export function CannonDefenseDemo({ engine, render }) {
         Composite.clear(engine.world, false);
     };
 }
+
+export function BalanceGameDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Events,
+        Mouse,
+        MouseConstraint,
+        Vector
+    } = Matter;
+
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ================= GROUND (FAIL ZONE) =================
+    const ground = Bodies.rectangle(w / 2, h + 40, w, 80, {
+        isStatic: true,
+        label: "ground",
+        render: { fillStyle: "#020617" }
+    });
+
+    World.add(engine.world, ground);
+
+    // ================= BALANCE BEAM =================
+    const beam = Bodies.rectangle(w / 2, h - 160, 360, 10, {
+        isStatic: true,
+        friction: 0.9,
+        render: { fillStyle: "#e5e7eb" }
+    });
+
+    World.add(engine.world, beam);
+
+    // ================= OBJECT SYSTEM =================
+    let objects = [];
+    let gameOver = false;
+    let score = 0;
+
+    const spawnObject = () => {
+        if (gameOver) return;
+
+        const isCircle = Math.random() > 0.5;
+
+        const body = isCircle
+            ? Bodies.circle(w / 2 + (Math.random() * 80 - 40), 40, 18, {
+                  density: 0.02,
+                  friction: 0.8,
+                  restitution: 0.1
+              })
+            : Bodies.rectangle(w / 2 + (Math.random() * 80 - 40), 40, 34, 24, {
+                  density: 0.02,
+                  friction: 0.9,
+                  restitution: 0.05
+              });
+
+        body.label = "object";
+        body.render.fillStyle = "#38bdf8";
+
+        objects.push(body);
+        World.add(engine.world, body);
+        score++;
+    };
+
+    let spawnInterval = setInterval(spawnObject, 1400);
+
+    // ================= MOUSE CONTROLS =================
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.2,
+            render: { visible: false }
+        }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // ================= BEAM TILT CONTROL =================
+    Events.on(engine, "beforeUpdate", () => {
+        if (gameOver) return;
+
+        const mx = mouse.position.x;
+        const delta = (mx - w / 2) / (w / 2);
+
+        const targetAngle = delta * 0.25; // max tilt
+        Body.setAngle(beam, targetAngle);
+    });
+
+    // ================= GAME OVER LOGIC =================
+    Events.on(engine, "collisionStart", e => {
+        e.pairs.forEach(pair => {
+            const a = pair.bodyA;
+            const b = pair.bodyB;
+
+            if (
+                (a.label === "object" && b.label === "ground") ||
+                (b.label === "object" && a.label === "ground")
+            ) {
+                gameOver = true;
+                clearInterval(spawnInterval);
+
+                engine.timing.timeScale = 0.4; // dramatic slow
+            }
+        });
+    });
+
+    // ================= CLEANUP =================
+    return () => {
+        clearInterval(spawnInterval);
+        Composite.clear(engine.world, false);
+    };
+}
+
+export function WaterFloatingDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Constraint,
+        Events,
+        Mouse,
+        MouseConstraint,
+        Vertices
+    } = Matter;
+
+    Composite.clear(engine.world, false);
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    // ================= WATER CONFIG =================
+    const WATER_Y = h * 0.55;
+    const WATER_SEGMENTS = 40;
+    const WATER_WIDTH = w / WATER_SEGMENTS;
+    const WATER_STIFFNESS = 0.04;
+    const WATER_DAMPING = 0.12;
+
+    // ================= GROUND =================
+    const ground = Bodies.rectangle(w / 2, h + 50, w, 100, {
+        isStatic: true
+    });
+    World.add(engine.world, ground);
+
+    // ================= WATER SURFACE =================
+    const waterParticles = [];
+    const waterConstraints = [];
+
+    for (let i = 0; i <= WATER_SEGMENTS; i++) {
+        const p = Bodies.circle(i * WATER_WIDTH, WATER_Y, 4, {
+            isStatic: i === 0 || i === WATER_SEGMENTS,
+            collisionFilter: { mask: 0 },
+            render: { visible: false }
+        });
+        waterParticles.push(p);
+
+        if (i > 0) {
+            waterConstraints.push(
+                Constraint.create({
+                    bodyA: waterParticles[i - 1],
+                    bodyB: p,
+                    stiffness: WATER_STIFFNESS,
+                    damping: WATER_DAMPING
+                })
+            );
+        }
+    }
+
+    World.add(engine.world, [...waterParticles, ...waterConstraints]);
+
+    // ================= WATER BODY (VISUAL ONLY) =================
+    const waterBody = Bodies.rectangle(w / 2, (h + WATER_Y) / 2, w, h, {
+        isStatic: true,
+        collisionFilter: { mask: 0 },
+        render: {
+            fillStyle: "#1e3a8a",
+            opacity: 0.85
+        }
+    });
+    World.add(engine.world, waterBody);
+
+    // ================= FLOATING OBJECTS =================
+    const floatingObjects = [];
+
+    function randomPolygon(x, y) {
+        const points = [];
+        const sides = 5 + Math.floor(Math.random() * 3);
+        const radius = 20 + Math.random() * 15;
+
+        for (let i = 0; i < sides; i++) {
+            const angle = (Math.PI * 2 * i) / sides;
+            points.push({
+                x: Math.cos(angle) * (radius + Math.random() * 5),
+                y: Math.sin(angle) * (radius + Math.random() * 5)
+            });
+        }
+
+        return Bodies.fromVertices(x, y, points, {
+            density: 0.002,
+            friction: 0.9,
+            frictionAir: 0.02,
+            restitution: 0.1,
+            render: {
+                fillStyle: "#78350f"
+            }
+        }, true);
+    }
+
+    for (let i = 0; i < 6; i++) {
+        const obj = randomPolygon(
+            w * 0.3 + Math.random() * w * 0.4,
+            WATER_Y - 150 - Math.random() * 100
+        );
+        floatingObjects.push(obj);
+    }
+
+    World.add(engine.world, floatingObjects);
+
+    // ================= BUOYANCY + DRAG =================
+    Events.on(engine, "beforeUpdate", () => {
+        floatingObjects.forEach(obj => {
+            const depth = WATER_Y - obj.position.y;
+
+            if (depth < 0) {
+                // Buoyancy (push up)
+                const forceMagnitude = Math.min(Math.abs(depth) * 0.0006, 0.02);
+                Body.applyForce(obj, obj.position, {
+                    x: 0,
+                    y: -forceMagnitude
+                });
+
+                // Water drag (stability)
+                Body.setVelocity(obj, {
+                    x: obj.velocity.x * 0.98,
+                    y: obj.velocity.y * 0.9
+                });
+
+                Body.setAngularVelocity(obj, obj.angularVelocity * 0.95);
+
+                // Ripple effect
+                const index = Math.floor(obj.position.x / WATER_WIDTH);
+                if (waterParticles[index]) {
+                    Body.applyForce(
+                        waterParticles[index],
+                        waterParticles[index].position,
+                        { x: 0, y: -0.002 }
+                    );
+                }
+            }
+        });
+    });
+
+    // ================= MOUSE =================
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+        mouse,
+        constraint: {
+            stiffness: 0.15,
+            render: { visible: false }
+        }
+    });
+
+    World.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // ================= CLEANUP =================
+    return () => {
+        Composite.clear(engine.world, false);
+    };
+}
+

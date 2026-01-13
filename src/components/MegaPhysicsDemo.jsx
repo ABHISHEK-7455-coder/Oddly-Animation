@@ -12,7 +12,7 @@ import {
   CatapultDemo, JengaPhysicsDemo, SharedPhysicsPlaygroundDemo,
   BridgeStressTestDemo, VehicleSuspensionDemo, MagneticFieldPhysicsDemo,
   ClothWindZoneDemo, GlassShatterDemo, WindTunnelLabDemo,
-  CannonDefenseDemo
+  CannonDefenseDemo, BalanceGameDemo, WaterFloatingDemo
 } from './demos';
 import './MatterJs.css';
 
@@ -221,6 +221,8 @@ export default function MegaPhysicsDemo() {
       case 'glass shatter': GlassShatterDemo({ engine, render }); break;
       case 'wind tunnel': WindTunnelLabDemo({ engine, render }); break;
       case 'cannon defence': CannonDefenseDemo({ engine, render }); break;
+      case 'balance game': BalanceGameDemo({ engine, render }); break;
+      case 'water floating': WaterFloatingDemo({ engine, render }); break;
       default: break;
     }
   };
@@ -258,7 +260,8 @@ export default function MegaPhysicsDemo() {
             ['jenga physics', 'Jenga Physics'], ['bridge stress', 'Bridge Stress'],
             ['vehicle suspension','Vehicle Suspension'], ['magnetic field','Magnetic Field'],
             ['cloth simulation','Cloth Simulation'],['glass shatter','Glass Shatter'],
-            ['wind tunnel','Wind Tunnel'], ['cannon defence', 'Cannon Defence']
+            ['wind tunnel','Wind Tunnel'], ['cannon defence', 'Cannon Defence'],
+            ['balance game', 'Balance Game'], ['water floating', 'Water Floating']
           ].map(([key, title]) => (
             <div key={key} className="physics-card" onClick={() => setActiveDemo(key)}>
               <canvas
