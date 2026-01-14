@@ -3453,15 +3453,15 @@ export function BalanceGameDemo({ engine, render }) {
 
         const body = isCircle
             ? Bodies.circle(w / 2 + (Math.random() * 80 - 40), 40, 18, {
-                  density: 0.02,
-                  friction: 0.8,
-                  restitution: 0.1
-              })
+                density: 0.02,
+                friction: 0.8,
+                restitution: 0.1
+            })
             : Bodies.rectangle(w / 2 + (Math.random() * 80 - 40), 40, 34, 24, {
-                  density: 0.02,
-                  friction: 0.9,
-                  restitution: 0.05
-              });
+                density: 0.02,
+                friction: 0.9,
+                restitution: 0.05
+            });
 
         body.label = "object";
         body.render.fillStyle = "#38bdf8";
@@ -3681,3 +3681,176 @@ export function WaterFloatingDemo({ engine, render }) {
     };
 }
 
+export function PinballDemo({ engine, render }) {
+    const {
+        Bodies,
+        Body,
+        World,
+        Composite,
+        Constraint,
+        Events
+    } = Matter;
+
+    // ⚠️ clear ONLY world, runner already running
+    Composite.clear(engine.world, false);
+
+    engine.gravity.y = 1;
+
+    const w = render.options.width;
+    const h = render.options.height;
+
+    /* ================= WALLS ================= */
+    const walls = [
+        Bodies.rectangle(w / 2, h + 50, w, 100, { isStatic: true }),
+        Bodies.rectangle(-30, h / 2, 60, h, { isStatic: true }),
+        Bodies.rectangle(w + 30, h / 2, 60, h, { isStatic: true }),
+        Bodies.rectangle(w / 2, -30, w, 60, { isStatic: true })
+    ];
+
+    World.add(engine.world, walls);
+
+    /* ================= BALL ================= */
+    let ball;
+    const spawnBall = () => {
+        ball = Bodies.circle(w - 60, h - 220, 14, {
+            restitution: 0.9,
+            friction: 0.01,
+            frictionAir: 0.001,
+            density: 0.004,
+            label: "ball",
+            render: { fillStyle: "#f87171" }
+        });
+        World.add(engine.world, ball);
+    };
+
+    spawnBall();
+
+    /* ================= BUMPERS ================= */
+    const bumpers = [
+        Bodies.circle(w * 0.3, h * 0.3, 28, {
+            isStatic: true,
+            restitution: 1.4,
+            label: "bumper",
+            render: { fillStyle: "#facc15" }
+        }),
+        Bodies.circle(w * 0.7, h * 0.3, 28, {
+            isStatic: true,
+            restitution: 1.4,
+            label: "bumper",
+            render: { fillStyle: "#facc15" }
+        }),
+        Bodies.circle(w * 0.5, h * 0.5, 28, {
+            isStatic: true,
+            restitution: 1.4,
+            label: "bumper",
+            render: { fillStyle: "#facc15" }
+        })
+    ];
+
+    World.add(engine.world, bumpers);
+
+    /* ================= FLIPPERS ================= */
+    const flippers = [];
+
+    function createFlipper(x, y, isLeft) {
+        const flipper = Bodies.rectangle(x, y, 100, 20, {
+            density: 0.003,
+            friction: 0,
+            frictionAir: 0.02,
+            restitution: 0.3,
+            label: "flipper",
+            render: { fillStyle: "#3b82f6" }
+        });
+
+        const pivot = {
+            x: x + (isLeft ? -40 : 40),
+            y
+        };
+
+        const constraint = Constraint.create({
+            bodyA: flipper,
+            pointB: pivot,
+            length: 0,
+            stiffness: 1
+        });
+
+        World.add(engine.world, [flipper, constraint]);
+        flippers.push({ flipper, isLeft });
+    }
+
+    createFlipper(w / 2 - 90, h - 110, true);
+    createFlipper(w / 2 + 90, h - 110, false);
+
+    /* ================= INPUT ================= */
+    const keys = {};
+
+    const keyDown = (e) => {
+        if (
+            e.code === "Space" ||
+            e.code === "ArrowLeft" ||
+            e.code === "ArrowRight"
+        ) {
+            e.preventDefault();   // 🚫 stop page scroll
+        }
+        keys[e.code] = true;
+    };
+
+    const keyUp = (e) => {
+        if (
+            e.code === "Space" ||
+            e.code === "ArrowLeft" ||
+            e.code === "ArrowRight"
+        ) {
+            e.preventDefault();
+        }
+        keys[e.code] = false;
+    };
+
+    window.addEventListener("keydown", keyDown);
+    window.addEventListener("keyup", keyUp);
+
+    /* ================= UPDATE LOOP ================= */
+    Events.on(engine, "beforeUpdate", () => {
+        // 🎯 FLIPPERS
+        flippers.forEach(f => {
+            const targetAngle = Math.PI / 4;
+            if (f.isLeft) {
+                Body.setAngularVelocity(
+                    f.flipper,
+                    keys["ArrowLeft"] ? -1.5 : 0.2
+                );
+                Body.setAngle(
+                    f.flipper,
+                    Math.max(f.flipper.angle, -targetAngle)
+                );
+            } else {
+                Body.setAngularVelocity(
+                    f.flipper,
+                    keys["ArrowRight"] ? 1.5 : -0.2
+                );
+                Body.setAngle(
+                    f.flipper,
+                    Math.min(f.flipper.angle, targetAngle)
+                );
+            }
+        });
+
+        // 🚀 BALL LAUNCH
+        if (keys["Space"] && ball.velocity.y > -1) {
+            Body.applyForce(ball, ball.position, { x: 0, y: -0.06 });
+        }
+
+        // ♻️ BALL RESET
+        if (ball.position.y > h + 100) {
+            World.remove(engine.world, ball);
+            spawnBall();
+        }
+    });
+
+    /* ================= CLEANUP ================= */
+    return () => {
+        window.removeEventListener("keydown", keyDown);
+        window.removeEventListener("keyup", keyUp);
+        Composite.clear(engine.world, false);
+    };
+}
